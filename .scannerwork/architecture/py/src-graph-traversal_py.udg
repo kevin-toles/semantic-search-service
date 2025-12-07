@@ -1,0 +1,297 @@
+
+1.0PythonFrontend"1765094054963*py2.BÛ
+
+
+imports1
+
+extends2
+
+returns3
+
+	has param4
+
+module5
+
+
+class6
+
+function7
+
+src/graph/traversal.py9
+
+src.graph.traversal11
+
+
+__future__12
+
+collections14
+
+dataclasses16
+
+
+enum18
+
+typing20
+,
+&src.graph.traversal.TraversalDirection22
+
+	enum.Enum24
+)
+#src.graph.traversal.Neo4jClientLike26
+6
+0src.graph.traversal.Neo4jClientLike.is_connected28
+
+
+bool30
+/
+)src.graph.traversal.Neo4jClientLike.query32
+
+
+list34
+	
+str36
+)
+#src.graph.traversal.TraversalResult38
+(
+"src.graph.traversal.GraphTraversal40
+5
+/src.graph.traversal.GraphTraversal.dfs_traverse42
+A
+;src.graph.traversal.GraphTraversal._infer_relationship_type44
+?
+9src.graph.traversal.GraphTraversal._sort_by_tier_priority46
+@
+:src.graph.traversal.GraphTraversal.get_traversal_direction48
+	
+int50
+7
+1src.graph.traversal.GraphTraversal._get_neighbors52
+=
+7src.graph.traversal.GraphTraversal._calculate_relevance54
+
+float56
+1
++src.graph.traversal.GraphTraversal.__init__58
+5
+/src.graph.traversal.GraphTraversal.bfs_traverse60
+>
+8src.graph.traversal.GraphTraversal.get_relationship_type62
+*
+$src.graph.traversal.RelationshipType64
+;
+5src.graph.traversal.GraphTraversal._get_tier_for_node66
+>
+8src.graph.traversal.GraphTraversal.find_related_chapters68
+B
+<src.graph.traversal.GraphTraversal.find_cross_reference_path70J
+
+8
+89jÎ
+ 
+10
+10115 *
+8 (
+
+13
+13125
+
+15
+15145
+
+17
+17165
+
+19
+19185
+
+21
+21205
+
+23
+23226 210
+
+25
+25246
+
+27
+27266 210
+
+29
+29287 227
+
+31
+31306
+
+33
+33327 227
+
+35
+35346
+
+37
+37366
+
+39
+39386 210
+
+41
+41406 210
+
+43
+43427 241
+
+45
+45447 241
+
+47
+47467 241
+
+49
+49487 241
+
+51
+51506
+
+53
+53527 241
+
+55
+55547 241
+
+57
+57566
+
+59
+59587 241
+
+61
+61607 241
+
+63
+63627 241
+
+65
+65646 210
+
+67
+67667 241
+
+69
+69687 241
+
+71
+71707 241r”
+
+10131*
+8 (#
+
+10151*
+8 (
+
+10171*
+8 ("
+
+10191*
+8 (
+
+10211*
+8 (4
+
+23252*
+8. .(
+
+29313*
+8k	 k(
+
+33353*
+8b b(
+
+33374*
+8b b(
+
+43353*
+8† †(
+
+43374*
+8† †(
+
+45373*
+8ö	 ö(!
+
+45354*
+8ö	 ö(!
+
+47353*
+8Ø Ø(%
+
+47354*
+8Ø Ø(%
+
+49233*
+8¶	 ¶( 
+
+49514*
+8¶	 ¶( 
+
+49514*
+8¶	 ¶( 
+
+53353*
+8¨ ¨(
+
+53374*
+8¨ ¨(
+
+55573*
+8Š	 Š(
+
+55514*
+8Š	 Š(
+
+55374*
+8Š	 Š(
+
+59514*
+8	 (
+
+61353*
+8Ï Ï(
+
+61374*
+8Ï Ï(
+
+63653*
+8Ÿ	 Ÿ(
+
+63514*
+8Ÿ	 Ÿ(
+
+63514*
+8Ÿ	 Ÿ(
+
+67374*
+8¿ ¿(!
+
+69353*
+8÷ ÷($
+
+69374*
+8÷ ÷($
+
+69314*
+8÷ ÷($
+
+69314*
+8÷ ÷($
+
+71374*
+8Á Á((
+
+71374*
+8Á Á((
+
+71314*
+8Á Á((
+
+65252*
+8   (

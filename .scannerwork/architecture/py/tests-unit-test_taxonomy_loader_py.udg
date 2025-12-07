@@ -1,0 +1,205 @@
+
+1.0PythonFrontend"1765094054594*py2.Bú
+
+imports1
+
+extends2
+
+returns3
+
+	has param4
+
+module5
+
+
+class6
+
+function7
+'
+"tests/unit/test_taxonomy_loader.py9
+%
+tests.unit.test_taxonomy_loader11
+
+
+json12
+
+pathlib14
+
+unittest.mock16
+
+src.core.config18
+
+src.graph.taxonomy_loader20
+?
+9tests.unit.test_taxonomy_loader.TestTaxonomyDomainObjects22
+j
+dtests.unit.test_taxonomy_loader.TestTaxonomyDomainObjects.test_chapter_dataclass_has_required_fields24
+g
+atests.unit.test_taxonomy_loader.TestTaxonomyDomainObjects.test_book_dataclass_has_required_fields26
+k
+etests.unit.test_taxonomy_loader.TestTaxonomyDomainObjects.test_taxonomy_dataclass_has_required_fields28
+8
+2tests.unit.test_taxonomy_loader.TestTaxonomyLoader30
+a
+[tests.unit.test_taxonomy_loader.TestTaxonomyLoader.test_load_taxonomy_creates_concept_nodes32
+
+src.core.config.Settings34
+^
+Xtests.unit.test_taxonomy_loader.TestTaxonomyLoader.test_load_taxonomy_creates_book_nodes36
+a
+[tests.unit.test_taxonomy_loader.TestTaxonomyLoader.test_load_taxonomy_creates_taxonomy_node38
+^
+Xtests.unit.test_taxonomy_loader.TestTaxonomyLoader.test_load_taxonomy_links_book_to_tier40
+t
+ntests.unit.test_taxonomy_loader.TestTaxonomyLoader.test_load_taxonomy_creates_chapter_nodes_with_relationships42
+8
+2tests.unit.test_taxonomy_loader.TestTaxonomyParser44
+R
+Ltests.unit.test_taxonomy_loader.TestTaxonomyParser.test_parse_book_from_json46
+V
+Ptests.unit.test_taxonomy_loader.TestTaxonomyParser.test_parse_taxonomy_from_json48
+U
+Otests.unit.test_taxonomy_loader.TestTaxonomyParser.test_parse_chapter_from_json50
+V
+Ptests.unit.test_taxonomy_loader.TestTaxonomyParser.test_parse_taxonomy_from_file52
+
+pathlib.Path54J
+
+8
+89jû
+ 
+10
+10115 *
+8 (
+
+13
+13125
+
+15
+15145
+
+17
+17165
+
+19
+19185
+
+21
+21205
+
+23
+23226 210
+
+25
+25247 223
+
+27
+27267 223
+
+29
+29287 223
+
+31
+31306 210
+
+33
+33327 231
+
+35
+35346
+
+37
+37367 231
+
+39
+39387 231
+
+41
+41407 231
+
+43
+43427 231
+
+45
+45446 210
+
+47
+47467 245
+
+49
+49487 245
+
+51
+51507 245
+
+53
+53527 245
+
+55
+55546r‘
+
+10131*
+8 (
+
+10151*
+8 (
+
+10171*
+8 ( 
+
+10191*
+8 (%
+
+10211*
+8<	 <(=
+
+10211*
+8J	 J(F
+
+10211*
+8Z	 Z(9
+
+10211*
+8j	 j(<
+
+10211*
+8Ä	 Ç(
+
+10211*
+8ñ	 ò(
+
+10211*
+8¨	 Æ(
+
+10211*
+8√	 ≈(
+
+10211*
+8Ÿ	 €(
+
+10211*
+8	 (7
+
+10211*
+8Ä	 Ä(3
+
+10211*
+8í	 í(6
+
+33354*
+8ª	 ª(1
+
+37354*
+8é	 é(.
+
+39354*
+8x	 x(1
+
+41354*
+8—	 —(.
+
+43354*
+8§	 §(D
+
+53554*
+8D	 D(&

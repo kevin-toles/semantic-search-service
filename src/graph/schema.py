@@ -91,7 +91,7 @@ def generate_create_node_cypher(
 def generate_merge_node_cypher(
     label: str,
     match_property: str,
-    match_value: str,  # noqa: ARG001 - Used in parameterized query execution
+    _match_value: str,  # noqa: ARG001 - Used in parameterized query execution
     set_properties: dict[str, Any] | None = None,
 ) -> str:
     """Generate Cypher to MERGE a node.
@@ -120,9 +120,9 @@ def generate_merge_node_cypher(
 
 def generate_create_relationship_cypher(
     from_label: str,
-    from_id: str,  # noqa: ARG001 - Used in parameterized query execution
+    _from_id: str,  # noqa: ARG001 - Used in parameterized query execution
     to_label: str,
-    to_id: str,  # noqa: ARG001 - Used in parameterized query execution
+    _to_id: str,  # noqa: ARG001 - Used in parameterized query execution
     relationship: str,
     properties: dict[str, Any] | None = None,
 ) -> str:

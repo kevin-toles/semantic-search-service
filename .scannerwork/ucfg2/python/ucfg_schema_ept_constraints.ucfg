@@ -1,0 +1,41 @@
+
+9src.graph.schema.SchemaManager.create_concept_constraintsM
+A/Users/kevintoles/POC/semantic-search-service/src/graph/schema.pyÓ Ó(("2*©
+2
+Ô Ô(5¸
+µ
+
+Õ Ø(
+cypher"__id*–
+
+__unknown_file (zx
+v
+        CREATE CONSTRAINT constraint_concept_id IF NOT EXISTS
+        FOR (c:Concept) REQUIRE c.id IS UNIQUE
+        g
+e
+
+Ù Ù(
+%1"__id*K
+
+__unknown_file (/*- 
+src.graph.schema.SchemaManager"	
+_clientom
+
+Ù Ù(0
+%2*"
+
+__unknown_file (
+
+%1*&
+
+__unknown_file (
+
+
+cypher2execute_write*
+3*1
+3
+	schema.py"
+Û Û(
+implicit returnB" 
+src.graph.schema.SchemaManagerH

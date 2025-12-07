@@ -1,0 +1,8 @@
+
+("Check if fake is 'connected'."strself
+   ("A-
++
+
+¢ ¢("#get-field# _connected:
+
+¢ ¢(*G/Users/kevintoles/POC/semantic-search-service/src/graph/neo4j_client.py

@@ -1,0 +1,13 @@
+
+8src.graph.neo4j_client.Neo4jClientProtocol.execute_writeQ
+G/Users/kevintoles/POC/semantic-search-service/src/graph/neo4j_client.py; ;("3*3
+3
+neo4j_client.py"
+D D
+implicit return:
+= =(
+cypher:
+> >(0
+
+parametersB.,
+*src.graph.neo4j_client.Neo4jClientProtocolH

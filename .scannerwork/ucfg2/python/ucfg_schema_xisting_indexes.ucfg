@@ -1,0 +1,37 @@
+
+3src.graph.schema.SchemaManager.get_existing_indexesM
+A/Users/kevintoles/POC/semantic-search-service/src/graph/schema.pyÃ Ã(""2*Å
+2
+Ä È(L
+J
+
+É É(
+cypher"__id*,
+
+__unknown_file (
+SHOW INDEXESg
+e
+
+Ê Ê(!
+%1"__id*K
+
+__unknown_file (/*- 
+src.graph.schema.SchemaManager"	
+_clientge
+
+Ê Ê(/
+%2*"
+
+__unknown_file (
+
+%1*&
+
+__unknown_file (
+
+
+cypher2query"
+
+Ê Ê(/
+
+%2B" 
+src.graph.schema.SchemaManagerH

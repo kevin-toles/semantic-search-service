@@ -320,7 +320,7 @@ class FakeNeo4jClient:
 
     async def query(
         self,
-        cypher: str,  # noqa: ARG002 - Required for interface compatibility
+        _cypher: str,  # noqa: ARG002 - Required for interface compatibility
         parameters: dict[str, Any] | None = None,
     ) -> list[dict[str, Any]]:
         """Return stored query results matching parameters.
@@ -356,7 +356,7 @@ class FakeNeo4jClient:
 
     async def execute_write(
         self,
-        cypher: str,  # noqa: ARG002 - Required for interface compatibility
+        _cypher: str,  # noqa: ARG002 - Required for interface compatibility
         parameters: dict[str, Any] | None = None,
     ) -> list[dict[str, Any]]:
         """Store node data from parameters.

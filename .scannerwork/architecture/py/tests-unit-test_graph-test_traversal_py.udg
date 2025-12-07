@@ -1,0 +1,418 @@
+
+1.0PythonFrontend"1765094055024*py2.Bž 
+
+imports1
+
+extends2
+
+returns3
+
+	has param4
+
+module5
+
+
+class6
+
+function7
+,
+'tests/unit/test_graph/test_traversal.py9
+*
+$tests.unit.test_graph.test_traversal11
+
+
+__future__12
+
+typing14
+
+unittest.mock16
+
+src.graph.traversal18
+
+src.graph.neo4j_client20
+@
+:tests.unit.test_graph.test_traversal.TestRelationshipTypes22
+_
+Ytests.unit.test_graph.test_traversal.TestRelationshipTypes.test_skip_tier_is_non_adjacent24
+[
+Utests.unit.test_graph.test_traversal.TestRelationshipTypes.test_parallel_is_same_tier26
+d
+^tests.unit.test_graph.test_traversal.TestRelationshipTypes.test_perpendicular_is_adjacent_tier28
+`
+Ztests.unit.test_graph.test_traversal.TestRelationshipTypes.test_relationship_types_defined30
+H
+Btests.unit.test_graph.test_traversal.TestTierRelationshipDetection32
+g
+atests.unit.test_graph.test_traversal.TestTierRelationshipDetection.test_non_adjacent_tier_is_skip34
+k
+etests.unit.test_graph.test_traversal.TestTierRelationshipDetection.test_relationship_is_bidirectional36
+c
+]tests.unit.test_graph.test_traversal.TestTierRelationshipDetection.test_same_tier_is_parallel38
+l
+ftests.unit.test_graph.test_traversal.TestTierRelationshipDetection.test_adjacent_tier_is_perpendicular40
+<
+6tests.unit.test_graph.test_traversal.sample_graph_data42
+
+
+dict44
+;
+5tests.unit.test_graph.test_traversal.TestBFSTraversal46
+W
+Qtests.unit.test_graph.test_traversal.TestBFSTraversal.test_bfs_respects_max_depth48
+
+unittest.mock.MagicMock50
+[
+Utests.unit.test_graph.test_traversal.TestBFSTraversal.test_bfs_returns_traversal_path52
+e
+_tests.unit.test_graph.test_traversal.TestBFSTraversal.test_bfs_finds_parallel_connections_first54
+J
+Dtests.unit.test_graph.test_traversal.fake_neo4j_client_for_traversal56
+A
+;tests.unit.test_graph.test_traversal.TestSpiderWebTraversal58
+o
+itests.unit.test_graph.test_traversal.TestSpiderWebTraversal.test_related_chapters_include_relevance_score60
+g
+atests.unit.test_graph.test_traversal.TestSpiderWebTraversal.test_related_chapters_grouped_by_tier62
+d
+^tests.unit.test_graph.test_traversal.TestSpiderWebTraversal.test_traverse_all_related_chapters64
+;
+5tests.unit.test_graph.test_traversal.TestDFSTraversal66
+R
+Ltests.unit.test_graph.test_traversal.TestDFSTraversal.test_dfs_avoids_cycles68
+X
+Rtests.unit.test_graph.test_traversal.TestDFSTraversal.test_dfs_explores_deep_paths70
+W
+Qtests.unit.test_graph.test_traversal.TestDFSTraversal.test_dfs_respects_max_depth72
+>
+8tests.unit.test_graph.test_traversal.TestTraversalResult74
+d
+^tests.unit.test_graph.test_traversal.TestTraversalResult.test_traversal_result_optional_fields76
+h
+btests.unit.test_graph.test_traversal.TestTraversalResult.test_traversal_result_has_required_fields78
+K
+Etests.unit.test_graph.test_traversal.TestGraphTraversalInitialization80
+k
+etests.unit.test_graph.test_traversal.TestGraphTraversalInitialization.test_traversal_stores_max_depth82
+n
+htests.unit.test_graph.test_traversal.TestGraphTraversalInitialization.test_traversal_accepts_fake_client84
+l
+ftests.unit.test_graph.test_traversal.TestGraphTraversalInitialization.test_traversal_default_max_depth86
+o
+itests.unit.test_graph.test_traversal.TestGraphTraversalInitialization.test_traversal_accepts_neo4j_client88
+A
+;tests.unit.test_graph.test_traversal.TestTraversalDirection90
+^
+Xtests.unit.test_graph.test_traversal.TestTraversalDirection.test_direction_types_defined92
+a
+[tests.unit.test_graph.test_traversal.TestTraversalDirection.test_up_direction_toward_tier_194
+c
+]tests.unit.test_graph.test_traversal.TestTraversalDirection.test_down_direction_toward_tier_n96
+b
+\tests.unit.test_graph.test_traversal.TestTraversalDirection.test_lateral_direction_same_tier98
+C
+<tests.unit.test_graph.test_traversal.TestCrossReferencePaths100
+d
+]tests.unit.test_graph.test_traversal.TestCrossReferencePaths.test_path_respects_tier_priority102
+c
+\tests.unit.test_graph.test_traversal.TestCrossReferencePaths.test_find_path_between_concepts104
+i
+btests.unit.test_graph.test_traversal.TestCrossReferencePaths.test_path_includes_relationship_types106J
+
+8
+89j·	
+ 
+10
+10115 *
+8 (
+
+13
+13125
+
+15
+15145
+
+17
+17165
+
+19
+19185
+
+21
+21205
+
+23
+23226 210
+
+25
+25247 223
+
+27
+27267 223
+
+29
+29287 223
+
+31
+31307 223
+
+33
+33326 210
+
+35
+35347 233
+
+37
+37367 233
+
+39
+39387 233
+
+41
+41407 233
+
+43
+43427 210
+
+45
+45446
+
+47
+47466 210
+
+49
+49487 247
+
+51
+51506
+
+53
+53527 247
+
+55
+55547 247
+
+57
+57567 210
+
+59
+59586 210
+
+61
+61607 259
+
+63
+63627 259
+
+65
+65647 259
+
+67
+67666 210
+
+69
+69687 267
+
+71
+71707 267
+
+73
+73727 267
+
+75
+75746 210
+
+77
+77767 275
+
+79
+79787 275
+
+81
+81806 210
+
+83
+83827 281
+
+85
+85847 281
+
+87
+87867 281
+
+89
+89887 281
+
+91
+91906 210
+
+93
+93927 291
+
+95
+95947 291
+
+97
+97967 291
+
+99
+99987 291
+
+101
+1011006 210
+
+103
+1031027 2101
+
+105
+1051047 2101
+
+107
+1071067 2101rÓ
+
+
+10131*
+8 (#
+
+10151*
+8 (
+
+10171*
+8 (/
+
+10191*
+8¯	 ¯(9
+
+10191*
+8·	 ·(9
+
+10191*
+8½	 ½(9
+
+10191*
+8Ã	 Ã(9
+
+10191*
+8Ò	 Ò(;
+
+10191*
+8Ú	 Ú(;
+
+10191*
+8à	 à(;
+
+10191*
+8æ	 æ(;
+
+10191*
+8õ	 õ(7
+
+10211*
+8ÿ	 ÿ(;
+
+10191*
+8€	 €(7
+
+10191*
+8‰	 ‰(7
+
+10191*
+8’	 ’(7
+
+10191*
+8¤	 ¤(I
+
+10191*
+8°	 °(I
+
+10191*
+8¼	 ¼(I
+
+10191*
+8È	 È(I
+
+10191*
+8á	 á(7
+
+10191*
+8ó	 ó(7
+
+10191*
+8…	 …(7
+
+10191*
+8 	  (7
+
+10191*
+8°	 °(7
+
+10191*
+8Á	 Á(7
+
+10191*
+8Ü	 Ü(7
+
+10191*
+8í	 í(7
+
+10191*
+8ÿ	 ÿ(7
+
+10191*
+8š	 š(7
+
+10191*
+8ª	 ª(7
+
+10191*
+8¾	 ¾(7
+
+10191*
+8Ö	 Ö(8
+
+10191*
+8æ	 æ(8
+
+43453*
+8 (
+
+49514*
+8ï ï(*
+
+53514*
+8 (.
+
+55514*
+8Ý Ý(8
+
+57513*
+8^ ^($
+
+57454*
+8^ ^($
+
+61514*
+8º º(<
+
+63514*
+8¦ ¦(4
+
+65514*
+8– –(1
+
+69514*
+8½ ½(%
+
+71514*
+8œ œ(+
+
+73514*
+8¬ ¬(*
+
+103514*
+8û û(/
+
+105514*
+8Ø Ø(.
+
+107514*
+8é é(4

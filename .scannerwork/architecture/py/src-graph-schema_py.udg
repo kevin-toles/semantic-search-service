@@ -1,0 +1,230 @@
+
+1.0PythonFrontend"1765094054903*py2.BŽ
+
+imports1
+
+extends2
+
+returns3
+
+	has param4
+
+module5
+
+
+class6
+
+function7
+
+src/graph/schema.py9
+
+src.graph.schema11
+
+
+__future__12
+
+typing14
+2
+,src.graph.schema.generate_create_node_cypher16
+	
+str18
+
+
+dict20
+:
+4src.graph.schema.generate_create_relationship_cypher22
+$
+src.graph.schema.SchemaManager24
+?
+9src.graph.schema.SchemaManager.create_chapter_constraints26
+5
+/src.graph.schema.SchemaManager.drop_all_indexes28
+<
+6src.graph.schema.SchemaManager.create_tier_constraints30
+?
+9src.graph.schema.SchemaManager.create_concept_constraints32
+@
+:src.graph.schema.SchemaManager.create_taxonomy_constraints34
+-
+'src.graph.schema.SchemaManager.__init__36
+0
+*src.graph.schema.SchemaManager.init_schema38
+;
+5src.graph.schema.SchemaManager.create_chapter_indexes40
+4
+.src.graph.schema.SchemaManager.validate_schema42
+7
+1src.graph.schema.SchemaManager.create_all_indexes44
+=
+7src.graph.schema.SchemaManager.get_existing_constraints46
+
+
+list48
+1
++src.graph.schema.SchemaManager.reset_schema50
+9
+3src.graph.schema.SchemaManager.get_existing_indexes52
+9
+3src.graph.schema.SchemaManager.drop_all_constraints54
+;
+5src.graph.schema.SchemaManager.create_all_constraints56
+<
+6src.graph.schema.SchemaManager.create_book_constraints58
+;
+5src.graph.schema.SchemaManager.create_concept_indexes60
+8
+2src.graph.schema.SchemaManager.create_book_indexes62
+1
++src.graph.schema.generate_merge_node_cypher64
+!
+src.graph.schema.NodeLabels66
+)
+#src.graph.schema.RelationshipLabels68J
+
+8
+89jÙ
+ 
+10
+10115 *
+8 (
+
+13
+13125
+
+15
+15145
+
+17
+17167 210
+
+19
+19186
+
+21
+21206
+
+23
+23227 210
+
+25
+25246 210
+
+27
+27267 225
+
+29
+29287 225
+
+31
+31307 225
+
+33
+33327 225
+
+35
+35347 225
+
+37
+37367 225
+
+39
+39387 225
+
+41
+41407 225
+
+43
+43427 225
+
+45
+45447 225
+
+47
+47467 225
+
+49
+49486
+
+51
+51507 225
+
+53
+53527 225
+
+55
+55547 225
+
+57
+57567 225
+
+59
+59587 225
+
+61
+61607 225
+
+63
+63627 225
+
+65
+65647 210
+
+67
+67666 210
+
+69
+69686 210rÚ
+
+10131*
+8 (#
+
+10151*
+8 (
+
+17193*
+8I I( 
+
+17194*
+8I I( 
+
+17214*
+8I I( 
+
+23193*
+8y y((
+
+23194*
+8y y((
+
+23194*
+8y y((
+
+23194*
+8y y((
+
+23194*
+8y y((
+
+23194*
+8y y((
+
+43213*
+8ž ž(
+
+47493*
+8º º('
+
+53493*
+8Ã Ã(#
+
+65193*
+8[ [(
+
+65194*
+8[ [(
+
+65194*
+8[ [(
+
+65194*
+8[ [(
