@@ -157,6 +157,9 @@ semantic-search-service/
 | POST | `/v1/embed/batch` | Async batch embedding job |
 | POST | `/v1/search` | Semantic similarity search |
 | POST | `/v1/search/vector` | Search by raw vector |
+| POST | `/v1/search/hybrid` | **NEW** - Combined vector + graph search |
+| POST | `/v1/graph/traverse` | **NEW** - Spider web graph traversal |
+| POST | `/v1/graph/query` | **NEW** - Raw Cypher query execution |
 | POST | `/v1/topics/infer` | Infer topics for text |
 | GET | `/v1/topics/{model_id}/topics` | List all topics |
 | POST | `/v1/topics/similar` | Find docs with similar topics |
@@ -178,10 +181,23 @@ semantic-search-service/
 - Supports multiple models (MiniLM, mpnet)
 - Batched inference for efficiency
 
-### Vector Search (FAISS)
-- Multiple index types (Flat, IVF, HNSW)
-- Metadata filtering post-search
+### Vector Search (Qdrant)
+- Cloud-native vector database
+- Metadata filtering with search
 - Top-k retrieval with scores
+- Payload storage for chunk metadata
+
+### Graph Engine (Neo4j) - NEW
+- Taxonomy graph storage
+- Cypher query execution
+- Spider web traversal (PARALLEL, PERPENDICULAR, SKIP_TIER)
+- Bidirectional relationship navigation
+
+### Hybrid Search Engine - NEW
+- Query planner (vector vs graph vs both)
+- Result merger with score fusion
+- Re-ranking based on tier relationships
+- Deduplication across sources
 
 ### Topic Modeler (Gensim)
 - LDA for topic discovery
@@ -200,7 +216,57 @@ semantic-search-service/
 | Dependency | Type | Purpose |
 |------------|------|---------|
 | HuggingFace Hub | External | SBERT model downloads |
+| Qdrant | Infrastructure | Vector database (replaces FAISS) |
+| Neo4j | Infrastructure | Taxonomy graph database |
 | S3 (optional) | Infrastructure | Index/model storage |
+
+---
+
+## Integration Points
+
+> **Important for WBS Planning**: These are the integration points that require coordination with other services.
+
+### Inbound (Services calling semantic-search)
+
+| Consumer | Endpoint | Purpose | Priority |
+|----------|----------|---------|----------|
+| llm-gateway | `POST /v1/search` | Tool execution (search_corpus) | P0 |
+| llm-gateway | `POST /v1/embed` | Generate embeddings for tools | P0 |
+| ai-agents | `POST /v1/search/hybrid` | Cross-Reference Agent similarity search | P0 |
+| ai-agents | `POST /v1/graph/traverse` | Spider web taxonomy traversal | P0 |
+| llm-document-enhancer | `POST /v1/embed` | Pre-compute embeddings | P1 |
+| llm-document-enhancer | `POST /v1/search` | Pre-compute matches | P1 |
+
+### Outbound (semantic-search calling other services)
+
+| Target | Protocol | Purpose | Priority |
+|--------|----------|---------|----------|
+| Qdrant | HTTP (6333) | Vector storage and search | P0 |
+| Neo4j | Bolt (7687) | Graph queries and traversal | P0 |
+| HuggingFace Hub | HTTPS | Model downloads (startup) | P1 |
+| S3 | HTTPS | Index persistence (optional) | P2 |
+
+### Data Dependencies
+
+| Data | Source | Required For |
+|------|--------|--------------|
+| SBERT models | HuggingFace Hub | Embedding generation |
+| Taxonomy graph | Neo4j | Hybrid search, traversal |
+| Chapter vectors | Qdrant | Similarity search |
+| Chunk metadata | Qdrant payloads | Result enrichment |
+
+---
+
+## Communication Matrix
+
+| From | To | Protocol | Endpoint/Method |
+|------|----|----------|-----------------|
+| llm-gateway | semantic-search | HTTP | `POST /v1/search` |
+| ai-agents | semantic-search | HTTP | `POST /v1/search/hybrid` |
+| ai-agents | semantic-search | HTTP | `POST /v1/graph/traverse` |
+| llm-doc-enhancer | semantic-search | HTTP | `POST /v1/embed`, `POST /v1/search` |
+| semantic-search | Qdrant | HTTP | Qdrant REST API |
+| semantic-search | Neo4j | Bolt | Cypher queries |
 
 ---
 
@@ -221,6 +287,34 @@ services:
       - SBERT_MODEL=all-mpnet-base-v2
       - INDEX_STORAGE_PATH=/data/indices
       - MODEL_CACHE_PATH=/data/models
+      - QDRANT_URL=http://qdrant:6333
+      - NEO4J_URL=bolt://neo4j:7687
+      - NEO4J_USER=neo4j
+      - NEO4J_PASSWORD=${NEO4J_PASSWORD}
+    depends_on:
+      - qdrant
+      - neo4j
+
+  qdrant:
+    image: qdrant/qdrant:latest
+    ports:
+      - "6333:6333"
+    volumes:
+      - qdrant_data:/qdrant/storage
+
+  neo4j:
+    image: neo4j:5-community
+    ports:
+      - "7474:7474"
+      - "7687:7687"
+    volumes:
+      - neo4j_data:/data
+    environment:
+      - NEO4J_AUTH=neo4j/${NEO4J_PASSWORD}
+
+volumes:
+  qdrant_data:
+  neo4j_data:
 ```
 
 ---
@@ -243,9 +337,33 @@ class Settings(BaseSettings):
     model_cache_path: str = "/data/models"
     topic_model_path: str = "/data/topics"
     
+    # Qdrant (NEW)
+    qdrant_url: str = "http://localhost:6333"
+    qdrant_collection: str = "chapters"
+    
+    # Neo4j (NEW)
+    neo4j_url: str = "bolt://localhost:7687"
+    neo4j_user: str = "neo4j"
+    neo4j_password: str = ""
+    neo4j_database: str = "neo4j"
+    
+    # Hybrid Search (NEW)
+    hybrid_default_vector_weight: float = 0.6
+    hybrid_default_graph_weight: float = 0.4
+    hybrid_max_traversal_hops: int = 5
+    
     # Optional S3
     s3_bucket: Optional[str] = None
     
     class Config:
         env_prefix = "SEMANTIC_SEARCH_"
 ```
+
+---
+
+## See Also
+
+- [GRAPH_RAG_POC.md](./GRAPH_RAG_POC.md) - Graph-augmented semantic search POC
+- [API.md](./API.md) - Full API documentation
+- [INDEXING.md](./INDEXING.md) - How to build indices
+- [ai-agents/docs/ARCHITECTURE.md](/ai-agents/docs/ARCHITECTURE.md) - AI Agents service (primary consumer)
