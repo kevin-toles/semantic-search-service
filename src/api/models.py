@@ -1,0 +1,283 @@
+"""
+Pydantic models for API request/response validation.
+
+These models define the contract for the hybrid search API endpoints.
+"""
+
+from __future__ import annotations
+
+from typing import Any
+
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
+
+
+class HybridSearchRequest(BaseModel):
+    """Request model for hybrid search endpoint."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    query: str | None = Field(
+        default=None,
+        description="Text query to search for",
+        min_length=1,
+        max_length=10000,
+    )
+    embedding: list[float] | None = Field(
+        default=None,
+        description="Pre-computed embedding vector",
+    )
+    start_node_id: str | None = Field(
+        default=None,
+        description="Starting node ID for graph context",
+    )
+    collection: str = Field(
+        default="documents",
+        description="Vector collection to search",
+    )
+    limit: int = Field(
+        default=10,
+        ge=1,
+        le=100,
+        description="Maximum number of results to return",
+    )
+    alpha: float = Field(
+        default=0.7,
+        ge=0.0,
+        le=1.0,
+        description="Weight for vector score vs graph score (0-1)",
+    )
+    include_graph: bool = Field(
+        default=True,
+        description="Whether to include graph-based scoring",
+    )
+    graph_context: dict[str, Any] | None = Field(
+        default=None,
+        description="Additional context for graph traversal",
+    )
+
+    @model_validator(mode="after")
+    def validate_query_or_embedding(self) -> HybridSearchRequest:
+        """Ensure at least one of query or embedding is provided."""
+        if self.query is None and self.embedding is None:
+            msg = "Either 'query' or 'embedding' must be provided"
+            raise ValueError(msg)
+        return self
+
+
+class SearchResultItem(BaseModel):
+    """Individual search result item."""
+
+    model_config = ConfigDict(extra="allow")
+
+    id: str = Field(description="Unique identifier for the result")
+    score: float = Field(description="Combined relevance score")
+    vector_score: float | None = Field(
+        default=None,
+        description="Score from vector similarity",
+    )
+    graph_score: float | None = Field(
+        default=None,
+        description="Score from graph relationships",
+    )
+    payload: dict[str, Any] = Field(
+        default_factory=dict,
+        description="Associated metadata",
+    )
+    graph_metadata: dict[str, Any] | None = Field(
+        default=None,
+        description="Graph relationship information",
+    )
+
+
+class HybridSearchResponse(BaseModel):
+    """Response model for hybrid search endpoint."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    results: list[SearchResultItem] = Field(
+        default_factory=list,
+        description="List of search results",
+    )
+    total: int = Field(
+        description="Total number of results found",
+    )
+    query: str | None = Field(
+        default=None,
+        description="Original query text",
+    )
+    alpha: float = Field(
+        description="Alpha value used for scoring",
+    )
+    latency_ms: float = Field(
+        description="Search latency in milliseconds",
+    )
+
+
+class TraverseRequest(BaseModel):
+    """Request model for graph traversal endpoint."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    start_node_id: str = Field(
+        description="Starting node ID for traversal",
+    )
+    relationship_types: list[str] | None = Field(
+        default=None,
+        description="Types of relationships to follow",
+    )
+    max_depth: int = Field(
+        default=3,
+        ge=1,
+        le=10,
+        description="Maximum traversal depth",
+    )
+    limit: int = Field(
+        default=50,
+        ge=1,
+        le=500,
+        description="Maximum number of nodes to return",
+    )
+
+
+class TraverseNode(BaseModel):
+    """Node in traversal result."""
+
+    model_config = ConfigDict(extra="allow")
+
+    id: str = Field(description="Node identifier")
+    labels: list[str] = Field(default_factory=list, description="Node labels")
+    properties: dict[str, Any] = Field(
+        default_factory=dict,
+        description="Node properties",
+    )
+    depth: int = Field(description="Distance from start node")
+
+
+class TraverseEdge(BaseModel):
+    """Edge in traversal result."""
+
+    model_config = ConfigDict(extra="allow")
+
+    source: str = Field(description="Source node ID")
+    target: str = Field(description="Target node ID")
+    type: str = Field(description="Relationship type")
+    properties: dict[str, Any] = Field(
+        default_factory=dict,
+        description="Edge properties",
+    )
+
+
+class TraverseResponse(BaseModel):
+    """Response model for graph traversal endpoint."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    nodes: list[TraverseNode] = Field(
+        default_factory=list,
+        description="Traversed nodes",
+    )
+    edges: list[TraverseEdge] = Field(
+        default_factory=list,
+        description="Relationships between nodes",
+    )
+    start_node: str = Field(description="Starting node ID")
+    depth: int = Field(description="Actual traversal depth")
+    latency_ms: float = Field(description="Traversal latency in milliseconds")
+
+    @property
+    def results(self) -> list[TraverseNode]:
+        """Alias for nodes to support expected API response format."""
+        return self.nodes
+
+    def model_dump(self, **kwargs: Any) -> dict[str, Any]:
+        """Include results alias in serialization."""
+        data = super().model_dump(**kwargs)
+        data["results"] = data.get("nodes", [])
+        return data
+
+
+class GraphQueryRequest(BaseModel):
+    """Request model for graph query endpoint."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    cypher: str = Field(
+        description="Cypher query to execute",
+        min_length=1,
+        max_length=10000,
+    )
+    parameters: dict[str, Any] | None = Field(
+        default=None,
+        description="Query parameters",
+    )
+    timeout_seconds: float = Field(
+        default=30.0,
+        ge=1.0,
+        le=300.0,
+        description="Query timeout in seconds",
+    )
+
+    @field_validator("cypher")
+    @classmethod
+    def validate_cypher_read_only(cls, v: str) -> str:
+        """Ensure cypher query is read-only for safety."""
+        write_keywords = ["CREATE", "DELETE", "MERGE", "SET", "REMOVE", "DETACH"]
+        upper_query = v.upper()
+        for keyword in write_keywords:
+            if keyword in upper_query:
+                msg = f"Write operation '{keyword}' not allowed in query endpoint"
+                raise ValueError(msg)
+        return v
+
+
+class GraphQueryResponse(BaseModel):
+    """Response model for graph query endpoint."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    records: list[dict[str, Any]] = Field(
+        default_factory=list,
+        description="Query result records",
+    )
+    columns: list[str] = Field(
+        default_factory=list,
+        description="Column names in result",
+    )
+    latency_ms: float = Field(description="Query latency in milliseconds")
+
+    @property
+    def results(self) -> list[dict[str, Any]]:
+        """Alias for records to support expected API response format."""
+        return self.records
+
+    def model_dump(self, **kwargs: Any) -> dict[str, Any]:
+        """Include results alias in serialization."""
+        data = super().model_dump(**kwargs)
+        data["results"] = data.get("records", [])
+        return data
+
+
+class HealthResponse(BaseModel):
+    """Response model for health check endpoint."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    status: str = Field(description="Overall health status")
+    services: dict[str, str] = Field(
+        default_factory=dict,
+        description="Individual service statuses",
+    )
+    version: str = Field(description="API version")
+
+
+class ErrorResponse(BaseModel):
+    """Standard error response model."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    error: str = Field(description="Error type")
+    message: str = Field(description="Error message")
+    detail: dict[str, Any] | None = Field(
+        default=None,
+        description="Additional error details",
+    )

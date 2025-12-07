@@ -23,7 +23,6 @@ from dataclasses import dataclass
 from enum import Enum
 from typing import Any, Protocol, runtime_checkable
 
-
 # =============================================================================
 # Enums for Relationship Types and Directions
 # =============================================================================

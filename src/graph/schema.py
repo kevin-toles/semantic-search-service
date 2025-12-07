@@ -91,7 +91,7 @@ def generate_create_node_cypher(
 def generate_merge_node_cypher(
     label: str,
     match_property: str,
-    _match_value: str,  # noqa: ARG001 - Used in parameterized query execution
+    match_value: str,
     set_properties: dict[str, Any] | None = None,
 ) -> str:
     """Generate Cypher to MERGE a node.
@@ -107,6 +107,8 @@ def generate_merge_node_cypher(
     Returns:
         Cypher MERGE statement
     """
+    # match_value is used as parameter at runtime, not in the query template
+    _ = match_value
     cypher = f"MERGE (n:{label} {{{match_property}: ${match_property}}})"
 
     if set_properties:
@@ -120,9 +122,9 @@ def generate_merge_node_cypher(
 
 def generate_create_relationship_cypher(
     from_label: str,
-    _from_id: str,  # noqa: ARG001 - Used in parameterized query execution
+    from_id: str,
     to_label: str,
-    _to_id: str,  # noqa: ARG001 - Used in parameterized query execution
+    to_id: str,
     relationship: str,
     properties: dict[str, Any] | None = None,
 ) -> str:
@@ -139,6 +141,8 @@ def generate_create_relationship_cypher(
     Returns:
         Cypher statement for relationship creation
     """
+    # from_id and to_id are used as parameters at runtime, not in the query template
+    _ = (from_id, to_id)
     cypher = f"""
     MATCH (a:{from_label} {{id: $from_id}})
     MATCH (b:{to_label} {{id: $to_id}})
