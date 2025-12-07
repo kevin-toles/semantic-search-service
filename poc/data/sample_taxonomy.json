@@ -1,0 +1,235 @@
+{
+  "taxonomy": {
+    "id": "software-engineering",
+    "name": "Software Engineering",
+    "description": "Comprehensive software engineering knowledge base"
+  },
+  "books": [
+    {
+      "id": "python-distilled",
+      "title": "Python Distilled",
+      "author": "David Beazley",
+      "year": 2021,
+      "tier": 1,
+      "category": "language",
+      "chapters": [
+        {
+          "id": "pd-ch1",
+          "number": 1,
+          "title": "Python Basics",
+          "keywords": ["variables", "types", "operators"],
+          "concepts": ["data types", "expressions", "statements"],
+          "summary": "Introduction to Python fundamentals including variables, data types, and basic operations.",
+          "page_range": "1-30"
+        },
+        {
+          "id": "pd-ch7",
+          "number": 7,
+          "title": "Classes and Object-Oriented Programming",
+          "keywords": ["classes", "objects", "inheritance", "polymorphism"],
+          "concepts": ["encapsulation", "abstraction", "OOP"],
+          "summary": "Comprehensive coverage of object-oriented programming in Python including classes, inheritance, and design patterns.",
+          "page_range": "150-200"
+        }
+      ]
+    },
+    {
+      "id": "clean-code",
+      "title": "Clean Code",
+      "author": "Robert C. Martin",
+      "year": 2008,
+      "tier": 2,
+      "category": "quality",
+      "chapters": [
+        {
+          "id": "cc-ch3",
+          "number": 3,
+          "title": "Functions",
+          "keywords": ["functions", "small functions", "single responsibility"],
+          "concepts": ["function design", "readability", "refactoring"],
+          "summary": "Guidelines for writing clean, small, well-named functions that do one thing well.",
+          "page_range": "31-52"
+        },
+        {
+          "id": "cc-ch10",
+          "number": 10,
+          "title": "Classes",
+          "keywords": ["classes", "cohesion", "single responsibility principle"],
+          "concepts": ["class design", "SOLID", "encapsulation"],
+          "summary": "Principles for designing clean classes with high cohesion and proper encapsulation.",
+          "page_range": "175-194"
+        }
+      ]
+    },
+    {
+      "id": "philosophy-software-design",
+      "title": "A Philosophy of Software Design",
+      "author": "John Ousterhout",
+      "year": 2018,
+      "tier": 2,
+      "category": "quality",
+      "chapters": [
+        {
+          "id": "psd-ch4",
+          "number": 4,
+          "title": "Modules Should Be Deep",
+          "keywords": ["modules", "interfaces", "abstraction", "information hiding"],
+          "concepts": ["deep modules", "shallow modules", "complexity"],
+          "summary": "The importance of deep modules with simple interfaces that hide complexity.",
+          "page_range": "22-30"
+        },
+        {
+          "id": "psd-ch9",
+          "number": 9,
+          "title": "Better Together Or Better Apart?",
+          "keywords": ["modularity", "coupling", "cohesion"],
+          "concepts": ["module boundaries", "separation of concerns"],
+          "summary": "Guidelines for deciding when to combine or separate code modules.",
+          "page_range": "60-70"
+        }
+      ]
+    },
+    {
+      "id": "building-microservices",
+      "title": "Building Microservices",
+      "author": "Sam Newman",
+      "year": 2021,
+      "tier": 3,
+      "category": "architecture",
+      "chapters": [
+        {
+          "id": "bm-ch1",
+          "number": 1,
+          "title": "What Are Microservices?",
+          "keywords": ["microservices", "distributed systems", "service boundaries"],
+          "concepts": ["service decomposition", "bounded contexts", "autonomy"],
+          "summary": "Introduction to microservices architecture and its key principles.",
+          "page_range": "1-30"
+        },
+        {
+          "id": "bm-ch8",
+          "number": 8,
+          "title": "Deployment",
+          "keywords": ["deployment", "containers", "kubernetes", "CI/CD"],
+          "concepts": ["containerization", "orchestration", "continuous deployment"],
+          "summary": "Deployment strategies and tools for microservices including containers and orchestration.",
+          "page_range": "200-240"
+        }
+      ]
+    },
+    {
+      "id": "designing-data-intensive",
+      "title": "Designing Data-Intensive Applications",
+      "author": "Martin Kleppmann",
+      "year": 2017,
+      "tier": 3,
+      "category": "architecture",
+      "chapters": [
+        {
+          "id": "ddia-ch2",
+          "number": 2,
+          "title": "Data Models and Query Languages",
+          "keywords": ["data models", "relational", "document", "graph"],
+          "concepts": ["schema design", "query optimization", "data modeling"],
+          "summary": "Comparison of different data models including relational, document, and graph databases.",
+          "page_range": "27-70"
+        },
+        {
+          "id": "ddia-ch5",
+          "number": 5,
+          "title": "Replication",
+          "keywords": ["replication", "consistency", "availability", "partitioning"],
+          "concepts": ["leader-follower", "eventual consistency", "CAP theorem"],
+          "summary": "Strategies for replicating data across multiple nodes for reliability and performance.",
+          "page_range": "151-200"
+        }
+      ]
+    },
+    {
+      "id": "ai-engineering",
+      "title": "AI Engineering",
+      "author": "Chip Huyen",
+      "year": 2024,
+      "tier": 5,
+      "category": "ai-ml",
+      "chapters": [
+        {
+          "id": "aie-ch3",
+          "number": 3,
+          "title": "Prompt Engineering",
+          "keywords": ["prompts", "LLM", "few-shot", "chain-of-thought"],
+          "concepts": ["prompt design", "in-context learning", "prompt optimization"],
+          "summary": "Techniques for designing effective prompts for large language models.",
+          "page_range": "80-120"
+        },
+        {
+          "id": "aie-ch5",
+          "number": 5,
+          "title": "RAG and Agents",
+          "keywords": ["RAG", "retrieval", "agents", "tool use"],
+          "concepts": ["retrieval-augmented generation", "agent architectures", "function calling"],
+          "summary": "Building retrieval-augmented generation systems and autonomous AI agents.",
+          "page_range": "160-210"
+        }
+      ]
+    }
+  ],
+  "relationships": [
+    {
+      "type": "PARALLEL",
+      "from": "clean-code",
+      "to": "philosophy-software-design",
+      "similarity": 0.85,
+      "reason": "Both cover code quality principles at same abstraction level"
+    },
+    {
+      "type": "PARALLEL",
+      "from": "building-microservices",
+      "to": "designing-data-intensive",
+      "similarity": 0.80,
+      "reason": "Both cover distributed systems architecture"
+    },
+    {
+      "type": "PERPENDICULAR",
+      "from": "python-distilled",
+      "to": "clean-code",
+      "similarity": 0.75,
+      "reason": "Language fundamentals applied to code quality"
+    },
+    {
+      "type": "PERPENDICULAR",
+      "from": "clean-code",
+      "to": "building-microservices",
+      "similarity": 0.70,
+      "reason": "Code quality principles applied to architecture"
+    },
+    {
+      "type": "PERPENDICULAR",
+      "from": "philosophy-software-design",
+      "to": "designing-data-intensive",
+      "similarity": 0.72,
+      "reason": "Module design principles applied to data systems"
+    },
+    {
+      "type": "SKIP_TIER",
+      "from": "python-distilled",
+      "to": "building-microservices",
+      "similarity": 0.60,
+      "reason": "Language fundamentals to distributed architecture (skip tier 2)"
+    },
+    {
+      "type": "SKIP_TIER",
+      "from": "clean-code",
+      "to": "ai-engineering",
+      "similarity": 0.55,
+      "reason": "Code quality to AI/ML (skip tiers 3,4)"
+    },
+    {
+      "type": "SKIP_TIER",
+      "from": "designing-data-intensive",
+      "to": "ai-engineering",
+      "similarity": 0.65,
+      "reason": "Data systems to AI infrastructure (skip tier 4)"
+    }
+  ]
+}
