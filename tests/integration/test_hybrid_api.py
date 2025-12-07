@@ -23,14 +23,10 @@ Anti-Pattern Mitigations Applied:
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any
+from typing import Any
 from unittest.mock import MagicMock
 
 import pytest
-
-if TYPE_CHECKING:
-    pass
-
 
 # =============================================================================
 # Test Fixtures
