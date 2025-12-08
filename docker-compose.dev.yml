@@ -1,5 +1,27 @@
 version: "3.9"
 
+# ==============================================================================
+# ⚠️  DEPRECATED - Use Unified Platform Instead
+# ==============================================================================
+# This file is deprecated as of Phase 7 (WBS 7.x).
+# 
+# The unified LLM Platform now provides all infrastructure services with proper
+# service discovery and consistent configuration across all repositories.
+#
+# Use instead:
+#   cd /Users/kevintoles/POC/llm-platform
+#   ./scripts/start.sh
+#
+# Benefits of unified platform:
+#   - Single source of truth for all services
+#   - Proper service discovery via Docker network
+#   - Consistent environment variable naming
+#   - Coordinated health checks
+#   - No port conflicts between repositories
+#
+# Reference: /Users/kevintoles/POC/llm-platform/README.md
+# ==============================================================================
+
 # Development Docker Compose for semantic-search-service
 # Includes Neo4j (graph) + Qdrant (vector) for hybrid search
 # Usage: docker-compose -f docker-compose.dev.yml up -d
