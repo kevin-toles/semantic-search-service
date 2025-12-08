@@ -58,14 +58,14 @@ class Settings(BaseSettings):
     )
 
     # ===========================================
-    # FEATURE FLAGS (Graph RAG)
+    # FEATURE FLAGS (Graph RAG) - Phase 6 Production Ready
     # ===========================================
     enable_graph_search: bool = Field(
-        default=False,
+        default=True,  # Enabled after WBS 6.1-6.3 validation
         description="Enable Neo4j graph traversal queries",
     )
     enable_hybrid_search: bool = Field(
-        default=False,
+        default=True,  # Enabled after WBS 6.1-6.3 validation
         description="Enable combined vector + graph search",
     )
 

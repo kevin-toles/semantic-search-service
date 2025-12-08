@@ -1,0 +1,576 @@
+openapi: 3.1.0
+info:
+  title: Semantic Search Service API
+  description: |
+    REST API for the Semantic Search Service providing:
+    - Embedding generation (SBERT)
+    - Vector search (Qdrant)
+    - Graph traversal (Neo4j spider web model)
+    - Hybrid search (vector + graph fusion)
+    - Topic modeling (Gensim LDA/LSI)
+    
+    ## Graph RAG Features (Phase 6)
+    
+    The service implements a "spider web" taxonomy model with three relationship types:
+    - **PARALLEL**: Same-tier horizontal relationships
+    - **PERPENDICULAR**: Adjacent-tier vertical relationships  
+    - **SKIP_TIER**: Non-adjacent tier relationships
+    
+    ## Performance Targets (WBS 6.1)
+    
+    | Operation | P95 Target |
+    |-----------|------------|
+    | Hybrid Search | <500ms |
+    | BFS/DFS Traversal | <200ms |
+    | Score Fusion | <1ms |
+    
+  version: 2.0.0
+  contact:
+    name: API Support
+    email: support@example.com
+  license:
+    name: MIT
+    
+servers:
+  - url: http://localhost:8081
+    description: Local development
+  - url: http://semantic-search:8081
+    description: Docker network
+
+tags:
+  - name: Embedding
+    description: Text embedding generation
+  - name: Search
+    description: Vector and hybrid search
+  - name: Graph
+    description: Graph traversal and queries
+  - name: Topics
+    description: Topic modeling
+  - name: Health
+    description: Health and readiness checks
+
+paths:
+  /v1/embed:
+    post:
+      tags: [Embedding]
+      summary: Generate embeddings for texts
+      description: Generate dense vector embeddings using SBERT models
+      operationId: createEmbedding
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EmbedRequest'
+      responses:
+        '200':
+          description: Embeddings generated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EmbedResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /v1/search:
+    post:
+      tags: [Search]
+      summary: Semantic similarity search
+      description: Search for similar content using vector embeddings
+      operationId: search
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SearchRequest'
+      responses:
+        '200':
+          description: Search results
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SearchResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+
+  /v1/search/hybrid:
+    post:
+      tags: [Search]
+      summary: Hybrid vector + graph search
+      description: |
+        Combined search using vector similarity (Qdrant) and graph relationships (Neo4j).
+        Results are merged using configurable score fusion strategies.
+        
+        **Score Fusion Strategies:**
+        - `LINEAR`: Weighted average (default)
+        - `RRF`: Reciprocal Rank Fusion
+        - `MAX`: Maximum score wins
+      operationId: hybridSearch
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/HybridSearchRequest'
+      responses:
+        '200':
+          description: Hybrid search results
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HybridSearchResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+
+  /v1/graph/traverse:
+    post:
+      tags: [Graph]
+      summary: Spider web graph traversal
+      description: |
+        Execute BFS or DFS traversal across the taxonomy graph following
+        PARALLEL, PERPENDICULAR, and SKIP_TIER relationships.
+        
+        **Relationship Types:**
+        | Type | Relevance Bonus |
+        |------|-----------------|
+        | PARALLEL | +0.20 |
+        | PERPENDICULAR | +0.10 |
+        | SKIP_TIER | +0.00 |
+        
+        Relevance decays by 20% per depth level.
+      operationId: graphTraverse
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TraversalRequest'
+      responses:
+        '200':
+          description: Traversal results
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TraversalResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+
+  /v1/graph/query:
+    post:
+      tags: [Graph]
+      summary: Execute raw Cypher query
+      description: Execute a Cypher query against the Neo4j taxonomy graph
+      operationId: graphQuery
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CypherQueryRequest'
+      responses:
+        '200':
+          description: Query results
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CypherQueryResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+
+  /v1/topics/infer:
+    post:
+      tags: [Topics]
+      summary: Infer topics for text
+      description: Infer topic distribution for input text using trained LDA/LSI models
+      operationId: inferTopics
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TopicInferRequest'
+      responses:
+        '200':
+          description: Topic inference results
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TopicInferResponse'
+
+  /health:
+    get:
+      tags: [Health]
+      summary: Health check
+      description: Returns service health status
+      operationId: healthCheck
+      responses:
+        '200':
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+
+  /ready:
+    get:
+      tags: [Health]
+      summary: Readiness check
+      description: Returns whether service is ready to accept requests
+      operationId: readyCheck
+      responses:
+        '200':
+          description: Service is ready
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReadyResponse'
+        '503':
+          description: Service not ready
+
+components:
+  schemas:
+    # Embedding schemas
+    EmbedRequest:
+      type: object
+      required: [texts]
+      properties:
+        texts:
+          type: array
+          items:
+            type: string
+          description: Texts to embed
+          example: ["Chapter on software design patterns"]
+        model:
+          type: string
+          default: all-mpnet-base-v2
+          description: SBERT model to use
+
+    EmbedResponse:
+      type: object
+      properties:
+        embeddings:
+          type: array
+          items:
+            type: array
+            items:
+              type: number
+          description: Vector embeddings
+        model:
+          type: string
+        dimension:
+          type: integer
+          example: 768
+
+    # Search schemas
+    SearchRequest:
+      type: object
+      required: [query]
+      properties:
+        query:
+          type: string
+          description: Search query text
+        top_k:
+          type: integer
+          default: 10
+          description: Number of results to return
+        min_score:
+          type: number
+          default: 0.5
+          description: Minimum similarity score threshold
+        filter:
+          $ref: '#/components/schemas/MetadataFilter'
+
+    SearchResponse:
+      type: object
+      properties:
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/SearchResult'
+        query_embedding:
+          type: array
+          items:
+            type: number
+          description: Embedding of the query
+
+    SearchResult:
+      type: object
+      properties:
+        id:
+          type: string
+        score:
+          type: number
+          format: float
+        payload:
+          type: object
+          additionalProperties: true
+
+    # Hybrid Search schemas
+    HybridSearchRequest:
+      type: object
+      required: [query]
+      properties:
+        query:
+          type: string
+          description: Search query text
+        top_k:
+          type: integer
+          default: 10
+        vector_weight:
+          type: number
+          default: 0.6
+          minimum: 0
+          maximum: 1
+          description: Weight for vector search scores
+        graph_weight:
+          type: number
+          default: 0.4
+          minimum: 0
+          maximum: 1
+          description: Weight for graph search scores
+        fusion_strategy:
+          type: string
+          enum: [LINEAR, RRF, MAX]
+          default: LINEAR
+          description: Score fusion strategy
+        start_node_id:
+          type: string
+          description: Optional starting node for graph traversal
+        max_depth:
+          type: integer
+          default: 3
+          minimum: 1
+          maximum: 5
+          description: Maximum graph traversal depth
+
+    HybridSearchResponse:
+      type: object
+      properties:
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/HybridSearchResult'
+        vector_count:
+          type: integer
+        graph_count:
+          type: integer
+        fusion_strategy:
+          type: string
+
+    HybridSearchResult:
+      type: object
+      properties:
+        id:
+          type: string
+        final_score:
+          type: number
+          format: float
+        vector_score:
+          type: number
+          format: float
+        graph_score:
+          type: number
+          format: float
+        relationship_type:
+          type: string
+          enum: [PARALLEL, PERPENDICULAR, SKIP_TIER, LATERAL]
+        depth:
+          type: integer
+        tier:
+          type: integer
+        payload:
+          type: object
+
+    # Graph Traversal schemas
+    TraversalRequest:
+      type: object
+      required: [start_node_id]
+      properties:
+        start_node_id:
+          type: string
+          description: ID of the starting node
+        max_depth:
+          type: integer
+          default: 3
+          minimum: 1
+          maximum: 5
+        algorithm:
+          type: string
+          enum: [BFS, DFS]
+          default: BFS
+          description: Traversal algorithm
+        relationship_types:
+          type: array
+          items:
+            type: string
+            enum: [PARALLEL, PERPENDICULAR, SKIP_TIER, LATERAL]
+          default: [PARALLEL, PERPENDICULAR, SKIP_TIER]
+          description: Which relationship types to follow
+        include_relevance:
+          type: boolean
+          default: true
+          description: Include calculated relevance scores
+
+    TraversalResponse:
+      type: object
+      properties:
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/TraversalResult'
+        stats:
+          $ref: '#/components/schemas/TraversalStats'
+
+    TraversalResult:
+      type: object
+      properties:
+        node_id:
+          type: string
+        depth:
+          type: integer
+        path:
+          type: array
+          items:
+            type: string
+        relationship_type:
+          type: string
+        relevance_score:
+          type: number
+          format: float
+        tier_id:
+          type: string
+
+    TraversalStats:
+      type: object
+      properties:
+        nodes_visited:
+          type: integer
+        max_depth_reached:
+          type: integer
+        relationship_distribution:
+          type: object
+          additionalProperties:
+            type: integer
+
+    # Cypher Query schemas
+    CypherQueryRequest:
+      type: object
+      required: [query]
+      properties:
+        query:
+          type: string
+          description: Cypher query string
+        parameters:
+          type: object
+          additionalProperties: true
+          description: Query parameters
+
+    CypherQueryResponse:
+      type: object
+      properties:
+        results:
+          type: array
+          items:
+            type: object
+        count:
+          type: integer
+
+    # Topic schemas
+    TopicInferRequest:
+      type: object
+      required: [text]
+      properties:
+        text:
+          type: string
+        model_id:
+          type: string
+          default: default_lda
+
+    TopicInferResponse:
+      type: object
+      properties:
+        topics:
+          type: array
+          items:
+            $ref: '#/components/schemas/TopicScore'
+
+    TopicScore:
+      type: object
+      properties:
+        topic_id:
+          type: integer
+        score:
+          type: number
+        keywords:
+          type: array
+          items:
+            type: string
+
+    # Metadata Filter
+    MetadataFilter:
+      type: object
+      properties:
+        tier:
+          type: integer
+          minimum: 1
+          maximum: 5
+        book:
+          type: string
+        chapter:
+          type: integer
+
+    # Health schemas
+    HealthResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [healthy, degraded, unhealthy]
+        version:
+          type: string
+        uptime:
+          type: number
+
+    ReadyResponse:
+      type: object
+      properties:
+        ready:
+          type: boolean
+        checks:
+          type: object
+          properties:
+            qdrant:
+              type: boolean
+            neo4j:
+              type: boolean
+            model_loaded:
+              type: boolean
+
+    # Error schemas
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+        detail:
+          type: string
+        code:
+          type: string
+
+  responses:
+    BadRequest:
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+    InternalError:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'

@@ -47,6 +47,17 @@ semantic-search-service/
 │   │   ├── metadata_filter.py       # Post-search filtering
 │   │   └── ranker.py                # Result ranking
 │   │
+│   ├── graph/                       # NEW - Graph RAG components
+│   │   ├── __init__.py
+│   │   ├── traversal.py             # Spider web traversal (BFS/DFS)
+│   │   └── hybrid_search.py         # Vector + Graph fusion
+│   │
+│   ├── retrievers/                  # NEW - Retriever abstractions
+│   │   ├── __init__.py
+│   │   ├── base.py                  # Abstract retriever interface
+│   │   ├── qdrant_retriever.py      # Qdrant vector retriever
+│   │   └── neo4j_retriever.py       # Neo4j graph retriever
+│   │
 │   ├── topics/
 │   │   ├── __init__.py
 │   │   ├── lda.py                   # Gensim LDA
@@ -71,26 +82,36 @@ semantic-search-service/
 │   ├── unit/
 │   │   ├── test_embedding/
 │   │   ├── test_search/
+│   │   ├── test_graph/              # NEW - Graph traversal tests
+│   │   ├── test_retrievers/         # NEW - Retriever tests
 │   │   └── test_topics/
 │   ├── integration/
 │   │   ├── test_search_api.py
-│   │   └── test_embed_api.py
+│   │   ├── test_embed_api.py
+│   │   └── test_retrievers_integration.py  # NEW
+│   ├── benchmark/                   # NEW - Performance benchmarks (WBS 6.1)
+│   │   └── test_performance.py
+│   ├── validation/                  # NEW - Validation tests (WBS 6.2, 6.3)
+│   │   ├── test_spider_web_coverage.py
+│   │   └── test_citation_accuracy.py
 │   └── conftest.py
-│
-├── data/
-│   ├── indices/                     # FAISS indices (gitignored)
-│   ├── models/                      # Cached SBERT models (gitignored)
-│   └── topics/                      # Gensim topic models (gitignored)
 │
 ├── docs/
 │   ├── ARCHITECTURE.md              # This file
 │   ├── API.md
-│   └── INDEXING.md                  # How to build indices
+│   ├── GRAPH_RAG_POC.md             # Graph RAG design document
+│   ├── INDEXING.md                  # How to build indices
+│   └── reports/                     # NEW - Generated reports
+│       ├── BENCHMARK_REPORT.md      # WBS 6.1 deliverable
+│       ├── SPIDER_WEB_COVERAGE_REPORT.md  # WBS 6.2 deliverable
+│       └── CITATION_ACCURACY_REPORT.md    # WBS 6.3 deliverable
 │
 ├── scripts/
 │   ├── start.sh
 │   ├── build_index.py               # CLI for index building
-│   └── train_topics.py              # CLI for topic model training
+│   ├── train_topics.py              # CLI for topic model training
+│   ├── generate_benchmark_report.py # NEW - WBS 6.1
+│   └── generate_citation_accuracy_report.py  # NEW - WBS 6.3
 │
 ├── Dockerfile
 ├── docker-compose.yml
@@ -198,6 +219,66 @@ semantic-search-service/
 - Result merger with score fusion
 - Re-ranking based on tier relationships
 - Deduplication across sources
+
+### Graph Traversal Engine - NEW (WBS 6.4)
+
+The graph traversal system implements a "spider web" model for navigating the taxonomy graph:
+
+#### Relationship Types
+| Type | Description | Relevance Bonus |
+|------|-------------|-----------------|
+| PARALLEL | Same-tier relationships (horizontal) | +0.20 |
+| PERPENDICULAR | Adjacent-tier relationships (vertical) | +0.10 |
+| SKIP_TIER | Non-adjacent tier relationships | +0.00 |
+| LATERAL | Cross-branch relationships | +0.05 |
+
+#### Traversal Algorithms
+- **BFS Traverse**: Breadth-first search for shortest paths
+- **DFS Traverse**: Depth-first search for deep exploration
+- **Cross-Reference Path**: Find connections between concepts
+
+#### Relevance Scoring
+```python
+# Relevance = base_depth_score + relationship_bonus
+depth_score = max(0.0, 1.0 - (depth * 0.2))  # Decay by 20% per hop
+relevance = min(1.0, depth_score + type_bonus)
+```
+
+#### Performance Targets (WBS 6.1 Validated)
+| Operation | P95 Target | P95 Actual | Status |
+|-----------|------------|------------|--------|
+| BFS Traversal | <200ms | 38.39ms | ✅ |
+| DFS Traversal | <200ms | 38.27ms | ✅ |
+| Hybrid Search | <500ms | 115.22ms | ✅ |
+| Score Fusion | <1ms | 0.08ms | ✅ |
+
+### Result Ranker - NEW (WBS 6.4)
+
+Implements multiple score fusion strategies for combining vector and graph results:
+
+| Strategy | Description | Use Case |
+|----------|-------------|----------|
+| LINEAR | Weighted average | General purpose |
+| RRF | Reciprocal Rank Fusion | Multi-source ranking |
+| MAX | Maximum score wins | High-confidence matches |
+
+```python
+# Linear fusion (default)
+final_score = (vector_score * vector_weight) + (graph_score * graph_weight)
+
+# RRF fusion
+rrf_score = 1 / (k + vector_rank) + 1 / (k + graph_rank)
+```
+
+### Citation Accuracy (WBS 6.3 Validated)
+
+Cross-reference citations maintain high relevance:
+
+| Relationship | Target | Achieved | Status |
+|--------------|--------|----------|--------|
+| PARALLEL (Tier 1) | ≥90% | 100% | ✅ |
+| PERPENDICULAR | ≥70% | 90% | ✅ |
+| Average Overall | ≥85% | 90% | ✅ |
 
 ### Topic Modeler (Gensim)
 - LDA for topic discovery
