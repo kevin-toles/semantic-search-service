@@ -43,10 +43,11 @@ class FakeNeo4jClientForHybrid:
 
     async def query(self, cypher: str, parameters: dict[str, Any] | None = None) -> list[dict[str, Any]]:
         """Simulate Neo4j query execution."""
+        await asyncio.sleep(0)  # Satisfy async requirement per Anti-Pattern #8.1
         if self._should_fail:
             raise RuntimeError("Simulated Neo4j connection failure")
         
-        search_text = (parameters or {}).get("search_text", "")
+        _ = cypher  # Unused but required by interface
         limit = (parameters or {}).get("limit", 4)
         
         results = []
@@ -95,6 +96,7 @@ class FakeQdrantClientForHybrid:
         score_threshold: float = 0.0,
     ) -> list[FakeSearchResult]:
         """Simulate Qdrant search returning SearchResult-like objects."""
+        await asyncio.sleep(0)  # Satisfy async requirement per Anti-Pattern #8.1
         if self._should_fail:
             raise RuntimeError("Simulated Qdrant connection failure")
         
@@ -121,10 +123,14 @@ class FakeEmbedderForHybrid:
 
     async def embed(self, text: str) -> list[float]:
         """Return a fake embedding vector."""
+        await asyncio.sleep(0)  # Satisfy async requirement per Anti-Pattern #8.1
+        _ = text  # Unused but required by interface
         return [0.1] * 384
 
     async def embed_query(self, text: str) -> list[float]:
         """Return a fake embedding vector for query (LangChain interface)."""
+        await asyncio.sleep(0)  # Satisfy async requirement per Anti-Pattern #8.1
+        _ = text  # Unused but required by interface
         return [0.1] * 384
 
 
@@ -167,8 +173,8 @@ class TestHybridRetrieverInit:
             qdrant_retriever=qdrant_retriever
         )
         
-        assert hybrid.neo4j_weight == 0.5
-        assert hybrid.qdrant_weight == 0.5
+        assert hybrid.neo4j_weight == pytest.approx(0.5)
+        assert hybrid.qdrant_weight == pytest.approx(0.5)
     
     def test_init_custom_weights(self):
         """HybridRetriever accepts custom weights."""
@@ -186,8 +192,8 @@ class TestHybridRetrieverInit:
             qdrant_weight=0.3
         )
         
-        assert hybrid.neo4j_weight == 0.7
-        assert hybrid.qdrant_weight == 0.3
+        assert hybrid.neo4j_weight == pytest.approx(0.7)
+        assert hybrid.qdrant_weight == pytest.approx(0.3)
     
     def test_init_with_k_limit(self):
         """HybridRetriever accepts k limit parameter."""

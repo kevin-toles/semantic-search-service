@@ -101,6 +101,8 @@ class IntegrationNeo4jClient:
 
     async def query(self, cypher: str, parameters: dict[str, Any] | None = None) -> list[dict[str, Any]]:
         """Execute a Cypher query simulation."""
+        await asyncio.sleep(0)  # Satisfy async requirement per Anti-Pattern #8.1
+        _ = cypher  # Unused but required by interface
         params = parameters or {}
         search_text = params.get("search_text", "").lower()
         limit = params.get("limit", 4)
@@ -153,6 +155,8 @@ class IntegrationQdrantClient:
         score_threshold: float = 0.0,
     ) -> list[FakeSearchResult]:
         """Execute a vector search simulation (uses fake similarity)."""
+        await asyncio.sleep(0)  # Satisfy async requirement per Anti-Pattern #8.1
+        _ = embedding  # Unused but required by interface
         results = []
         for i, ch in enumerate(self._chapters):
             # Simulate similarity score based on embedding (fake)
@@ -180,6 +184,8 @@ class IntegrationEmbedder:
 
     async def embed_query(self, text: str) -> list[float]:
         """Generate a fake embedding vector."""
+        await asyncio.sleep(0)  # Satisfy async requirement per Anti-Pattern #8.1
+        _ = text  # Unused but required by interface
         # In reality, this would call an embedding model
         return [0.1] * 384
 

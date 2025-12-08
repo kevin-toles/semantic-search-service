@@ -81,6 +81,46 @@ class FakeNeo4jClientForRetriever:
         """Check if client is connected."""
         return self._is_connected
 
+    def _search_chapters(self, search_term: str) -> list[dict[str, Any]]:
+        """Search chapters by text (extracted for complexity reduction)."""
+        results = []
+        search_lower = search_term.lower()
+        for chapter in self._chapters.values():
+            if self._chapter_matches_search(chapter, search_lower):
+                results.append({"n": chapter, "score": 0.8})
+        return results
+
+    def _chapter_matches_search(self, chapter: dict[str, Any], search_lower: str) -> bool:
+        """Check if chapter matches search term."""
+        title_match = search_lower in chapter["title"].lower()
+        content_match = search_lower in chapter["content"].lower()
+        concept_match = any(search_lower in c.lower() for c in chapter.get("concepts", []))
+        return title_match or content_match or concept_match
+
+    def _get_related_chapters(self, start_id: str) -> list[dict[str, Any]]:
+        """Get chapters related to start_id (extracted for complexity reduction)."""
+        related = []
+        for rel in self._relationships:
+            target_id = self._get_related_target(rel, start_id)
+            if target_id:
+                target = self._chapters.get(target_id)
+                if target:
+                    related.append({
+                        "n": target,
+                        "relationship_type": rel["type"],
+                        "depth": 1,
+                        "score": 0.7,
+                    })
+        return related
+
+    def _get_related_target(self, rel: dict[str, str], start_id: str) -> str | None:
+        """Get target ID from relationship if connected to start_id."""
+        if rel["from"] == start_id:
+            return rel["to"]
+        if rel["to"] == start_id:
+            return rel["from"]
+        return None
+
     async def query(
         self,
         cypher: str,
@@ -90,58 +130,24 @@ class FakeNeo4jClientForRetriever:
 
         Simulates Neo4j query responses for retriever tests.
         """
-        # Simulate async behavior
-        await asyncio.sleep(0)
-
-        # Handle different query types based on content
+        await asyncio.sleep(0)  # Satisfy async requirement
+        _ = cypher  # Unused but required by interface
         params = parameters or {}
 
         # Full-text search simulation
         if "search_text" in params:
-            search_term = params["search_text"].lower()
-            results = []
-            for chapter in self._chapters.values():
-                if (
-                    search_term in chapter["title"].lower()
-                    or search_term in chapter["content"].lower()
-                    or any(search_term in c.lower() for c in chapter.get("concepts", []))
-                ):
-                    results.append({
-                        "n": chapter,
-                        "score": 0.8,  # Simulated relevance score
-                    })
-            return results
+            return self._search_chapters(params["search_text"])
 
         # Traversal queries
         if "start_id" in params:
-            start_id = params["start_id"]
-            related = []
-            for rel in self._relationships:
-                if rel["from"] == start_id:
-                    target = self._chapters.get(rel["to"])
-                    if target:
-                        related.append({
-                            "n": target,
-                            "relationship_type": rel["type"],
-                            "depth": 1,
-                            "score": 0.7,
-                        })
-                elif rel["to"] == start_id:
-                    target = self._chapters.get(rel["from"])
-                    if target:
-                        related.append({
-                            "n": target,
-                            "relationship_type": rel["type"],
-                            "depth": 1,
-                            "score": 0.7,
-                        })
-            return related
+            return self._get_related_chapters(params["start_id"])
 
         # Default: return all chapters
         return [{"n": ch, "score": 0.5} for ch in self._chapters.values()]
 
     async def close(self) -> None:
         """Close the fake client."""
+        await asyncio.sleep(0)  # Satisfy async requirement per Anti-Pattern #8.1
         self._is_connected = False
 
 
@@ -170,7 +176,6 @@ class TestNeo4jRetrieverInit:
     ) -> None:
         """Test initialization with injected client."""
         retriever = Neo4jRetriever(client=fake_neo4j_client)
-        assert retriever is not None
         assert retriever._client is fake_neo4j_client
 
     def test_init_with_custom_limit(

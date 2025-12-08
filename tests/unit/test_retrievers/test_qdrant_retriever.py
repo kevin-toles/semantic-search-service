@@ -176,6 +176,7 @@ class FakeQdrantClientForRetriever:
 
     async def close(self) -> None:
         """Close the fake client."""
+        await asyncio.sleep(0)  # Satisfy async requirement per Anti-Pattern #8.1
         self._is_connected = False
 
 
@@ -226,7 +227,6 @@ class TestQdrantRetrieverInit:
     ) -> None:
         """Test initialization with injected client and embedder."""
         retriever = QdrantRetriever(client=fake_qdrant_client, embedder=fake_embedder)
-        assert retriever is not None
         assert retriever._client is fake_qdrant_client
         assert retriever._embedder is fake_embedder
 
@@ -259,7 +259,7 @@ class TestQdrantRetrieverInit:
         retriever = QdrantRetriever(
             client=fake_qdrant_client, embedder=fake_embedder, score_threshold=0.5
         )
-        assert retriever.score_threshold == 0.5
+        assert retriever.score_threshold == pytest.approx(0.5)
 
 
 # =============================================================================
