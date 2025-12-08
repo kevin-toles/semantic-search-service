@@ -53,7 +53,7 @@ def create_mock_client() -> AsyncMock:
         {"source": "micro_ch4", "target": "clean_ch7", "type": RelationshipType.PARALLEL.value},
     ]
     
-    async def mock_query(cypher: str, parameters: dict[str, Any] | None = None) -> list[dict]:
+    def mock_query(cypher: str, parameters: dict[str, Any] | None = None) -> list[dict]:
         source_id = parameters.get("node_id") if parameters else None
         results = []
         for rel in relationships:

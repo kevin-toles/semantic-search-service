@@ -13,6 +13,7 @@ Phase 6 Acceptance Criteria:
 
 from __future__ import annotations
 
+from collections.abc import Generator
 from dataclasses import dataclass
 from typing import Any
 from unittest.mock import AsyncMock
@@ -124,8 +125,8 @@ def create_graph_mock_client() -> AsyncMock:
     client = AsyncMock()
     client.is_connected = True
 
-    async def mock_query(cypher: str, parameters: dict[str, Any] | None = None) -> list[dict[str, Any]]:
-        """Simulate Neo4j query responses."""
+    def mock_query(cypher: str, parameters: dict[str, Any] | None = None) -> list[dict[str, Any]]:
+        """Simulate Neo4j query responses (sync function used with AsyncMock side_effect)."""
         if parameters is None:
             return []
 
@@ -144,7 +145,8 @@ def create_graph_mock_client() -> AsyncMock:
 
         return results
 
-    client.query = mock_query
+    # Use side_effect to make the sync function work with async calls
+    client.query = AsyncMock(side_effect=mock_query)
     return client
 
 
@@ -171,7 +173,6 @@ class TestSpiderWebTraversalCoverage:
 
         # Should find sub_nlp via PARALLEL relationship
         node_ids = [r["node_id"] for r in results]
-        relationship_types = [r.get("relationship_type") for r in results]
 
         assert "sub_nlp" in node_ids, "PARALLEL neighbor sub_nlp not found"
 
@@ -335,7 +336,7 @@ class TestTraversalDirectionClassification:
 
 
 @pytest.fixture(scope="module")
-def coverage_report(request: pytest.FixtureRequest) -> None:
+def coverage_report(request: pytest.FixtureRequest) -> Generator[None, None, None]:
     """Generate coverage report at end of test module."""
     yield
 

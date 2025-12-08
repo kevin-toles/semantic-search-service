@@ -19,6 +19,15 @@ from dataclasses import asdict, dataclass
 from datetime import datetime
 from typing import Any
 
+# =============================================================================
+# Constants (avoid string duplication - SonarLint S1192)
+# =============================================================================
+
+BOOK_ARCHITECTURE_PATTERNS = "Architecture Patterns with Python"
+BOOK_BUILDING_MICROSERVICES = "Building Microservices"
+BOOK_CLEAN_ARCHITECTURE = "Clean Architecture"
+BOOK_DOMAIN_DRIVEN_DESIGN = "Domain-Driven Design"
+
 # Simulated demo data (in production, this comes from services)
 
 
@@ -69,7 +78,7 @@ def demo_spider_web_traversal() -> list[DemoTraversalResult]:
         keywords=["complexity", "abstraction", "deep modules"]
     )
     
-    print(f"Starting Node:")
+    print("Starting Node:")
     print(f"  Book: {start.book}")
     print(f"  Chapter: {start.chapter} - {start.title}")
     print(f"  Tier: {start.tier} (Architecture)")
@@ -79,7 +88,7 @@ def demo_spider_web_traversal() -> list[DemoTraversalResult]:
     results = [
         DemoTraversalResult(
             node_id="patterns_ch3",
-            book="Architecture Patterns with Python",
+            book=BOOK_ARCHITECTURE_PATTERNS,
             chapter=3,
             tier=1,
             relationship_type="PARALLEL",
@@ -88,7 +97,7 @@ def demo_spider_web_traversal() -> list[DemoTraversalResult]:
         ),
         DemoTraversalResult(
             node_id="micro_ch4",
-            book="Building Microservices",
+            book=BOOK_BUILDING_MICROSERVICES,
             chapter=4,
             tier=2,
             relationship_type="PERPENDICULAR",
@@ -97,7 +106,7 @@ def demo_spider_web_traversal() -> list[DemoTraversalResult]:
         ),
         DemoTraversalResult(
             node_id="clean_ch7",
-            book="Clean Architecture",
+            book=BOOK_CLEAN_ARCHITECTURE,
             chapter=7,
             tier=2,
             relationship_type="PERPENDICULAR",
@@ -106,7 +115,7 @@ def demo_spider_web_traversal() -> list[DemoTraversalResult]:
         ),
         DemoTraversalResult(
             node_id="ddd_ch5",
-            book="Domain-Driven Design",
+            book=BOOK_DOMAIN_DRIVEN_DESIGN,
             chapter=5,
             tier=3,
             relationship_type="SKIP_TIER",
@@ -133,10 +142,10 @@ def demo_hybrid_search() -> None:
     
     print(f"Query: \"{query}\"")
     print_subheader("Search Configuration")
-    print(f"  Vector Weight: 0.6")
-    print(f"  Graph Weight: 0.4")
-    print(f"  Fusion Strategy: LINEAR")
-    print(f"  Max Depth: 3")
+    print("  Vector Weight: 0.6")
+    print("  Graph Weight: 0.4")
+    print("  Fusion Strategy: LINEAR")
+    print("  Max Depth: 3")
     
     # Simulated results
     results = [
@@ -196,10 +205,10 @@ def demo_chicago_citations(traversal_results: list[DemoTraversalResult]) -> None
     for i, r in enumerate(traversal_results, 1):
         # Simulated Chicago footnote format
         author = {
-            "Architecture Patterns with Python": "Percival, Harry J.",
-            "Building Microservices": "Newman, Sam",
-            "Clean Architecture": "Martin, Robert C.",
-            "Domain-Driven Design": "Evans, Eric",
+            BOOK_ARCHITECTURE_PATTERNS: "Percival, Harry J.",
+            BOOK_BUILDING_MICROSERVICES: "Newman, Sam",
+            BOOK_CLEAN_ARCHITECTURE: "Martin, Robert C.",
+            BOOK_DOMAIN_DRIVEN_DESIGN: "Evans, Eric",
         }.get(r.book, "Unknown Author")
         
         footnote = f"[^{i}]: {author}, *{r.book}*, Ch. {r.chapter}, Tier {r.tier} ({r.relationship_type})."
@@ -217,10 +226,10 @@ def demo_chicago_citations(traversal_results: list[DemoTraversalResult]) -> None
             print(f"\n**Tier {tier} ({tier_names[tier]})**")
             for r in tier_results:
                 author = {
-                    "Architecture Patterns with Python": "Percival, Harry J.",
-                    "Building Microservices": "Newman, Sam",
-                    "Clean Architecture": "Martin, Robert C.",
-                    "Domain-Driven Design": "Evans, Eric",
+                    BOOK_ARCHITECTURE_PATTERNS: "Percival, Harry J.",
+                    BOOK_BUILDING_MICROSERVICES: "Newman, Sam",
+                    BOOK_CLEAN_ARCHITECTURE: "Martin, Robert C.",
+                    BOOK_DOMAIN_DRIVEN_DESIGN: "Evans, Eric",
                 }.get(r.book, "Unknown")
                 print(f"  - {author}. *{r.book}*. Chapter {r.chapter}.")
 

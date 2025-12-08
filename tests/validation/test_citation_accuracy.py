@@ -147,7 +147,7 @@ def mock_neo4j_client(
     """Create a mock Neo4j client with citation data."""
     client = AsyncMock()
     
-    async def mock_query(cypher: str, parameters: dict[str, Any] | None = None) -> list[dict]:
+    def mock_query(cypher: str, parameters: dict[str, Any] | None = None) -> list[dict]:
         """Mock query that returns citation graph data."""
         # Handle neighbor queries
         if "MATCH" in cypher and "neighbor" in cypher.lower():
