@@ -54,6 +54,30 @@ class HybridSearchRequest(BaseModel):
         default=None,
         description="Additional context for graph traversal",
     )
+    # Tier filtering (feature/semantic-tuning)
+    tier_filter: list[int] | None = Field(
+        default=None,
+        description="Filter results to specific taxonomy tiers (1, 2, or 3)",
+    )
+    tier_boost: bool = Field(
+        default=True,
+        description="Apply tier-based score boosting (tier 1 = highest)",
+    )
+    min_term_matches: int = Field(
+        default=1,
+        ge=1,
+        le=10,
+        description="Minimum number of query terms that must match",
+    )
+    # Domain-aware filtering (RELEVANCE_TUNING_PLAN.md)
+    focus_areas: list[str] | None = Field(
+        default=None,
+        description="Focus areas for domain-aware filtering (e.g., 'llm_rag', 'microservices_architecture')",
+    )
+    focus_keywords: list[str] | None = Field(
+        default=None,
+        description="Custom focus keywords for relevance scoring",
+    )
 
     @model_validator(mode="after")
     def validate_query_or_embedding(self) -> HybridSearchRequest:
@@ -62,6 +86,18 @@ class HybridSearchRequest(BaseModel):
             msg = "Either 'query' or 'embedding' must be provided"
             raise ValueError(msg)
         return self
+    
+    @field_validator("tier_filter")
+    @classmethod
+    def validate_tier_filter(cls, v: list[int] | None) -> list[int] | None:
+        """Ensure tier filter values are valid (1, 2, or 3)."""
+        if v is not None:
+            valid_tiers = {1, 2, 3}
+            invalid = [t for t in v if t not in valid_tiers]
+            if invalid:
+                msg = f"Invalid tier values: {invalid}. Valid tiers are 1, 2, 3."
+                raise ValueError(msg)
+        return v
 
 
 class SearchResultItem(BaseModel):
@@ -86,6 +122,32 @@ class SearchResultItem(BaseModel):
     graph_metadata: dict[str, Any] | None = Field(
         default=None,
         description="Graph relationship information",
+    )
+    # Tier information (feature/semantic-tuning)
+    tier: int | None = Field(
+        default=None,
+        description="Taxonomy tier (1=Architecture, 2=Implementation, 3=Engineering)",
+    )
+    tier_boost_applied: float | None = Field(
+        default=None,
+        description="Boost factor applied based on tier (if tier_boost enabled)",
+    )
+    term_match_count: int | None = Field(
+        default=None,
+        description="Number of query terms that matched in this result",
+    )
+    # Domain filtering results (RELEVANCE_TUNING_PLAN.md)
+    focus_area_applied: str | None = Field(
+        default=None,
+        description="Focus area filter that was applied (if any)",
+    )
+    focus_score: float | None = Field(
+        default=None,
+        description="Focus keyword overlap score (0-1)",
+    )
+    domain_filter_adjustment: float | None = Field(
+        default=None,
+        description="Score adjustment from domain filtering",
     )
 
 

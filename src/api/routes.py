@@ -6,6 +6,7 @@ Provides endpoints for hybrid search, graph traversal, and graph queries.
 
 from __future__ import annotations
 
+import logging
 import time
 from typing import TYPE_CHECKING, Any
 
@@ -24,6 +25,9 @@ from src.api.models import (
     TraverseRequest,
     TraverseResponse,
 )
+from src.search.metadata_filter import create_filter as create_domain_filter
+
+logger = logging.getLogger(__name__)
 
 if TYPE_CHECKING:
     from src.api.dependencies import ServiceContainer
@@ -92,6 +96,53 @@ async def hybrid_search(
             limit=request.limit * 2,  # Fetch extra for re-ranking
         )
 
+        # === Phase 1-2: Domain-aware filtering ===
+        # Apply focus area domain filter if specified
+        domain_filter = None
+        domain_applied = None
+        if request.focus_areas:
+            try:
+                domain_filter = create_domain_filter()
+                # Use first focus area as domain (could extend to multiple)
+                domain_applied = request.focus_areas[0] if request.focus_areas else None
+                if domain_applied and domain_applied in domain_filter.available_domains:
+                    # Convert vector results to filter-compatible format
+                    passages = [
+                        {
+                            "id": r.id,
+                            "content": r.payload.get("content", "") if r.payload else "",
+                            "score": r.score,
+                            "metadata": r.payload or {},
+                        }
+                        for r in vector_results
+                    ]
+                    # Apply filter (adjust scores, optionally remove low-relevance)
+                    filtered_passages = domain_filter.apply(
+                        passages=passages,
+                        domain=domain_applied,
+                        remove_filtered=False,  # Keep all, just adjust scores
+                    )
+                    # Update vector_results with adjusted scores and metadata
+                    passage_map = {p["id"]: p for p in filtered_passages}
+                    for vr in vector_results:
+                        if vr.id in passage_map:
+                            fp = passage_map[vr.id]
+                            vr.score = fp["score"]  # Use adjusted score
+                            if vr.payload is None:
+                                vr.payload = {}
+                            # Add domain filter metadata
+                            vr.payload["domain_filter"] = fp.get("metadata", {}).get("domain_filter", {})
+                    logger.debug(
+                        "Applied domain filter '%s' to %d results",
+                        domain_applied,
+                        len(vector_results),
+                    )
+                else:
+                    domain_applied = None  # Domain not recognized
+            except Exception as e:
+                logger.warning("Domain filter failed, continuing without: %s", e)
+                domain_applied = None
+
         # Get graph scores if enabled
         graph_scores: dict[str, float] = {}
         graph_metadata: dict[str, dict[str, Any]] = {}
@@ -118,6 +169,12 @@ async def hybrid_search(
             # Hybrid score formula
             hybrid_score = request.alpha * vector_score + (1 - request.alpha) * graph_score
 
+            # Extract domain filter metadata if present
+            domain_filter_data = (vr.payload or {}).get("domain_filter", {})
+            focus_area_result = domain_applied if domain_filter_data else None
+            focus_score_result = domain_filter_data.get("adjustment", 0.0) if domain_filter_data else None
+            domain_adjustment = domain_filter_data.get("adjustment", 0.0) if domain_filter_data else None
+
             results.append(
                 SearchResultItem(
                     id=vr.id,
@@ -126,6 +183,9 @@ async def hybrid_search(
                     graph_score=graph_score if graph_score > 0 else None,
                     payload=vr.payload or {},
                     graph_metadata=graph_metadata.get(vr.id),
+                    focus_area_applied=focus_area_result,
+                    focus_score=focus_score_result,
+                    domain_filter_adjustment=domain_adjustment,
                 )
             )
 

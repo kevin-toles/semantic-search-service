@@ -1,0 +1,90 @@
+{
+  "domains": {
+    "llm_rag": {
+      "description": "LLM, RAG, document processing, embeddings, vector search",
+      "primary_keywords": ["chunk", "chunking", "split", "segment", "token", "tokenize"],
+      "domain_keywords": [
+        "RAG", "retrieval", "vector", "embedding", "LLM", "token", 
+        "context window", "document", "corpus", "index", "semantic search",
+        "prompt", "completion", "inference", "transformer", "attention",
+        "fine-tune", "fine-tuning", "BERT", "GPT", "langchain", "llamaindex"
+      ],
+      "min_domain_matches": 1,
+      "tier_whitelist": ["architecture", "practices"],
+      "book_blacklist_patterns": [
+        "Effective Modern C++",
+        "C++ Concurrency*",
+        "Game Programming Gems*",
+        "C++ Templates*"
+      ],
+      "book_whitelist_patterns": [
+        "LLM-Engineers-Handbook",
+        "AI Agents*",
+        "AI Engineering*",
+        "Building LLM*",
+        "Generative AI*",
+        "Machine Learning*"
+      ],
+      "score_adjustments": {
+        "in_whitelist_book": 0.3,
+        "in_blacklist_book": -0.4,
+        "in_whitelist_tier": 0.2,
+        "domain_keyword_present": 0.1,
+        "primary_only_no_domain": -0.3
+      }
+    },
+    "python_implementation": {
+      "description": "Python programming, libraries, APIs, implementation details",
+      "primary_keywords": ["python", "def", "class", "import", "pip", "package"],
+      "domain_keywords": [
+        "fastapi", "flask", "django", "pydantic", "asyncio", "typing",
+        "pandas", "numpy", "scipy", "sklearn", "pytorch", "tensorflow",
+        "decorator", "generator", "comprehension", "lambda"
+      ],
+      "min_domain_matches": 0,
+      "tier_whitelist": ["implementation"],
+      "book_blacklist_patterns": [],
+      "book_whitelist_patterns": [
+        "Fluent Python*",
+        "Python*",
+        "Learning Python*"
+      ],
+      "score_adjustments": {
+        "in_whitelist_book": 0.2,
+        "in_blacklist_book": 0.0,
+        "in_whitelist_tier": 0.15,
+        "domain_keyword_present": 0.05,
+        "primary_only_no_domain": 0.0
+      }
+    },
+    "microservices_architecture": {
+      "description": "Distributed systems, microservices, API design",
+      "primary_keywords": ["microservice", "API", "service", "distributed", "container"],
+      "domain_keywords": [
+        "docker", "kubernetes", "REST", "gRPC", "message queue", "kafka",
+        "service mesh", "circuit breaker", "load balancer", "gateway",
+        "12-factor", "orchestration", "scalability", "resilience"
+      ],
+      "min_domain_matches": 1,
+      "tier_whitelist": ["architecture"],
+      "book_blacklist_patterns": [],
+      "book_whitelist_patterns": [
+        "Building Microservices*",
+        "Microservice*",
+        "Architecture Patterns*"
+      ],
+      "score_adjustments": {
+        "in_whitelist_book": 0.25,
+        "in_blacklist_book": 0.0,
+        "in_whitelist_tier": 0.2,
+        "domain_keyword_present": 0.08,
+        "primary_only_no_domain": -0.1
+      }
+    }
+  },
+  "default_settings": {
+    "min_domain_matches": 1,
+    "primary_only_penalty": -0.3,
+    "unknown_domain_behavior": "no_filter"
+  }
+}
