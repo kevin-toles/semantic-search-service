@@ -1,13 +1,13 @@
 
 )src.graph.traversal.Neo4jClientLike.queryN
-D/Users/kevintoles/POC/semantic-search-service/src/graph/traversal.pyb b("3*2
+D/Users/kevintoles/POC/semantic-search-service/src/graph/traversal.pya a("3*2
 3
 traversal.py"
-j j(
+i i(
 implicit return:
-d d(
+c c(
 cypher:
-e e(0
+d d(0
 
 parametersB'%
 #src.graph.traversal.Neo4jClientLikeH

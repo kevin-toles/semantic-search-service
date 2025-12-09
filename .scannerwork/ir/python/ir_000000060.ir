@@ -1,11 +1,51 @@
 
-'"Async context manager entry."strself
-® ®("\#
+) "Return fake traversal results."str
+
+0intself
+‘ ‘(start_node_id
+’ ’("relationship_types
+“ “(3	max_depth
+” ”(limit
+• •(	tuple"­*
+(
+
+™ ™(	"#unknown-value#Btuple(
+&
+
+™ ™(		"
+#is-exact#:Bbool
+
+
+™ ™(	
+"
+#assume#:	:
+8
+
+™ ™(	"#set-field# __collection_size:Bint(
+&
+
+™ ™(	"#array-add-last#:(
+&
+
+™ ™(	"#array-add-last#:(
+&
+
+™ ™(	"#array-add-last#:(
+&
+
+™ ™(	"#array-add-last#:%
+#
+
+™ ™(A_"#id#:Btuple=
+;
+
+š š("
+asyncio.taskssleep:Btyping.Coroutine#
 !
 
-° °("#unknown-value##
-!
+š š("#unknown-value#3
+1
 
-° °("#unknown-value#
+› ›($"#get-field# _traverse_result:
 
-± ±(*G/Users/kevintoles/POC/semantic-search-service/src/graph/neo4j_client.py
+› ›($*E/Users/kevintoles/POC/semantic-search-service/src/api/dependencies.py

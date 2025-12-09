@@ -1,11 +1,11 @@
 
 2src.graph.schema.SchemaManager.create_book_indexesM
-A/Users/kevintoles/POC/semantic-search-service/src/graph/schema.pyï ï(!"2*‘
+A/Users/kevintoles/POC/semantic-search-service/src/graph/schema.pyó ó(!"2*‘
 2
-ğ ğ(C 
+ô ô(C 
 
 
-ñ ô(
+õ ø(
 cypher"__id*
 
 __unknown_file (ca
@@ -15,14 +15,14 @@ _
         g
 e
 
-õ õ(
+ù ù(
 %1"__id*K
 
 __unknown_file (/*- 
 src.graph.schema.SchemaManager"	
 _clientom
 
-õ õ(0
+ù ù(0
 %2*"
 
 __unknown_file (
@@ -36,6 +36,6 @@ e
 3*1
 3
 	schema.py"
-÷ ÷(
+û û(
 implicit returnB" 
 src.graph.schema.SchemaManagerH

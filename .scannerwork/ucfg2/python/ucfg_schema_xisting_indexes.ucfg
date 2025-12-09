@@ -1,25 +1,25 @@
 
 3src.graph.schema.SchemaManager.get_existing_indexesM
-A/Users/kevintoles/POC/semantic-search-service/src/graph/schema.pyÃ Ã(""2*Å
+A/Users/kevintoles/POC/semantic-search-service/src/graph/schema.pyÇ Ç(""2*Å
 2
-Ä È(L
+È Ì(L
 J
 
-É É(
+Í Í(
 cypher"__id*,
 
 __unknown_file (
 SHOW INDEXESg
 e
 
-Ê Ê(!
+Î Î(!
 %1"__id*K
 
 __unknown_file (/*- 
 src.graph.schema.SchemaManager"	
 _clientge
 
-Ê Ê(/
+Î Î(/
 %2*"
 
 __unknown_file (
@@ -31,7 +31,7 @@ e
 
 cypher2query"
 
-Ê Ê(/
+Î Î(/
 
 %2B" 
 src.graph.schema.SchemaManagerH

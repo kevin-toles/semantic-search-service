@@ -8,10 +8,11 @@ from __future__ import annotations
 
 import logging
 import time
-from typing import TYPE_CHECKING, Any
+from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException, status
 
+from src.api.dependencies import ServiceContainer
 from src.api.models import (
     ErrorResponse,
     GraphQueryRequest,
@@ -28,9 +29,6 @@ from src.api.models import (
 from src.search.metadata_filter import create_filter as create_domain_filter
 
 logger = logging.getLogger(__name__)
-
-if TYPE_CHECKING:
-    from src.api.dependencies import ServiceContainer
 
 router = APIRouter()
 

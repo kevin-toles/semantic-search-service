@@ -1,86 +1,8 @@
 
-"constraint_book_id"str
-"constraints"str
-"missing_constraints"str
+("Check if fake is 'connected'."strself
+   ("A-
++
 
-0int
-vm"Validate the current schema.
+¢ ¢("#get-field# _connected:
 
-        Returns:
-            dict with validation status and details
-        "str
-
-"constraint_tier_id"str
-
-"is_valid"str
- "constraint_chapter_id"str
-!"constraint_taxonomy_id"str
- "constraint_concept_id"str
-	"indexes"strself
-ž ž(""–#
-!
-
-¤ ¤(;"#unknown-value#0
-.
-
-¤ ¤(;constraints"#unknown-value##
-!
-
-¥ ¥(3"#unknown-value#,
-*
-
-¥ ¥(3indexes"#unknown-value#;
-9
-
-§ ­(	expected_constraints"#new-object#Bset(
-&
-
-§ ­(		"#array-add-last#:(
-&
-
-§ ­(	"#array-add-last#:
-(
-&
-
-§ ­(	"#array-add-last#:(
-&
-
-§ ­(	"#array-add-last#:(
-&
-
-§ ­(	"#array-add-last#:G
-E
-
-¯$ ¯(Lexisting_constraint_names"?python-unknown?:Bset<
-:
-
-± ±(Nmissing_constraints"	#binop -#*2-:&
-$
-
-³ ¸(	"#new-object#Bdict,
-*
-
-´ ´(0"
-builtinslen*:Bint,
-*
-
-´ ´(5"
-#binop ==#2==:Bbool"
- 
-
-´ ´(5"	#map-set#:"
- 
-
-µ µ(&"	#map-set#:"
- 
-
-¶ ¶("	#map-set#:.
-,
-
-·# ·(<"
-builtinslist*:Blist"
- 
-
-· ·(< "	#map-set#:
-
-³ ¸(	*A/Users/kevintoles/POC/semantic-search-service/src/graph/schema.py
+¢ ¢(*G/Users/kevintoles/POC/semantic-search-service/src/graph/neo4j_client.py

@@ -1,5 +1,5 @@
 
-1.0PythonFrontend"1765094050346*py2.B“
+1.0PythonFrontend"1765168175676*py2.B“
 
 imports1
 
@@ -30,10 +30,10 @@ __future__12
 src.graph.neo4j_client18
 6
 0tests.unit.test_graph.test_schema.TestNodeLabels20
-Q
-Ktests.unit.test_graph.test_schema.TestNodeLabels.test_concept_label_defined22
 N
-Htests.unit.test_graph.test_schema.TestNodeLabels.test_tier_label_defined24
+Htests.unit.test_graph.test_schema.TestNodeLabels.test_tier_label_defined22
+Q
+Ktests.unit.test_graph.test_schema.TestNodeLabels.test_concept_label_defined24
 N
 Htests.unit.test_graph.test_schema.TestNodeLabels.test_book_label_defined26
 R
@@ -43,25 +43,25 @@ Ktests.unit.test_graph.test_schema.TestNodeLabels.test_chapter_label_defined30
 >
 8tests.unit.test_graph.test_schema.TestRelationshipLabels32
 [
-Utests.unit.test_graph.test_schema.TestRelationshipLabels.test_references_relationship34
+Utests.unit.test_graph.test_schema.TestRelationshipLabels.test_belongs_to_relationship34
 \
 Vtests.unit.test_graph.test_schema.TestRelationshipLabels.test_has_concept_relationship36
 [
 Utests.unit.test_graph.test_schema.TestRelationshipLabels.test_related_to_relationship38
 [
-Utests.unit.test_graph.test_schema.TestRelationshipLabels.test_belongs_to_relationship40
+Utests.unit.test_graph.test_schema.TestRelationshipLabels.test_references_relationship40
 \
 Vtests.unit.test_graph.test_schema.TestRelationshipLabels.test_has_chapter_relationship42
 <
 6tests.unit.test_graph.test_schema.TestSchemaValidation44
-Z
-Ttests.unit.test_graph.test_schema.TestSchemaValidation.test_get_existing_constraints46
+`
+Ztests.unit.test_graph.test_schema.TestSchemaValidation.test_validate_schema_returns_status46
 
 unittest.mock.MagicMock48
 V
 Ptests.unit.test_graph.test_schema.TestSchemaValidation.test_get_existing_indexes50
-`
-Ztests.unit.test_graph.test_schema.TestSchemaValidation.test_validate_schema_returns_status52
+Z
+Ttests.unit.test_graph.test_schema.TestSchemaValidation.test_get_existing_constraints52
 =
 7tests.unit.test_graph.test_schema.TestSchemaManagerInit54
 h
@@ -72,38 +72,38 @@ Ztests.unit.test_graph.test_schema.TestSchemaManagerInit.test_schema_manager_acc
 8tests.unit.test_graph.test_schema.TestFullSchemaCreation60
 V
 Ptests.unit.test_graph.test_schema.TestFullSchemaCreation.test_create_all_indexes62
-Z
-Ttests.unit.test_graph.test_schema.TestFullSchemaCreation.test_create_all_constraints64
 O
-Itests.unit.test_graph.test_schema.TestFullSchemaCreation.test_init_schema66
+Itests.unit.test_graph.test_schema.TestFullSchemaCreation.test_init_schema64
+Z
+Ttests.unit.test_graph.test_schema.TestFullSchemaCreation.test_create_all_constraints66
 <
 6tests.unit.test_graph.test_schema.TestCypherGeneration68
-]
-Wtests.unit.test_graph.test_schema.TestCypherGeneration.test_generate_create_node_cypher70
 e
-_tests.unit.test_graph.test_schema.TestCypherGeneration.test_generate_create_relationship_cypher72
+_tests.unit.test_graph.test_schema.TestCypherGeneration.test_generate_create_relationship_cypher70
+]
+Wtests.unit.test_graph.test_schema.TestCypherGeneration.test_generate_create_node_cypher72
 \
 Vtests.unit.test_graph.test_schema.TestCypherGeneration.test_generate_merge_node_cypher74
 9
 3tests.unit.test_graph.test_schema.TestIndexCreation76
-V
-Ptests.unit.test_graph.test_schema.TestIndexCreation.test_create_index_book_title78
 _
-Ytests.unit.test_graph.test_schema.TestIndexCreation.test_create_unique_constraint_tier_id80
-_
-Ytests.unit.test_graph.test_schema.TestIndexCreation.test_create_unique_constraint_book_id82
-b
-\tests.unit.test_graph.test_schema.TestIndexCreation.test_create_unique_constraint_chapter_id84
+Ytests.unit.test_graph.test_schema.TestIndexCreation.test_create_unique_constraint_tier_id78
 Z
-Ttests.unit.test_graph.test_schema.TestIndexCreation.test_create_index_chapter_number86
+Ttests.unit.test_graph.test_schema.TestIndexCreation.test_create_index_chapter_number80
+b
+\tests.unit.test_graph.test_schema.TestIndexCreation.test_create_unique_constraint_chapter_id82
+_
+Ytests.unit.test_graph.test_schema.TestIndexCreation.test_create_unique_constraint_book_id84
+V
+Ptests.unit.test_graph.test_schema.TestIndexCreation.test_create_index_book_title86
 7
 1tests.unit.test_graph.test_schema.TestSchemaReset88
-Q
-Ktests.unit.test_graph.test_schema.TestSchemaReset.test_drop_all_constraints90
-M
-Gtests.unit.test_graph.test_schema.TestSchemaReset.test_drop_all_indexes92
 I
-Ctests.unit.test_graph.test_schema.TestSchemaReset.test_reset_schema94
+Ctests.unit.test_graph.test_schema.TestSchemaReset.test_reset_schema90
+Q
+Ktests.unit.test_graph.test_schema.TestSchemaReset.test_drop_all_constraints92
+M
+Gtests.unit.test_graph.test_schema.TestSchemaReset.test_drop_all_indexes94
 9
 3tests.unit.test_graph.test_schema.mock_neo4j_client96J
 
@@ -341,13 +341,13 @@ Ctests.unit.test_graph.test_schema.TestSchemaReset.test_reset_schema94
 8­	 ­(3
 
 47494*
-8Û Û(,
+8È È(2
 
 51494*
 8ì ì((
 
 53494*
-8È È(2
+8Û Û(,
 
 59494*
 8|	 |(+
@@ -356,34 +356,34 @@ Ctests.unit.test_graph.test_schema.TestSchemaReset.test_reset_schema94
 8ð ð(&
 
 65494*
-8ã ã(*
-
-67494*
 8ý ý(
 
-79494*
-8Â Â(+
+67494*
+8ã ã(*
 
-81494*
+79494*
 8š š(4
 
-83494*
-8ª ª(4
-
-85494*
-8¶ ¶(7
-
-87494*
+81494*
 8Î Î(/
 
+83494*
+8¶ ¶(7
+
+85494*
+8ª ª(4
+
+87494*
+8Â Â(+
+
 91494*
-8† †((
+8© ©( 
 
 93494*
-8™ ™($
+8† †((
 
 95494*
-8© ©( 
+8™ ™($
 
 97493*
 8 (

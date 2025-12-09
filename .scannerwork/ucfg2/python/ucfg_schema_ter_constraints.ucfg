@@ -1,11 +1,11 @@
 
 9src.graph.schema.SchemaManager.create_chapter_constraintsM
-A/Users/kevintoles/POC/semantic-search-service/src/graph/schema.pyË Ë(("2*©
+A/Users/kevintoles/POC/semantic-search-service/src/graph/schema.pyÏ Ï(("2*©
 2
-Ì Ì(5¸
+Ð Ð(5¸
 µ
 
-Í Ð(
+Ñ Ô(
 cypher"__id*–
 
 __unknown_file (zx
@@ -15,14 +15,14 @@ v
         g
 e
 
-Ñ Ñ(
+Õ Õ(
 %1"__id*K
 
 __unknown_file (/*- 
 src.graph.schema.SchemaManager"	
 _clientom
 
-Ñ Ñ(0
+Õ Õ(0
 %2*"
 
 __unknown_file (
@@ -36,6 +36,6 @@ e
 3*1
 3
 	schema.py"
-Ó Ó(
+× ×(
 implicit returnB" 
 src.graph.schema.SchemaManagerH

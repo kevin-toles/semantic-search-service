@@ -1,11 +1,11 @@
 
 :src.graph.traversal.GraphTraversal.get_traversal_directionP
-D/Users/kevintoles/POC/semantic-search-service/src/graph/traversal.py¶ ¶("2*²
+D/Users/kevintoles/POC/semantic-search-service/src/graph/traversal.pyµ µ("2*²
 2
-» Ã(˜
+º Â(˜
 •
 
-Ä Ä(
+Ã Ã(
 %5"	__compare*"
 
 __unknown_file (
@@ -21,52 +21,52 @@ D/Users/kevintoles/POC/semantic-search-service/src/graph/traversal.py¶ ¶("
 4
 7*–
 4
-Å Å(-o
+Ä Ä(-o
 m
 
-Å Å(-
+Ä Ä(-
 %1"__id*S
 
 __unknown_file (7*5(
 &src.graph.traversal.TraversalDirection"	
 LATERAL"
 
-Å Å(-
+Ä Ä(-
 
 %1*“
 5
-É É(*l
+È È(*l
 j
 
-É É(*
+È È(*
 %2"__id*P
 
 __unknown_file (4*2(
 &src.graph.traversal.TraversalDirection"
 DOWN"
 
-É É(*
+È È(*
 
 %2*‘
 6
-Ç Ç((j
+Æ Æ((j
 h
 
-Ç Ç((
+Æ Æ((
 %3"__id*N
 
 __unknown_file (2*0(
 &src.graph.traversal.TraversalDirection"
 UP"
 
-Ç Ç((
+Æ Æ((
 
 %3*±
 7
-Æ Æ( —
+Å Å( —
 ”
 
-Æ Æ( 
+Å Å( 
 %4"	__compare*!
 
 __unknown_file (
@@ -82,9 +82,9 @@ h
 5
 6:
 
-¸ ¸(
+· ·(
 	tier_from:
 
-¹ ¹(	
+¸ ¸(	
 tier_toB&$
 "src.graph.traversal.GraphTraversalH

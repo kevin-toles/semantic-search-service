@@ -63,6 +63,9 @@ services:
       - NEO4J_AUTH=neo4j/${NEO4J_PASSWORD:-devpassword}
       - NEO4J_PLUGINS=["apoc"]
       - NEO4J_dbms_security_procedures_unrestricted=apoc.*
+      # Increase connection pool for higher concurrency (default 40 -> 100)
+      - NEO4J_server_bolt_thread__pool__max__size=100
+      - NEO4J_dbms_connector_bolt_thread__pool__max__size=100
     healthcheck:
       test: ["CMD", "cypher-shell", "-u", "neo4j", "-p", "${NEO4J_PASSWORD:-devpassword}", "RETURN 1"]
       interval: 10s
