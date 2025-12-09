@@ -14,6 +14,8 @@ from fastapi import APIRouter, Depends, HTTPException, status
 
 from src.api.dependencies import ServiceContainer
 from src.api.models import (
+    EmbedRequest,
+    EmbedResponse,
     ErrorResponse,
     GraphQueryRequest,
     GraphQueryResponse,
@@ -405,3 +407,85 @@ async def health_check(
         services=service_statuses,
         version="1.0.0",
     )
+
+
+# ==============================================================================
+# Embedding Endpoint (WBS 0.2.1)
+# ==============================================================================
+
+
+@router.post(
+    "/v1/embed",
+    response_model=EmbedResponse,
+    responses={
+        400: {"model": ErrorResponse, "description": "Invalid request"},
+        422: {"model": ErrorResponse, "description": "Validation error"},
+        500: {"model": ErrorResponse, "description": "Internal server error"},
+        503: {"model": ErrorResponse, "description": "Service unavailable"},
+    },
+    tags=["embeddings"],
+    summary="Generate embeddings for text",
+)
+async def embed_text(
+    request: EmbedRequest,
+    services: ServiceContainer = Depends(get_services),  # noqa: B008
+) -> EmbedResponse:
+    """
+    Generate embedding vectors for text input.
+
+    Accepts either a single text string or a list of texts.
+    Returns embedding vectors of the configured dimension.
+
+    Reference: END_TO_END_INTEGRATION_WBS.md WBS 0.2.1.3
+
+    Args:
+        request: Embedding request with text(s) to embed
+        services: Injected service container
+
+    Returns:
+        EmbedResponse with embedding vectors and metadata
+    """
+    if services.embedding_service is None:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail={"error": "embedding_service_unavailable", "message": "Embedding service is not configured"},
+        )
+
+    start_time = time.perf_counter()
+
+    try:
+        # Normalize input to list
+        texts = [request.text] if isinstance(request.text, str) else request.text
+
+        # Generate embeddings for each text
+        embeddings: list[list[float]] = []
+        for text in texts:
+            embedding = await services.embedding_service.embed(text)
+            embeddings.append(embedding)
+
+        # Determine dimensions from first embedding
+        dimensions = len(embeddings[0]) if embeddings else 0
+
+        # Model name (use default if not specified)
+        model_name = request.model or services.config.embedding_model if hasattr(services.config, 'embedding_model') else "all-mpnet-base-v2"
+
+        latency_ms = (time.perf_counter() - start_time) * 1000
+        logger.info(
+            "Generated %d embeddings in %.2fms",
+            len(embeddings),
+            latency_ms,
+        )
+
+        return EmbedResponse(
+            embeddings=embeddings,
+            model=model_name,
+            dimensions=dimensions,
+            usage={"total_tokens": sum(len(t.split()) for t in texts)},
+        )
+
+    except Exception as e:
+        logger.exception("Embedding generation failed")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail={"error": "embedding_failed", "message": str(e)},
+        ) from e

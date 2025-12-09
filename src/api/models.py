@@ -343,3 +343,66 @@ class ErrorResponse(BaseModel):
         default=None,
         description="Additional error details",
     )
+
+
+# ==============================================================================
+# Embedding Models (WBS 0.2.1)
+# ==============================================================================
+
+
+class EmbedRequest(BaseModel):
+    """Request model for text embedding endpoint.
+    
+    Reference: END_TO_END_INTEGRATION_WBS.md WBS 0.2.1.1
+    """
+
+    model_config = ConfigDict(extra="forbid")
+
+    text: str | list[str] = Field(
+        description="Text or list of texts to embed",
+    )
+    model: str | None = Field(
+        default=None,
+        description="Model to use for embedding (uses default if not specified)",
+    )
+
+    @field_validator("text")
+    @classmethod
+    def validate_text(cls, v: str | list[str]) -> str | list[str]:
+        """Ensure text is not empty."""
+        if isinstance(v, str):
+            if not v.strip():
+                msg = "Text cannot be empty"
+                raise ValueError(msg)
+        elif isinstance(v, list):
+            if not v:
+                msg = "Text list cannot be empty"
+                raise ValueError(msg)
+            for i, t in enumerate(v):
+                if not isinstance(t, str) or not t.strip():
+                    msg = f"Text at index {i} is empty or invalid"
+                    raise ValueError(msg)
+        return v
+
+
+class EmbedResponse(BaseModel):
+    """Response model for text embedding endpoint.
+    
+    Reference: END_TO_END_INTEGRATION_WBS.md WBS 0.2.1.2
+    """
+
+    model_config = ConfigDict(extra="forbid")
+
+    embeddings: list[list[float]] = Field(
+        description="List of embedding vectors",
+    )
+    model: str = Field(
+        description="Model used for embedding",
+    )
+    dimensions: int = Field(
+        description="Dimension of each embedding vector",
+    )
+    usage: dict[str, int] | None = Field(
+        default=None,
+        description="Token usage statistics",
+    )

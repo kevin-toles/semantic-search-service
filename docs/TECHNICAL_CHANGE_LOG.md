@@ -20,6 +20,57 @@ This document tracks all implementation changes, their rationale, and git commit
 
 ## 2025-12-09
 
+### CL-005: WBS 0.2.1 - Add /v1/embed Endpoint
+
+| Field | Value |
+|-------|-------|
+| **Date/Time** | 2025-12-09 |
+| **WBS Item** | 0.2.1 - Add Missing /v1/embed Endpoint |
+| **Change Type** | Feature |
+| **Summary** | Added /v1/embed endpoint for text embedding generation |
+| **Files Changed** | See table below |
+| **Rationale** | Required for end-to-end integration per END_TO_END_INTEGRATION_WBS.md |
+| **Git Commit** | Pending |
+
+**Tasks Completed:**
+
+| Task | Description | Status |
+|------|-------------|--------|
+| 0.2.1.1 | Create EmbedRequest model with `text: str \| list[str]` | ✅ |
+| 0.2.1.2 | Create EmbedResponse model with `embeddings`, `model`, `dimensions` | ✅ |
+| 0.2.1.3 | Implement POST /v1/embed route handler | ✅ |
+| 0.2.1.4 | Wire to embedding_service.embed() | ✅ |
+| 0.2.1.5 | Add unit tests (20 tests) | ✅ |
+
+**Implementation Details:**
+
+| File | Change |
+|------|--------|
+| `src/api/models.py` | Added EmbedRequest, EmbedResponse models |
+| `src/api/routes.py` | Added POST /v1/embed endpoint |
+| `tests/unit/test_embed_api.py` | NEW: 20 unit tests |
+
+**API Contract:**
+
+```python
+# Request
+POST /v1/embed
+{
+    "text": "string" | ["string", ...],
+    "model": "optional-model-name"
+}
+
+# Response
+{
+    "embeddings": [[0.1, 0.2, ...]],
+    "model": "all-mpnet-base-v2",
+    "dimensions": 768,
+    "usage": {"total_tokens": 3}
+}
+```
+
+---
+
 ### CL-004: WBS 0.1.1 - Integration Profile Cross-Reference
 
 | Field | Value |
