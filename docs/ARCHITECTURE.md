@@ -10,6 +10,80 @@ The Semantic Search Service is a **microservice** that provides embedding genera
 
 ---
 
+## Kitchen Brigade Role: COOKBOOK (DUMB RETRIEVAL)
+
+In the Kitchen Brigade architecture, **semantic-search-service** is the **Cookbook** - a dumb retrieval system:
+
+```
+┌──────────────────────────────────────────────────────────────────────────────┐
+│                     📖 COOKBOOK - INTENTIONALLY DUMB                         │
+├──────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│  WHAT IT DOES:                                                               │
+│  ─────────────                                                               │
+│  ✓ Receives keywords/queries as INPUT (does NOT generate them)              │
+│  ✓ Queries Qdrant vector DB and Neo4j graph DB                              │
+│  ✓ Returns ALL matches without filtering or judgment                        │
+│  ✓ Just looks up "recipes" in the "cookbook"                                │
+│                                                                              │
+│  WHAT IT DOES NOT DO:                                                        │
+│  ────────────────────                                                        │
+│  ✗ Generate search terms (that's Code-Orchestrator-Service)                 │
+│  ✗ Filter or rank results (that's Code-Orchestrator-Service curation)       │
+│  ✗ Make semantic judgments (e.g., "chunking" = LLM context)                 │
+│  ✗ Host HuggingFace models (that's Code-Orchestrator-Service)               │
+│                                                                              │
+│  WHY DUMB IS GOOD:                                                           │
+│  ─────────────────                                                           │
+│  • Single responsibility (just retrieval)                                   │
+│  • Easy to test (input → output, no complex logic)                          │
+│  • Horizontally scalable (no state, no model loading)                       │
+│  • Intelligence is centralized in Sous Chef                                 │
+│                                                                              │
+└──────────────────────────────────────────────────────────────────────────────┘
+```
+
+### Data Flow
+
+```
+Code-Orchestrator-Service (Sous Chef)
+    │
+    │ Extracted keywords: ["chunking", "RAG", "embedding", "overlap"]
+    ▼
+┌─────────────────────────────────────────────────────────────────┐
+│             Semantic Search Service (This Service)              │
+│                                                                 │
+│  POST /v1/search                                                │
+│  {                                                              │
+│    "keywords": ["chunking", "RAG", "embedding"],               │
+│    "top_k": 20                                                  │
+│  }                                                              │
+│                                                                 │
+│  Internal:                                                      │
+│  ├── Qdrant: Vector similarity search                          │
+│  ├── Neo4j: Graph traversal (optional)                         │
+│  └── Hybrid: Combine results                                   │
+│                                                                 │
+│  Returns: ALL matches (no filtering)                           │
+│  [                                                              │
+│    {book: "AI Engineering", chapter: 5, score: 0.91},         │
+│    {book: "C++ Concurrency", chapter: 3, score: 0.45}, ← wrong│
+│    {book: "Building LLM Apps", chapter: 8, score: 0.88},      │
+│    ...                                                          │
+│  ]                                                              │
+└─────────────────────────────────────────────────────────────────┘
+    │
+    │ Raw results (may include false positives like C++ memory chunks)
+    ▼
+Code-Orchestrator-Service (Chef de Partie - Curation)
+    │
+    │ Filtered/ranked results (C++ filtered out)
+    ▼
+Consumer (ai-agents, llm-document-enhancer)
+```
+
+---
+
 ## Folder Structure
 
 ```
