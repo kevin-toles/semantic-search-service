@@ -443,24 +443,41 @@ def load_book_from_json(json_path: Path) -> BookData:
     with open(json_path, "r") as f:
         data = json.load(f)
     
+    # Get book ID from filename or data
+    book_id = data.get("id", json_path.stem)
+    
     chapters = []
     for ch_data in data.get("chapters", []):
+        # Support both "number" and "chapter_number" field names
+        chapter_num = ch_data.get("number", ch_data.get("chapter_number", 0))
+        
+        # Generate chapter ID if not present
+        chapter_id = ch_data.get("id", f"{book_id}-ch{chapter_num}")
+        
+        # Support both "page_range" and "start_page/end_page" formats
+        page_range = ch_data.get("page_range", "")
+        if not page_range and "start_page" in ch_data and "end_page" in ch_data:
+            page_range = f"{ch_data['start_page']}-{ch_data['end_page']}"
+        
         chapters.append(ChapterData(
-            id=ch_data.get("id", f"ch-{ch_data.get('number', 0)}"),
-            number=ch_data.get("number", 0),
+            id=chapter_id,
+            number=chapter_num,
             title=ch_data.get("title", ""),
             keywords=ch_data.get("keywords", []),
             concepts=ch_data.get("concepts", []),
             summary=ch_data.get("summary", ""),
-            page_range=ch_data.get("page_range", ""),
+            page_range=page_range,
         ))
     
+    # Support both flat and nested book info structures
+    book_info = data.get("book", {})
+    
     return BookData(
-        id=data.get("id", json_path.stem),
-        title=data.get("title", data.get("book", {}).get("title", "Unknown")),
-        author=data.get("author", data.get("book", {}).get("author", "Unknown")),
-        year=data.get("year", data.get("book", {}).get("year", 2024)),
-        tier=data.get("tier", data.get("book", {}).get("tier", 2)),
+        id=book_id,
+        title=data.get("title", data.get("book_title", book_info.get("title", "Unknown"))),
+        author=data.get("author", book_info.get("author", "Unknown")),
+        year=data.get("year", book_info.get("year", 2024)),
+        tier=data.get("tier", book_info.get("tier", 2)),
         category=data.get("category", "general"),
         chapters=chapters,
     )
