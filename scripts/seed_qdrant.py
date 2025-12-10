@@ -327,7 +327,9 @@ def print_summary(client, collection_name: str) -> None:
     print("QDRANT SEEDING SUMMARY")
     print("=" * 50)
     print(f"Collection:    {collection_name}")
-    print(f"Vector count:  {info.vectors_count}")
+    # Use points_count (newer API) with fallback to vectors_count (older API)
+    vector_count = getattr(info, 'points_count', None) or getattr(info, 'vectors_count', 'N/A')
+    print(f"Vector count:  {vector_count}")
     print(f"Vector size:   {info.config.params.vectors.size}")
     print(f"Distance:      {info.config.params.vectors.distance}")
     print(f"Status:        {info.status}")
@@ -341,11 +343,20 @@ def test_search(client, model, collection_name: str) -> None:
     test_query = "domain driven design patterns"
     query_embedding = generate_embedding(model, test_query)
     
-    results = client.search(
-        collection_name=collection_name,
-        query_vector=query_embedding,
-        limit=3,
-    )
+    # Use query_points for newer qdrant-client API, fallback to search for older versions
+    try:
+        results = client.query_points(
+            collection_name=collection_name,
+            query=query_embedding,
+            limit=3,
+        ).points
+    except AttributeError:
+        # Fallback for older qdrant-client versions
+        results = client.search(
+            collection_name=collection_name,
+            query_vector=query_embedding,
+            limit=3,
+        )
     
     print(f"\nSearch results for: '{test_query}'")
     for i, result in enumerate(results, 1):
