@@ -20,6 +20,65 @@ This document tracks all implementation changes, their rationale, and git commit
 
 ## 2025-12-09
 
+### CL-007: WBS 0.2.3 - Wire Real Database Clients
+
+| Field | Value |
+|-------|-------|
+| **Date/Time** | 2025-12-09 |
+| **WBS Item** | 0.2.3 - Wire Real Database Clients |
+| **Change Type** | Feature |
+| **Summary** | Added real database client wrappers and USE_REAL_CLIENTS toggle |
+| **Files Changed** | See table below |
+| **Rationale** | Required for end-to-end integration per END_TO_END_INTEGRATION_WBS.md |
+| **Git Commit** | Pending |
+
+**Tasks Completed:**
+
+| Task | Description | Status |
+|------|-------------|--------|
+| 0.2.3.1 | Create `create_real_services(config)` factory function | ✅ |
+| 0.2.3.2 | Initialize `QdrantClient(url=os.getenv("QDRANT_URL"))` | ✅ |
+| 0.2.3.3 | Initialize `neo4j.GraphDatabase.driver()` | ✅ |
+| 0.2.3.4 | Initialize `SentenceTransformer("all-mpnet-base-v2")` | ✅ |
+| 0.2.3.5 | Add lifespan handler for startup/shutdown | ✅ |
+| 0.2.3.6 | Add `USE_REAL_CLIENTS=true` env var toggle | ✅ |
+
+**Implementation Details:**
+
+| File | Change |
+|------|--------|
+| `src/main.py` | Added RealQdrantClient, RealNeo4jClient, RealEmbeddingService wrappers |
+| `src/main.py` | Added create_real_services() factory function |
+| `src/main.py` | Added lifespan context manager for startup/shutdown |
+| `src/api/models.py` | Added `dependencies` field to HealthResponse |
+| `src/api/routes.py` | Updated /health to include dependency status |
+| `scripts/validate_0.2.3_real_clients.sh` | NEW: Validation script (7 acceptance tests) |
+
+**Environment Variables:**
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| USE_REAL_CLIENTS | false | Set to "true" to use real database clients |
+| QDRANT_URL | http://localhost:6333 | Qdrant server URL |
+| NEO4J_URI | bolt://localhost:7687 | Neo4j Bolt URI |
+| NEO4J_USER | neo4j | Neo4j username |
+| NEO4J_PASSWORD | devpassword | Neo4j password |
+| EMBEDDING_MODEL | all-mpnet-base-v2 | SentenceTransformer model name |
+
+**Acceptance Tests (7/7 passed):**
+
+| # | Test | Status |
+|---|------|--------|
+| 1 | App starts with real clients (HTTP 200) | ✅ |
+| 2 | Health response has dependencies field | ✅ |
+| 3 | Qdrant connected | ✅ |
+| 4 | Neo4j connected | ✅ |
+| 5 | Embedder loaded | ✅ |
+| 6 | Startup < 30s | ✅ |
+| 7 | Real embedder produces 768-dim vectors | ✅ |
+
+---
+
 ### CL-006: WBS 0.2.2 - Add /v1/search Endpoint
 
 | Field | Value |

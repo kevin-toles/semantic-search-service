@@ -10,7 +10,7 @@ import logging
 import time
 from typing import Any
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 
 from src.api.dependencies import ServiceContainer
 from src.api.models import (
@@ -363,6 +363,7 @@ async def graph_query(
     summary="Health check endpoint",
 )
 async def health_check(
+    request: Request,
     services: ServiceContainer = Depends(get_services),  # noqa: B008
 ) -> HealthResponse:
     """
@@ -374,10 +375,11 @@ async def health_check(
     - Embedding service
 
     Args:
+        request: FastAPI request (for app.state access)
         services: Injected service container
 
     Returns:
-        HealthResponse with service statuses
+        HealthResponse with service statuses and dependencies
     """
     service_statuses: dict[str, str] = {}
 
@@ -401,6 +403,18 @@ async def health_check(
     except Exception:
         service_statuses["graph"] = "unhealthy"
 
+    # Get dependency status from app.state (set by lifespan handler)
+    dependencies: dict[str, str] = {}
+    if hasattr(request.app.state, "dependencies"):
+        dependencies = request.app.state.dependencies
+    else:
+        # Default for backward compatibility
+        dependencies = {
+            "qdrant": service_statuses.get("vector", "unknown"),
+            "neo4j": service_statuses.get("graph", "unknown"),
+            "embedder": "loaded" if services.embedding_service else "not_configured",
+        }
+
     # Determine overall status
     all_healthy = all(s in ("healthy", "not_configured") for s in service_statuses.values())
     overall_status = "healthy" if all_healthy else "degraded"
@@ -408,6 +422,7 @@ async def health_check(
     return HealthResponse(
         status=overall_status,
         services=service_statuses,
+        dependencies=dependencies,
         version="1.0.0",
     )
 

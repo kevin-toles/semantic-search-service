@@ -329,6 +329,10 @@ class HealthResponse(BaseModel):
         default_factory=dict,
         description="Individual service statuses",
     )
+    dependencies: dict[str, str] = Field(
+        default_factory=dict,
+        description="External dependency connection statuses (qdrant, neo4j, embedder)",
+    )
     version: str = Field(description="API version")
 
 
