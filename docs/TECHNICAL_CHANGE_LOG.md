@@ -20,6 +20,79 @@ This document tracks all implementation changes, their rationale, and git commit
 
 ## 2025-12-09
 
+### CL-006: WBS 0.2.2 - Add /v1/search Endpoint
+
+| Field | Value |
+|-------|-------|
+| **Date/Time** | 2025-12-09 |
+| **WBS Item** | 0.2.2 - Add Missing /v1/search (Similarity Search) Endpoint |
+| **Change Type** | Feature |
+| **Summary** | Added /v1/search endpoint for simple vector similarity search |
+| **Files Changed** | See table below |
+| **Rationale** | Required for end-to-end integration per END_TO_END_INTEGRATION_WBS.md |
+| **Git Commit** | Pending |
+
+**Tasks Completed:**
+
+| Task | Description | Status |
+|------|-------------|--------|
+| 0.2.2.1 | Create SimpleSearchRequest model | ✅ |
+| 0.2.2.2 | Create SimpleSearchResponse, SimpleSearchResultItem models | ✅ |
+| 0.2.2.3 | Implement POST /v1/search route handler | ✅ |
+| 0.2.2.4 | Wire to vector_client.search() and embedding_service.embed() | ✅ |
+| 0.2.2.5 | Add unit tests (35 tests) | ✅ |
+
+**Implementation Details:**
+
+| File | Change |
+|------|--------|
+| `src/api/models.py` | Added SimpleSearchRequest, SimpleSearchResponse, SimpleSearchResultItem models |
+| `src/api/routes.py` | Added POST /v1/search endpoint |
+| `tests/unit/test_search_api.py` | NEW: 35 unit tests |
+| `scripts/validate_0.2.2_search.sh` | NEW: Validation script (8 acceptance tests) |
+
+**API Contract:**
+
+```python
+# Request
+POST /v1/search
+{
+    "query": "search text",
+    "collection": "documents",  # optional, default: "documents"
+    "limit": 10,               # optional, 1-100, default: 10
+    "min_score": 0.5           # optional, 0-1, filter threshold
+}
+
+# Response
+{
+    "results": [
+        {
+            "id": "doc-123",
+            "score": 0.85,
+            "payload": {...}
+        }
+    ],
+    "total": 1,
+    "query": "search text",
+    "latency_ms": 25.3
+}
+```
+
+**Acceptance Tests (8/8 passed):**
+
+| # | Test | Status |
+|---|------|--------|
+| 1 | Endpoint exists (HTTP 200) | ✅ |
+| 2 | Returns results array | ✅ |
+| 3 | Results have id/score fields | ✅ |
+| 4 | Limit parameter works | ✅ |
+| 5 | Score in range [0,1] | ✅ |
+| 6 | Response has metadata | ✅ |
+| 7 | Empty query rejected (422) | ✅ |
+| 8 | Invalid limit rejected (422) | ✅ |
+
+---
+
 ### CL-005: WBS 0.2.1 - Add /v1/embed Endpoint
 
 | Field | Value |

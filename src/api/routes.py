@@ -23,6 +23,9 @@ from src.api.models import (
     HybridSearchRequest,
     HybridSearchResponse,
     SearchResultItem,
+    SimpleSearchRequest,
+    SimpleSearchResponse,
+    SimpleSearchResultItem,
     TraverseEdge,
     TraverseNode,
     TraverseRequest,
@@ -488,4 +491,106 @@ async def embed_text(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail={"error": "embedding_failed", "message": str(e)},
+        ) from e
+
+
+# ==============================================================================
+# Simple Search Endpoint (WBS 0.2.2)
+# ==============================================================================
+
+
+@router.post(
+    "/v1/search",
+    response_model=SimpleSearchResponse,
+    responses={
+        400: {"model": ErrorResponse, "description": "Invalid request"},
+        422: {"model": ErrorResponse, "description": "Validation error"},
+        500: {"model": ErrorResponse, "description": "Internal server error"},
+        503: {"model": ErrorResponse, "description": "Service unavailable"},
+    },
+    tags=["search"],
+    summary="Perform simple similarity search",
+)
+async def simple_search(
+    request: SimpleSearchRequest,
+    services: ServiceContainer = Depends(get_services),  # noqa: B008
+) -> SimpleSearchResponse:
+    """
+    Execute a simple vector similarity search.
+
+    This is a streamlined search endpoint that performs pure vector
+    similarity search without graph-based scoring.
+
+    Reference: END_TO_END_INTEGRATION_WBS.md WBS 0.2.2
+
+    Args:
+        request: Search parameters including query and limit
+        services: Injected service container
+
+    Returns:
+        SimpleSearchResponse with ranked results
+    """
+    if services.vector_client is None:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail={"error": "vector_service_unavailable", "message": "Vector search service is not configured"},
+        )
+
+    start_time = time.perf_counter()
+
+    try:
+        # Get embedding for query
+        if services.embedding_service is None:
+            raise HTTPException(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                detail={"error": "embedding_service_unavailable", "message": "Embedding service is not configured"},
+            )
+
+        embedding = await services.embedding_service.embed(request.query)
+
+        # Perform vector search
+        vector_results = await services.vector_client.search(
+            collection=request.collection,
+            vector=embedding,
+            limit=request.limit,
+        )
+
+        # Build response results
+        results: list[SimpleSearchResultItem] = []
+        for vr in vector_results:
+            # Apply min_score filter if specified
+            if request.min_score is not None and vr.score < request.min_score:
+                continue
+
+            results.append(
+                SimpleSearchResultItem(
+                    id=vr.id,
+                    score=vr.score,
+                    payload=vr.payload or {},
+                )
+            )
+
+        latency_ms = (time.perf_counter() - start_time) * 1000
+
+        logger.info(
+            "Simple search for '%s' returned %d results in %.2fms",
+            request.query[:50],
+            len(results),
+            latency_ms,
+        )
+
+        return SimpleSearchResponse(
+            results=results,
+            total=len(results),
+            query=request.query,
+            latency_ms=latency_ms,
+        )
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.exception("Simple search failed")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail={"error": "search_failed", "message": str(e)},
         ) from e

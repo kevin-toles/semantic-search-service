@@ -406,3 +406,79 @@ class EmbedResponse(BaseModel):
         default=None,
         description="Token usage statistics",
     )
+
+
+# ==============================================================================
+# Simple Search Models (WBS 0.2.2)
+# ==============================================================================
+
+
+class SimpleSearchRequest(BaseModel):
+    """Request model for simple similarity search endpoint.
+    
+    Reference: END_TO_END_INTEGRATION_WBS.md WBS 0.2.2
+    """
+
+    model_config = ConfigDict(extra="forbid")
+
+    query: str = Field(
+        description="Text query to search for",
+        min_length=1,
+        max_length=10000,
+    )
+    collection: str = Field(
+        default="documents",
+        description="Vector collection to search",
+    )
+    limit: int = Field(
+        default=10,
+        ge=1,
+        le=100,
+        description="Maximum number of results to return",
+    )
+    min_score: float | None = Field(
+        default=None,
+        ge=0.0,
+        le=1.0,
+        description="Minimum similarity score threshold",
+    )
+
+
+class SimpleSearchResultItem(BaseModel):
+    """Individual search result for simple search."""
+
+    model_config = ConfigDict(extra="allow")
+
+    id: str = Field(description="Unique identifier for the result")
+    score: float = Field(
+        ge=0.0,
+        le=1.0,
+        description="Similarity score (0-1)",
+    )
+    payload: dict[str, Any] = Field(
+        default_factory=dict,
+        description="Associated metadata",
+    )
+
+
+class SimpleSearchResponse(BaseModel):
+    """Response model for simple similarity search endpoint.
+    
+    Reference: END_TO_END_INTEGRATION_WBS.md WBS 0.2.2
+    """
+
+    model_config = ConfigDict(extra="forbid")
+
+    results: list[SimpleSearchResultItem] = Field(
+        default_factory=list,
+        description="List of search results",
+    )
+    total: int = Field(
+        description="Number of results returned",
+    )
+    query: str = Field(
+        description="Original query text",
+    )
+    latency_ms: float = Field(
+        description="Search latency in milliseconds",
+    )
