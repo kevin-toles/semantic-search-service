@@ -61,28 +61,28 @@ class RealQdrantClient:
         **kwargs: Any,
     ) -> list[Any]:
         """Search for similar vectors in Qdrant."""
-        from qdrant_client.http.models import ScoredPoint
-        
         try:
             # Run sync client in thread pool
+            # Use query_points (new API) instead of search (deprecated)
             results = await asyncio.get_event_loop().run_in_executor(
                 None,
-                lambda: self._client.search(
+                lambda: self._client.query_points(
                     collection_name=collection,
-                    query_vector=vector,
+                    query=vector,
                     limit=limit,
                     **kwargs,
                 ),
             )
             
             # Convert to format expected by routes
+            # query_points returns QueryResponse with .points attribute
             return [
                 _ScoredResult(
                     id=str(r.id),
                     score=r.score,
                     payload=r.payload or {},
                 )
-                for r in results
+                for r in results.points
             ]
         except Exception as e:
             logger.warning("Qdrant search failed: %s", e)
