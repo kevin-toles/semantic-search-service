@@ -14,6 +14,7 @@ from fastapi import APIRouter, Depends, HTTPException, Request, status
 
 from src.api.dependencies import ServiceContainer
 from src.api.models import (
+    ChapterContentResponse,
     EmbedRequest,
     EmbedResponse,
     ErrorResponse,
@@ -608,4 +609,102 @@ async def simple_search(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail={"error": "search_failed", "message": str(e)},
+        ) from e
+
+
+# =============================================================================
+# Chapter Content Retrieval - Kitchen Brigade: Cookbook (semantic-search)
+# =============================================================================
+
+
+@router.get(
+    "/v1/chapters/{book_id}/{chapter_number}",
+    response_model=ChapterContentResponse,
+    responses={
+        404: {"model": ErrorResponse, "description": "Chapter not found"},
+        500: {"model": ErrorResponse, "description": "Internal server error"},
+        503: {"model": ErrorResponse, "description": "Service unavailable"},
+    },
+    tags=["chapters"],
+    summary="Get chapter content by book and chapter number",
+)
+async def get_chapter_content(
+    book_id: str,
+    chapter_number: int,
+    services: ServiceContainer = Depends(get_services),  # noqa: B008
+) -> ChapterContentResponse:
+    """
+    Retrieve chapter content from Neo4j by book ID and chapter number.
+    
+    This endpoint enables the Kitchen Brigade architecture where ai-agents
+    (Expeditor) retrieves content through semantic-search (Cookbook) rather
+    than directly accessing Neo4j.
+    
+    Args:
+        book_id: Book identifier (e.g., "Architecture_Patterns_with_Python")
+        chapter_number: Chapter number (1-indexed)
+        services: Injected service container
+        
+    Returns:
+        ChapterContentResponse with full chapter content and metadata
+    """
+    if services.graph_client is None:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail={"error": "graph_unavailable", "message": "Graph database is not configured"},
+        )
+    
+    try:
+        # Query Neo4j for chapter content
+        cypher = """
+        MATCH (c:Chapter)
+        WHERE c.book_id = $book_id AND c.number = $chapter_number
+        RETURN c.book_id as book_id,
+               c.number as chapter_number,
+               c.title as title,
+               c.summary as summary,
+               c.keywords as keywords,
+               c.concepts as concepts,
+               c.page_range as page_range
+        LIMIT 1
+        """
+        
+        result = await services.graph_client.execute_query(
+            cypher=cypher,
+            parameters={"book_id": book_id, "chapter_number": chapter_number},
+        )
+        
+        records = result.get("records", [])
+        
+        if not records:
+            # Return not found response
+            return ChapterContentResponse(
+                book_id=book_id,
+                chapter_number=chapter_number,
+                title="",
+                summary="",
+                keywords=[],
+                concepts=[],
+                page_range="",
+                found=False,
+            )
+        
+        record = records[0]
+        
+        return ChapterContentResponse(
+            book_id=record.get("book_id", book_id),
+            chapter_number=record.get("chapter_number", chapter_number),
+            title=record.get("title", ""),
+            summary=record.get("summary", ""),
+            keywords=record.get("keywords") or [],
+            concepts=record.get("concepts") or [],
+            page_range=record.get("page_range", ""),
+            found=True,
+        )
+        
+    except Exception as e:
+        logger.exception("Failed to retrieve chapter content: %s/%d", book_id, chapter_number)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail={"error": "chapter_retrieval_failed", "message": str(e)},
         ) from e

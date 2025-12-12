@@ -486,3 +486,29 @@ class SimpleSearchResponse(BaseModel):
     latency_ms: float = Field(
         description="Search latency in milliseconds",
     )
+
+
+# =============================================================================
+# Chapter Content Models - Kitchen Brigade: Cookbook (semantic-search)
+# =============================================================================
+
+
+class ChapterContentResponse(BaseModel):
+    """Response model for chapter content retrieval.
+    
+    Used by ai-agents (Expeditor) to retrieve chapter content from
+    the Cookbook (semantic-search) via Neo4j.
+    
+    Reference: Kitchen Brigade Architecture - Option A
+    """
+
+    model_config = ConfigDict(extra="forbid")
+
+    book_id: str = Field(description="Book identifier")
+    chapter_number: int = Field(description="Chapter number")
+    title: str = Field(description="Chapter title")
+    summary: str = Field(default="", description="Full chapter summary/content")
+    keywords: list[str] = Field(default_factory=list, description="Chapter keywords")
+    concepts: list[str] = Field(default_factory=list, description="Chapter concepts")
+    page_range: str = Field(default="", description="Page range (e.g., '46-73')")
+    found: bool = Field(default=True, description="Whether chapter was found")
