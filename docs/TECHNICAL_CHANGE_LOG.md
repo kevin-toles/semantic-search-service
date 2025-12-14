@@ -20,6 +20,60 @@ This document tracks all implementation changes, their rationale, and git commit
 
 ## 2025-12-13
 
+### CL-009: Enrichment Scalability - Query-Time Similar Chapter Filtering
+
+| Field | Value |
+|-------|-------|
+| **Date/Time** | 2025-12-13 |
+| **WBS Item** | Phase 3.7 - Incremental/Delta Enrichment Pipeline |
+| **Change Type** | Architecture |
+| **Summary** | `similar_chapters` filtering now happens at query-time, not enrichment-time |
+| **Files Changed** | `docs/ARCHITECTURE.md`, `docs/TECHNICAL_CHANGE_LOG.md` |
+| **Rationale** | Enable multi-taxonomy support without O(n²×t) enrichment overhead |
+| **Git Commit** | Pending |
+
+**Key Changes:**
+
+| Before | After |
+|--------|-------|
+| `similar_chapters` pre-filtered by taxonomy | `similar_chapters` from FULL corpus |
+| Different Qdrant payloads per taxonomy | Single payload, filtered at query-time |
+| Adding book = O(n²×t) | Adding book = O(n) delta update |
+
+**API Contract Update:**
+
+```python
+# Similar chapters endpoint with taxonomy filter
+POST /v1/search/similar-chapters
+{
+    "chapter_id": "arch_patterns_ch4_abc123",
+    "taxonomy": "AI-ML_taxonomy",    # Optional: filter by taxonomy
+    "limit": 10
+}
+
+# Response: similar_chapters filtered to books in AI-ML_taxonomy
+{
+    "similar_chapters": [
+        {"chapter_id": "...", "book": "Building Microservices", "score": 0.91, "tier": 1},
+        {"chapter_id": "...", "book": "Clean Architecture", "score": 0.88, "tier": 2}
+    ]
+}
+```
+
+**Query-Time Filtering Logic:**
+1. Retrieve `similar_chapters` from Qdrant payload (all books)
+2. Load specified taxonomy from `ai-platform-data/taxonomies/`
+3. Filter `similar_chapters` to only include books IN the taxonomy
+4. Attach tier/priority from taxonomy
+5. Return filtered, ranked results
+
+**Benefits:**
+- Adding new taxonomy = O(1) (just add JSON file)
+- Adding new book = O(n) delta enrichment + Qdrant `set_payload()`
+- Same enriched data works for ALL taxonomies
+
+---
+
 ### CL-008: Taxonomy-Agnostic Search Architecture
 
 | Field | Value |

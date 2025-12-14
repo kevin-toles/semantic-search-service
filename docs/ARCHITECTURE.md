@@ -331,6 +331,97 @@ semantic-search-service/
 
 ---
 
+## Enrichment Scalability Architecture
+
+> **Key Principle**: Cross-book similarity (`similar_chapters`) is computed against the FULL corpus, then filtered at query-time by taxonomy.
+
+### Problem (Pre-v1.4.0)
+
+```
+similar_chapters computed per taxonomy
+    ↓
+47 books × 1000 taxonomies = 47,000 enriched files (doesn't scale!)
+    ↓
+Adding new book = O(n² × t) re-enrichment
+```
+
+### Solution (v1.4.0)
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│            COMPUTE ONCE AGAINST FULL CORPUS, FILTER AT QUERY-TIME           │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│  ENRICHMENT (One-time, O(n²)):                                              │
+│  • `similar_chapters` computed against ALL 47+ books                        │
+│  • Single enriched file per book, shared across all taxonomies              │
+│  • Stored in Qdrant payload (no taxonomy info)                               │
+│                                                                              │
+│  QUERY-TIME FILTERING:                                                       │
+│  ─────────────────────                                                       │
+│  POST /v1/search/similar-chapters                                            │
+│  {                                                                           │
+│    "chapter_id": "arch_patterns_ch4",                                       │
+│    "taxonomy": "AI-ML_taxonomy"    ← Filter by books in this taxonomy       │
+│  }                                                                           │
+│                                                                              │
+│  1. Retrieve similar_chapters from Qdrant (all books)                       │
+│  2. Load taxonomy from ai-platform-data/taxonomies/                          │
+│  3. Filter similar_chapters to only books IN the taxonomy                   │
+│  4. Attach tier/priority from taxonomy                                       │
+│  5. Return filtered results                                                  │
+│                                                                              │
+│  INCREMENTAL UPDATE (Adding New Book):                                       │
+│  ─────────────────────────────────────                                       │
+│  1. Enrich new book against existing corpus (O(n))                          │
+│  2. Append new book to existing books' similar_chapters                     │
+│  3. Use Qdrant set_payload() for atomic updates                              │
+│  4. NO full re-enrichment required!                                          │
+│                                                                              │
+│  COMPLEXITY:                                                                 │
+│  │ Operation              │ Before        │ After          │                │
+│  ├────────────────────────┼───────────────┼────────────────┤                │
+│  │ Full enrichment        │ O(n² × t)     │ O(n²)          │                │
+│  │ Add new taxonomy       │ O(n²)         │ O(1)           │                │
+│  │ Add new book           │ O(n² × t)     │ O(n)           │                │
+│  └────────────────────────┴───────────────┴────────────────┘                │
+│                                                                              │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+### Similar Chapters API
+
+```python
+# Endpoint: POST /v1/search/similar-chapters
+{
+    "chapter_id": "arch_patterns_ch4_abc123",
+    "taxonomy": "AI-ML_taxonomy",    # Optional: filter by taxonomy
+    "tier_filter": [1, 2],           # Optional: only certain tiers
+    "limit": 10
+}
+
+# Response with taxonomy filter
+{
+    "similar_chapters": [
+        {"chapter_id": "...", "book": "Building Microservices", "score": 0.91, "tier": 1},
+        {"chapter_id": "...", "book": "Clean Architecture", "score": 0.88, "tier": 2}
+    ],
+    "total_unfiltered": 47,  # Total before taxonomy filter
+    "filtered_by": "AI-ML_taxonomy"
+}
+
+# Response without taxonomy filter
+{
+    "similar_chapters": [
+        {"chapter_id": "...", "book": "Building Microservices", "score": 0.91},
+        {"chapter_id": "...", "book": "Random Book Not In Taxonomy", "score": 0.87}
+    ],
+    "total_unfiltered": 47
+}
+```
+
+---
+
 ## Components
 
 ### Embedding Engine (SBERT)
@@ -344,6 +435,7 @@ semantic-search-service/
 - Metadata filtering with search
 - Top-k retrieval with scores
 - Payload storage for chunk metadata
+- **Atomic payload updates** via `set_payload()` for incremental enrichment
 
 ### Graph Engine (Neo4j) - NEW
 - Taxonomy graph storage
