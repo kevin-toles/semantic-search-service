@@ -252,9 +252,9 @@ semantic-search-service/
 | POST | `/v1/embed/batch` | Async batch embedding job |
 | POST | `/v1/search` | Semantic similarity search |
 | POST | `/v1/search/vector` | Search by raw vector |
-| POST | `/v1/search/hybrid` | **NEW** - Combined vector + graph search |
-| POST | `/v1/graph/traverse` | **NEW** - Spider web graph traversal |
-| POST | `/v1/graph/query` | **NEW** - Raw Cypher query execution |
+| POST | `/v1/search/hybrid` | Combined vector + graph search (accepts `taxonomy` param) |
+| POST | `/v1/graph/traverse` | Spider web graph traversal |
+| POST | `/v1/graph/query` | Raw Cypher query execution |
 | POST | `/v1/topics/infer` | Infer topics for text |
 | GET | `/v1/topics/{model_id}/topics` | List all topics |
 | POST | `/v1/topics/similar` | Find docs with similar topics |
@@ -264,7 +264,70 @@ semantic-search-service/
 | DELETE | `/v1/indices/{id}` | Delete index |
 | GET | `/v1/chunks/{chunk_id}` | Get chunk text by ID |
 | GET | `/v1/chunks/{chunk_id}/context` | Get surrounding chunks |
+| GET | `/v1/taxonomies` | List available taxonomies |
 | GET | `/health` | Health check |
+
+---
+
+## Taxonomy-Agnostic Architecture
+
+> **Key Principle**: Taxonomies are query-time overlays, NOT baked into seeded data.
+
+### How It Works
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                    TAXONOMY AS QUERY-TIME OVERLAY                            │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│  SEEDED DATA (One-time, taxonomy-agnostic):                                 │
+│  • Qdrant vectors: content embeddings + enriched payloads (NO tier)         │
+│  • Neo4j nodes: Book/Chapter structure (NO tier baked in)                   │
+│                                                                              │
+│  QUERY FLOW:                                                                 │
+│  ───────────                                                                 │
+│  POST /v1/search/hybrid                                                      │
+│  {                                                                           │
+│    "query": "rate limiting patterns",                                       │
+│    "taxonomy": "AI-ML_taxonomy",    ← Optional: loaded at query time        │
+│    "tier_filter": [1, 2]            ← Optional: filter by tier              │
+│  }                                                                           │
+│                                                                              │
+│  1. Search Qdrant (taxonomy-agnostic vectors)                               │
+│  2. Load taxonomy from ai-platform-data/taxonomies/ (if specified)          │
+│  3. Apply tier mapping to results (query-time overlay)                      │
+│  4. Filter by tier_filter (if specified)                                     │
+│  5. Return results with tier/priority attached                               │
+│                                                                              │
+│  BENEFITS:                                                                   │
+│  • Adding new taxonomy = just add JSON file (NO re-seeding!)                │
+│  • Same book can have different tiers in different taxonomies               │
+│  • Users specify taxonomy at runtime via prompt/API                         │
+│                                                                              │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+### Search Response Examples
+
+**Without taxonomy** (returns all results, no tier info):
+```json
+{
+  "results": [
+    {"book": "Building Microservices", "chapter": 5, "score": 0.91},
+    {"book": "AI Engineering", "chapter": 3, "score": 0.88}
+  ]
+}
+```
+
+**With taxonomy** (tier/priority from specified taxonomy):
+```json
+{
+  "results": [
+    {"book": "Building Microservices", "chapter": 5, "score": 0.91, "tier": 1, "priority": 6},
+    {"book": "AI Engineering", "chapter": 3, "score": 0.88, "tier": 1, "priority": 3}
+  ]
+}
+```
 
 ---
 

@@ -18,6 +18,54 @@ This document tracks all implementation changes, their rationale, and git commit
 
 ---
 
+## 2025-12-13
+
+### CL-008: Taxonomy-Agnostic Search Architecture
+
+| Field | Value |
+|-------|-------|
+| **Date/Time** | 2025-12-13 |
+| **WBS Item** | Phase 3.6 - Taxonomy Registry & Query-Time Resolution |
+| **Change Type** | Architecture |
+| **Summary** | Search APIs now support taxonomy as query-time overlay |
+| **Files Changed** | `docs/ARCHITECTURE.md` |
+| **Rationale** | Enable multi-taxonomy support without re-seeding databases |
+| **Git Commit** | Pending |
+
+**Key Changes:**
+
+| Aspect | Description |
+|--------|-------------|
+| **Seeded Data** | Taxonomy-agnostic (NO tier in Qdrant payloads) |
+| **Query Parameter** | New `taxonomy` and `tier_filter` params in `/v1/search/hybrid` |
+| **Taxonomy Loading** | Loaded from `ai-platform-data/taxonomies/` at query-time |
+| **New Endpoint** | `GET /v1/taxonomies` - List available taxonomies |
+
+**API Contract Update:**
+
+```python
+# Search WITHOUT taxonomy (taxonomy-agnostic)
+POST /v1/search/hybrid
+{"query": "rate limiting patterns"}
+# Returns: results without tier info
+
+# Search WITH taxonomy (query-time overlay)
+POST /v1/search/hybrid
+{
+    "query": "rate limiting patterns",
+    "taxonomy": "AI-ML_taxonomy",    # Loaded at query-time
+    "tier_filter": [1, 2]            # Filter by tier
+}
+# Returns: results with tier/priority from specified taxonomy
+```
+
+**Benefits:**
+- Adding new taxonomy = just add JSON file (NO re-seeding!)
+- Same book can have different tiers in different taxonomies
+- Users specify taxonomy via prompt/API at runtime
+
+---
+
 ## 2025-12-09
 
 ### CL-007: WBS 0.2.3 - Wire Real Database Clients
