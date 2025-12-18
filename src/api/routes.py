@@ -14,7 +14,10 @@ from fastapi import APIRouter, Depends, HTTPException, Request, status
 
 from src.api.dependencies import ServiceContainer
 from src.api.models import (
+    BatchRelationshipsRequest,
+    BatchRelationshipsResponse,
     ChapterContentResponse,
+    ChapterRelationshipsResponse,
     EmbedRequest,
     EmbedResponse,
     ErrorResponse,
@@ -23,6 +26,7 @@ from src.api.models import (
     HealthResponse,
     HybridSearchRequest,
     HybridSearchResponse,
+    RelatedChapterItem,
     SearchResultItem,
     SimpleSearchRequest,
     SimpleSearchResponse,
@@ -707,4 +711,173 @@ async def get_chapter_content(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail={"error": "chapter_retrieval_failed", "message": str(e)},
+        ) from e
+
+
+# =============================================================================
+# EEP-4: Graph Relationships Endpoints (AC-4.3.1 to AC-4.3.3)
+# =============================================================================
+
+
+@router.get(
+    "/v1/graph/relationships/{chapter_id}",
+    response_model=ChapterRelationshipsResponse,
+    responses={
+        404: {"model": ErrorResponse, "description": "Chapter not found"},
+        500: {"model": ErrorResponse, "description": "Internal server error"},
+        503: {"model": ErrorResponse, "description": "Service unavailable"},
+    },
+    tags=["graph"],
+    summary="Get relationships for a chapter",
+)
+async def get_chapter_relationships(
+    chapter_id: str,
+    services: ServiceContainer = Depends(get_services),  # noqa: B008
+) -> ChapterRelationshipsResponse:
+    """Get all relationships for a specific chapter.
+
+    AC-4.3.1: GET /v1/graph/relationships/{chapter_id}
+
+    Returns all PARALLEL, PERPENDICULAR, and SKIP_TIER relationships
+    for the specified chapter.
+
+    Args:
+        chapter_id: The chapter ID to query
+        services: Injected service container
+
+    Returns:
+        ChapterRelationshipsResponse with relationships
+    """
+    if services.graph_client is None:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail={"error": "graph_unavailable", "message": "Graph database is not configured"},
+        )
+
+    try:
+        # Query all relationship types
+        cypher = """
+        MATCH (c {id: $chapter_id})-[r:PARALLEL|PERPENDICULAR|SKIP_TIER]-(related)
+        RETURN 
+            related.id AS chapter_id,
+            related.title AS title,
+            related.tier AS target_tier,
+            type(r) AS relationship_type
+        """
+
+        result = await services.graph_client.execute_query(
+            cypher=cypher,
+            parameters={"chapter_id": chapter_id},
+        )
+
+        records = result.get("records", [])
+
+        relationships = [
+            RelatedChapterItem(
+                chapter_id=r.get("chapter_id", ""),
+                relationship_type=r.get("relationship_type", ""),
+                target_tier=r.get("target_tier", 1),
+                title=r.get("title"),
+            )
+            for r in records
+        ]
+
+        return ChapterRelationshipsResponse(
+            chapter_id=chapter_id,
+            relationships=relationships,
+            total_count=len(relationships),
+        )
+
+    except Exception as e:
+        logger.exception("Failed to get relationships for chapter: %s", chapter_id)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail={"error": "relationship_query_failed", "message": str(e)},
+        ) from e
+
+
+@router.post(
+    "/v1/graph/relationships/batch",
+    response_model=BatchRelationshipsResponse,
+    responses={
+        400: {"model": ErrorResponse, "description": "Invalid request"},
+        500: {"model": ErrorResponse, "description": "Internal server error"},
+        503: {"model": ErrorResponse, "description": "Service unavailable"},
+    },
+    tags=["graph"],
+    summary="Get relationships for multiple chapters",
+)
+async def get_batch_relationships(
+    request: BatchRelationshipsRequest,
+    services: ServiceContainer = Depends(get_services),  # noqa: B008
+) -> BatchRelationshipsResponse:
+    """Get relationships for multiple chapters in a batch.
+
+    AC-4.3.2: POST /v1/graph/relationships/batch
+
+    Efficiently retrieves relationships for multiple chapters
+    in a single request.
+
+    Args:
+        request: List of chapter IDs to query
+        services: Injected service container
+
+    Returns:
+        BatchRelationshipsResponse with all chapter relationships
+    """
+    if services.graph_client is None:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail={"error": "graph_unavailable", "message": "Graph database is not configured"},
+        )
+
+    try:
+        results: list[ChapterRelationshipsResponse] = []
+
+        for chapter_id in request.chapter_ids:
+            # Query relationships for each chapter
+            cypher = """
+            MATCH (c {id: $chapter_id})-[r:PARALLEL|PERPENDICULAR|SKIP_TIER]-(related)
+            RETURN 
+                related.id AS chapter_id,
+                related.title AS title,
+                related.tier AS target_tier,
+                type(r) AS relationship_type
+            """
+
+            result = await services.graph_client.execute_query(
+                cypher=cypher,
+                parameters={"chapter_id": chapter_id},
+            )
+
+            records = result.get("records", [])
+
+            relationships = [
+                RelatedChapterItem(
+                    chapter_id=r.get("chapter_id", ""),
+                    relationship_type=r.get("relationship_type", ""),
+                    target_tier=r.get("target_tier", 1),
+                    title=r.get("title"),
+                )
+                for r in records
+            ]
+
+            results.append(
+                ChapterRelationshipsResponse(
+                    chapter_id=chapter_id,
+                    relationships=relationships,
+                    total_count=len(relationships),
+                )
+            )
+
+        return BatchRelationshipsResponse(
+            results=results,
+            total_chapters=len(results),
+        )
+
+    except Exception as e:
+        logger.exception("Failed to get batch relationships")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail={"error": "batch_relationship_query_failed", "message": str(e)},
         ) from e

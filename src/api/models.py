@@ -512,3 +512,83 @@ class ChapterContentResponse(BaseModel):
     concepts: list[str] = Field(default_factory=list, description="Chapter concepts")
     page_range: str = Field(default="", description="Page range (e.g., '46-73')")
     found: bool = Field(default=True, description="Whether chapter was found")
+
+
+# =============================================================================
+# EEP-4: Graph Relationships Models (AC-4.3.1 to AC-4.3.3)
+# =============================================================================
+
+
+class RelatedChapterItem(BaseModel):
+    """A related chapter from relationship traversal.
+    
+    AC-4.3.3: Return relationship type with each related chapter.
+    """
+
+    model_config = ConfigDict(extra="forbid")
+
+    chapter_id: str = Field(description="Related chapter ID")
+    relationship_type: str = Field(
+        description="Type of relationship (PARALLEL, PERPENDICULAR, SKIP_TIER)"
+    )
+    target_tier: int = Field(
+        ge=1,
+        le=10,
+        description="Tier of the related chapter",
+    )
+    title: str | None = Field(
+        default=None,
+        description="Chapter title (if available)",
+    )
+
+
+class ChapterRelationshipsResponse(BaseModel):
+    """Response model for chapter relationships endpoint.
+    
+    AC-4.3.1: GET /v1/graph/relationships/{chapter_id}
+    """
+
+    model_config = ConfigDict(extra="forbid")
+
+    chapter_id: str = Field(description="The queried chapter ID")
+    relationships: list[RelatedChapterItem] = Field(
+        default_factory=list,
+        description="List of related chapters",
+    )
+    total_count: int = Field(
+        ge=0,
+        description="Total number of relationships found",
+    )
+
+
+class BatchRelationshipsRequest(BaseModel):
+    """Request model for batch relationships endpoint.
+    
+    AC-4.3.2: POST /v1/graph/relationships/batch
+    """
+
+    model_config = ConfigDict(extra="forbid")
+
+    chapter_ids: list[str] = Field(
+        min_length=1,
+        max_length=100,
+        description="List of chapter IDs to query",
+    )
+
+
+class BatchRelationshipsResponse(BaseModel):
+    """Response model for batch relationships endpoint.
+    
+    AC-4.3.2: POST /v1/graph/relationships/batch
+    """
+
+    model_config = ConfigDict(extra="forbid")
+
+    results: list[ChapterRelationshipsResponse] = Field(
+        default_factory=list,
+        description="Relationships for each queried chapter",
+    )
+    total_chapters: int = Field(
+        ge=0,
+        description="Number of chapters processed",
+    )

@@ -18,6 +18,42 @@ This document tracks all implementation changes, their rationale, and git commit
 
 ---
 
+## 2025-12-18
+
+### CL-010: EEP-6 Diagram Similarity - Service Integration Notes
+
+| Field | Value |
+|-------|-------|
+| **Date/Time** | 2025-12-18 |
+| **WBS Item** | ENHANCED_ENRICHMENT_PIPELINE_WBS.md - Phase EEP-6 |
+| **Change Type** | Documentation |
+| **Summary** | EEP-6 Diagram Similarity implemented in Code-Orchestrator-Service. Future integration with semantic-search-service may enable diagram-based search. |
+| **Files Changed** | `docs/TECHNICAL_CHANGE_LOG.md` |
+| **Rationale** | Document cross-service integration points |
+| **Git Commit** | N/A (documentation only) |
+
+**EEP-6 Integration Potential:**
+
+| Feature | Integration Path | Priority |
+|---------|------------------|----------|
+| Diagram-based search | Add `/v1/search/diagrams` endpoint | Future |
+| Similar diagram detection | Query Code-Orchestrator `/api/v1/diagrams/similar` | Future |
+| Diagram metadata in Qdrant | Add `diagram_references` to chapter payload | Future |
+
+**Current Architecture**:
+```
+semantic-search-service (Port 8081)
+    ↓ calls for diagram analysis
+Code-Orchestrator-Service (Port 8083)
+    └── DiagramExtractor (SBERT-based)
+```
+
+**No Code Changes Required**: EEP-6 is self-contained in Code-Orchestrator-Service.
+
+**Deviations from Original Architecture**: None
+
+---
+
 ## 2025-12-13
 
 ### CL-009: Enrichment Scalability - Query-Time Similar Chapter Filtering
