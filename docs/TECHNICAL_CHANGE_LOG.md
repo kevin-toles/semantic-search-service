@@ -18,6 +18,30 @@ This document tracks all implementation changes, their rationale, and git commit
 
 ---
 
+## 2025-12-19
+
+### CL-011: Gateway-First Communication Pattern Documentation
+
+| Field | Value |
+|-------|-------|
+| **Date/Time** | 2025-12-19 |
+| **WBS Item** | Architecture Documentation |
+| **Change Type** | Documentation |
+| **Summary** | Added Gateway-First Communication Pattern section to ARCHITECTURE.md. External applications MUST route through Gateway:8080 to access semantic-search-service. |
+| **Files Changed** | `docs/ARCHITECTURE.md` |
+| **Rationale** | Explicitly document that external apps cannot call semantic-search:8081 directly. All external access must go through Gateway. Internal platform services (ai-agents, Code-Orchestrator) may call directly. |
+| **Git Commit** | Pending |
+
+**Communication Pattern:**
+
+| Source | Target | Route | Status |
+|--------|--------|-------|--------|
+| External app | semantic-search | Via Gateway:8080 | ✅ REQUIRED |
+| Platform service (ai-agents) | semantic-search | Direct:8081 | ✅ Allowed |
+| Platform service (Code-Orchestrator) | semantic-search | Direct:8081 | ✅ Allowed |
+
+---
+
 ## 2025-12-18
 
 ### CL-010: EEP-6 Diagram Similarity - Service Integration Notes

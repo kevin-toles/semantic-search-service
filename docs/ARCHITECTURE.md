@@ -10,6 +10,34 @@ The Semantic Search Service is a **microservice** that provides embedding genera
 
 ---
 
+## ⚠️ Gateway-First Communication Pattern
+
+**CRITICAL RULE**: External applications MUST access platform services through the Gateway.
+
+```
+┌──────────────────────────────────────────────────────────────────────────────┐
+│                    SERVICE COMMUNICATION PATTERN                             │
+├──────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│  EXTERNAL → semantic-search: Via Gateway:8080 (REQUIRED)                    │
+│  ─────────────────────────────────────────────────────                       │
+│  Applications outside the AI Platform must route through Gateway.           │
+│                                                                              │
+│  ✅ llm-document-enhancer → Gateway:8080 → semantic-search:8081             │
+│  ❌ llm-document-enhancer → semantic-search:8081 (VIOLATION!)               │
+│                                                                              │
+│  INTERNAL (Platform Services): Direct calls allowed                          │
+│  ───────────────────────────────────────────────────                         │
+│  Platform services (ai-agents, Code-Orchestrator) may call directly.        │
+│                                                                              │
+│  ✅ ai-agents:8082 → semantic-search:8081 (internal)                        │
+│  ✅ Code-Orchestrator:8083 → semantic-search:8081 (internal)                │
+│                                                                              │
+└──────────────────────────────────────────────────────────────────────────────┘
+```
+
+---
+
 ## Kitchen Brigade Role: COOKBOOK (DUMB RETRIEVAL)
 
 In the Kitchen Brigade architecture, **semantic-search-service** is the **Cookbook** - a dumb retrieval system:
