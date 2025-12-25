@@ -18,6 +18,386 @@ This document tracks all implementation changes, their rationale, and git commit
 
 ---
 
+## 2025-12-19
+
+### CL-011: Gateway-First Communication Pattern Documentation
+
+| Field | Value |
+|-------|-------|
+| **Date/Time** | 2025-12-19 |
+| **WBS Item** | Architecture Documentation |
+| **Change Type** | Documentation |
+| **Summary** | Added Gateway-First Communication Pattern section to ARCHITECTURE.md. External applications MUST route through Gateway:8080 to access semantic-search-service. |
+| **Files Changed** | `docs/ARCHITECTURE.md` |
+| **Rationale** | Explicitly document that external apps cannot call semantic-search:8081 directly. All external access must go through Gateway. Internal platform services (ai-agents, Code-Orchestrator) may call directly. |
+| **Git Commit** | Pending |
+
+**Communication Pattern:**
+
+| Source | Target | Route | Status |
+|--------|--------|-------|--------|
+| External app | semantic-search | Via Gateway:8080 | ✅ REQUIRED |
+| Platform service (ai-agents) | semantic-search | Direct:8081 | ✅ Allowed |
+| Platform service (Code-Orchestrator) | semantic-search | Direct:8081 | ✅ Allowed |
+
+---
+
+## 2025-12-18
+
+### CL-010: EEP-6 Diagram Similarity - Service Integration Notes
+
+| Field | Value |
+|-------|-------|
+| **Date/Time** | 2025-12-18 |
+| **WBS Item** | ENHANCED_ENRICHMENT_PIPELINE_WBS.md - Phase EEP-6 |
+| **Change Type** | Documentation |
+| **Summary** | EEP-6 Diagram Similarity implemented in Code-Orchestrator-Service. Future integration with semantic-search-service may enable diagram-based search. |
+| **Files Changed** | `docs/TECHNICAL_CHANGE_LOG.md` |
+| **Rationale** | Document cross-service integration points |
+| **Git Commit** | N/A (documentation only) |
+
+**EEP-6 Integration Potential:**
+
+| Feature | Integration Path | Priority |
+|---------|------------------|----------|
+| Diagram-based search | Add `/v1/search/diagrams` endpoint | Future |
+| Similar diagram detection | Query Code-Orchestrator `/api/v1/diagrams/similar` | Future |
+| Diagram metadata in Qdrant | Add `diagram_references` to chapter payload | Future |
+
+**Current Architecture**:
+```
+semantic-search-service (Port 8081)
+    ↓ calls for diagram analysis
+Code-Orchestrator-Service (Port 8083)
+    └── DiagramExtractor (SBERT-based)
+```
+
+**No Code Changes Required**: EEP-6 is self-contained in Code-Orchestrator-Service.
+
+**Deviations from Original Architecture**: None
+
+---
+
+## 2025-12-13
+
+### CL-009: Enrichment Scalability - Query-Time Similar Chapter Filtering
+
+| Field | Value |
+|-------|-------|
+| **Date/Time** | 2025-12-13 |
+| **WBS Item** | Phase 3.7 - Incremental/Delta Enrichment Pipeline |
+| **Change Type** | Architecture |
+| **Summary** | `similar_chapters` filtering now happens at query-time, not enrichment-time |
+| **Files Changed** | `docs/ARCHITECTURE.md`, `docs/TECHNICAL_CHANGE_LOG.md` |
+| **Rationale** | Enable multi-taxonomy support without O(n²×t) enrichment overhead |
+| **Git Commit** | Pending |
+
+**Key Changes:**
+
+| Before | After |
+|--------|-------|
+| `similar_chapters` pre-filtered by taxonomy | `similar_chapters` from FULL corpus |
+| Different Qdrant payloads per taxonomy | Single payload, filtered at query-time |
+| Adding book = O(n²×t) | Adding book = O(n) delta update |
+
+**API Contract Update:**
+
+```python
+# Similar chapters endpoint with taxonomy filter
+POST /v1/search/similar-chapters
+{
+    "chapter_id": "arch_patterns_ch4_abc123",
+    "taxonomy": "AI-ML_taxonomy",    # Optional: filter by taxonomy
+    "limit": 10
+}
+
+# Response: similar_chapters filtered to books in AI-ML_taxonomy
+{
+    "similar_chapters": [
+        {"chapter_id": "...", "book": "Building Microservices", "score": 0.91, "tier": 1},
+        {"chapter_id": "...", "book": "Clean Architecture", "score": 0.88, "tier": 2}
+    ]
+}
+```
+
+**Query-Time Filtering Logic:**
+1. Retrieve `similar_chapters` from Qdrant payload (all books)
+2. Load specified taxonomy from `ai-platform-data/taxonomies/`
+3. Filter `similar_chapters` to only include books IN the taxonomy
+4. Attach tier/priority from taxonomy
+5. Return filtered, ranked results
+
+**Benefits:**
+- Adding new taxonomy = O(1) (just add JSON file)
+- Adding new book = O(n) delta enrichment + Qdrant `set_payload()`
+- Same enriched data works for ALL taxonomies
+
+---
+
+### CL-008: Taxonomy-Agnostic Search Architecture
+
+| Field | Value |
+|-------|-------|
+| **Date/Time** | 2025-12-13 |
+| **WBS Item** | Phase 3.6 - Taxonomy Registry & Query-Time Resolution |
+| **Change Type** | Architecture |
+| **Summary** | Search APIs now support taxonomy as query-time overlay |
+| **Files Changed** | `docs/ARCHITECTURE.md` |
+| **Rationale** | Enable multi-taxonomy support without re-seeding databases |
+| **Git Commit** | Pending |
+
+**Key Changes:**
+
+| Aspect | Description |
+|--------|-------------|
+| **Seeded Data** | Taxonomy-agnostic (NO tier in Qdrant payloads) |
+| **Query Parameter** | New `taxonomy` and `tier_filter` params in `/v1/search/hybrid` |
+| **Taxonomy Loading** | Loaded from `ai-platform-data/taxonomies/` at query-time |
+| **New Endpoint** | `GET /v1/taxonomies` - List available taxonomies |
+
+**API Contract Update:**
+
+```python
+# Search WITHOUT taxonomy (taxonomy-agnostic)
+POST /v1/search/hybrid
+{"query": "rate limiting patterns"}
+# Returns: results without tier info
+
+# Search WITH taxonomy (query-time overlay)
+POST /v1/search/hybrid
+{
+    "query": "rate limiting patterns",
+    "taxonomy": "AI-ML_taxonomy",    # Loaded at query-time
+    "tier_filter": [1, 2]            # Filter by tier
+}
+# Returns: results with tier/priority from specified taxonomy
+```
+
+**Benefits:**
+- Adding new taxonomy = just add JSON file (NO re-seeding!)
+- Same book can have different tiers in different taxonomies
+- Users specify taxonomy via prompt/API at runtime
+
+---
+
+## 2025-12-09
+
+### CL-007: WBS 0.2.3 - Wire Real Database Clients
+
+| Field | Value |
+|-------|-------|
+| **Date/Time** | 2025-12-09 |
+| **WBS Item** | 0.2.3 - Wire Real Database Clients |
+| **Change Type** | Feature |
+| **Summary** | Added real database client wrappers and USE_REAL_CLIENTS toggle |
+| **Files Changed** | See table below |
+| **Rationale** | Required for end-to-end integration per END_TO_END_INTEGRATION_WBS.md |
+| **Git Commit** | Pending |
+
+**Tasks Completed:**
+
+| Task | Description | Status |
+|------|-------------|--------|
+| 0.2.3.1 | Create `create_real_services(config)` factory function | ✅ |
+| 0.2.3.2 | Initialize `QdrantClient(url=os.getenv("QDRANT_URL"))` | ✅ |
+| 0.2.3.3 | Initialize `neo4j.GraphDatabase.driver()` | ✅ |
+| 0.2.3.4 | Initialize `SentenceTransformer("all-mpnet-base-v2")` | ✅ |
+| 0.2.3.5 | Add lifespan handler for startup/shutdown | ✅ |
+| 0.2.3.6 | Add `USE_REAL_CLIENTS=true` env var toggle | ✅ |
+
+**Implementation Details:**
+
+| File | Change |
+|------|--------|
+| `src/main.py` | Added RealQdrantClient, RealNeo4jClient, RealEmbeddingService wrappers |
+| `src/main.py` | Added create_real_services() factory function |
+| `src/main.py` | Added lifespan context manager for startup/shutdown |
+| `src/api/models.py` | Added `dependencies` field to HealthResponse |
+| `src/api/routes.py` | Updated /health to include dependency status |
+| `scripts/validate_0.2.3_real_clients.sh` | NEW: Validation script (7 acceptance tests) |
+
+**Environment Variables:**
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| USE_REAL_CLIENTS | false | Set to "true" to use real database clients |
+| QDRANT_URL | http://localhost:6333 | Qdrant server URL |
+| NEO4J_URI | bolt://localhost:7687 | Neo4j Bolt URI |
+| NEO4J_USER | neo4j | Neo4j username |
+| NEO4J_PASSWORD | devpassword | Neo4j password |
+| EMBEDDING_MODEL | all-mpnet-base-v2 | SentenceTransformer model name |
+
+**Acceptance Tests (7/7 passed):**
+
+| # | Test | Status |
+|---|------|--------|
+| 1 | App starts with real clients (HTTP 200) | ✅ |
+| 2 | Health response has dependencies field | ✅ |
+| 3 | Qdrant connected | ✅ |
+| 4 | Neo4j connected | ✅ |
+| 5 | Embedder loaded | ✅ |
+| 6 | Startup < 30s | ✅ |
+| 7 | Real embedder produces 768-dim vectors | ✅ |
+
+---
+
+### CL-006: WBS 0.2.2 - Add /v1/search Endpoint
+
+| Field | Value |
+|-------|-------|
+| **Date/Time** | 2025-12-09 |
+| **WBS Item** | 0.2.2 - Add Missing /v1/search (Similarity Search) Endpoint |
+| **Change Type** | Feature |
+| **Summary** | Added /v1/search endpoint for simple vector similarity search |
+| **Files Changed** | See table below |
+| **Rationale** | Required for end-to-end integration per END_TO_END_INTEGRATION_WBS.md |
+| **Git Commit** | Pending |
+
+**Tasks Completed:**
+
+| Task | Description | Status |
+|------|-------------|--------|
+| 0.2.2.1 | Create SimpleSearchRequest model | ✅ |
+| 0.2.2.2 | Create SimpleSearchResponse, SimpleSearchResultItem models | ✅ |
+| 0.2.2.3 | Implement POST /v1/search route handler | ✅ |
+| 0.2.2.4 | Wire to vector_client.search() and embedding_service.embed() | ✅ |
+| 0.2.2.5 | Add unit tests (35 tests) | ✅ |
+
+**Implementation Details:**
+
+| File | Change |
+|------|--------|
+| `src/api/models.py` | Added SimpleSearchRequest, SimpleSearchResponse, SimpleSearchResultItem models |
+| `src/api/routes.py` | Added POST /v1/search endpoint |
+| `tests/unit/test_search_api.py` | NEW: 35 unit tests |
+| `scripts/validate_0.2.2_search.sh` | NEW: Validation script (8 acceptance tests) |
+
+**API Contract:**
+
+```python
+# Request
+POST /v1/search
+{
+    "query": "search text",
+    "collection": "documents",  # optional, default: "documents"
+    "limit": 10,               # optional, 1-100, default: 10
+    "min_score": 0.5           # optional, 0-1, filter threshold
+}
+
+# Response
+{
+    "results": [
+        {
+            "id": "doc-123",
+            "score": 0.85,
+            "payload": {...}
+        }
+    ],
+    "total": 1,
+    "query": "search text",
+    "latency_ms": 25.3
+}
+```
+
+**Acceptance Tests (8/8 passed):**
+
+| # | Test | Status |
+|---|------|--------|
+| 1 | Endpoint exists (HTTP 200) | ✅ |
+| 2 | Returns results array | ✅ |
+| 3 | Results have id/score fields | ✅ |
+| 4 | Limit parameter works | ✅ |
+| 5 | Score in range [0,1] | ✅ |
+| 6 | Response has metadata | ✅ |
+| 7 | Empty query rejected (422) | ✅ |
+| 8 | Invalid limit rejected (422) | ✅ |
+
+---
+
+### CL-005: WBS 0.2.1 - Add /v1/embed Endpoint
+
+| Field | Value |
+|-------|-------|
+| **Date/Time** | 2025-12-09 |
+| **WBS Item** | 0.2.1 - Add Missing /v1/embed Endpoint |
+| **Change Type** | Feature |
+| **Summary** | Added /v1/embed endpoint for text embedding generation |
+| **Files Changed** | See table below |
+| **Rationale** | Required for end-to-end integration per END_TO_END_INTEGRATION_WBS.md |
+| **Git Commit** | Pending |
+
+**Tasks Completed:**
+
+| Task | Description | Status |
+|------|-------------|--------|
+| 0.2.1.1 | Create EmbedRequest model with `text: str \| list[str]` | ✅ |
+| 0.2.1.2 | Create EmbedResponse model with `embeddings`, `model`, `dimensions` | ✅ |
+| 0.2.1.3 | Implement POST /v1/embed route handler | ✅ |
+| 0.2.1.4 | Wire to embedding_service.embed() | ✅ |
+| 0.2.1.5 | Add unit tests (20 tests) | ✅ |
+
+**Implementation Details:**
+
+| File | Change |
+|------|--------|
+| `src/api/models.py` | Added EmbedRequest, EmbedResponse models |
+| `src/api/routes.py` | Added POST /v1/embed endpoint |
+| `tests/unit/test_embed_api.py` | NEW: 20 unit tests |
+
+**API Contract:**
+
+```python
+# Request
+POST /v1/embed
+{
+    "text": "string" | ["string", ...],
+    "model": "optional-model-name"
+}
+
+# Response
+{
+    "embeddings": [[0.1, 0.2, ...]],
+    "model": "all-mpnet-base-v2",
+    "dimensions": 768,
+    "usage": {"total_tokens": 3}
+}
+```
+
+---
+
+### CL-004: WBS 0.1.1 - Integration Profile Cross-Reference
+
+| Field | Value |
+|-------|-------|
+| **Date/Time** | 2025-12-09 |
+| **WBS Item** | 0.1.1 - Create Unified Docker Compose |
+| **Change Type** | Documentation |
+| **Summary** | Cross-reference to new integration profile in llm-document-enhancer |
+| **Files Changed** | `docs/TECHNICAL_CHANGE_LOG.md` |
+| **Rationale** | Track integration profile that orchestrates this service for testing |
+| **Git Commit** | Pending |
+
+**Integration Profile Location:**
+- Primary Platform: `/llm-platform/docker-compose.yml`
+- Integration Profile: `/llm-document-enhancer/docker-compose.integration.yml`
+
+**This Service in Integration Profile:**
+| Setting | Value |
+|---------|-------|
+| Container Name | `integration-semantic-search` |
+| Port | 8081 |
+| Network | `integration-network` |
+| Health Check | `http://localhost:8081/health` |
+
+**Usage:**
+```bash
+# Run with integration profile
+cd /Users/kevintoles/POC/llm-document-enhancer
+docker-compose -f docker-compose.integration.yml --profile standalone up -d
+```
+
+---
+
 ## 2025-12-08
 
 ### CL-003: Phase 7 - Unified Docker Compose Platform Integration

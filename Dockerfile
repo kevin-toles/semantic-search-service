@@ -30,9 +30,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy Python packages from builder
-COPY --from=builder /root/.local /root/.local
-ENV PATH=/root/.local/bin:$PATH
+# Copy Python packages from builder to system-wide location
+COPY --from=builder /root/.local/lib/python3.11/site-packages /usr/local/lib/python3.11/site-packages
+COPY --from=builder /root/.local/bin /usr/local/bin
 
 # Copy application code
 COPY src/ ./src/
@@ -55,5 +55,6 @@ HEALTHCHECK --interval=30s --timeout=10s --retries=3 \
 # Expose port
 EXPOSE 8081
 
-# Start the service
-CMD ["python", "-m", "uvicorn", "src.main:app", "--host", "0.0.0.0", "--port", "8081"]
+# Start the service with multiple workers for higher concurrency
+# Use 4 workers to handle ~150-200 concurrent users
+CMD ["python", "-m", "uvicorn", "src.main:app", "--host", "0.0.0.0", "--port", "8081", "--workers", "4"]

@@ -1,22 +1,22 @@
 
 +src.graph.schema.SchemaManager.reset_schemaM
-A/Users/kevintoles/POC/semantic-search-service/src/graph/schema.pyì ì("2*Ë
+A/Users/kevintoles/POC/semantic-search-service/src/graph/schema.pyð ð("2*Ë
 2
-í ð(jh
+ñ ô(jh
 
-ñ ñ()
+õ õ()
 %1*>
 
 __unknown_file (" 
 src.graph.schema.SchemaManager2drop_all_constraintsfd
 
-ò ò(%
+ö ö(%
 %2*>
 
 __unknown_file (" 
 src.graph.schema.SchemaManager2drop_all_indexesa_
 
-ó ó( 
+÷ ÷( 
 %3*>
 
 __unknown_file (" 
@@ -24,6 +24,6 @@ A/Users/kevintoles/POC/semantic-search-service/src/graph/schema.pyì ì("2*
 3*/
 3
 	schema.py"
-ô ô
+ø ø
 implicit returnB" 
 src.graph.schema.SchemaManagerH

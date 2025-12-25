@@ -6,27 +6,39 @@ Provides endpoints for hybrid search, graph traversal, and graph queries.
 
 from __future__ import annotations
 
+import logging
 import time
-from typing import TYPE_CHECKING, Any
+from typing import Any
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 
+from src.api.dependencies import ServiceContainer
 from src.api.models import (
+    BatchRelationshipsRequest,
+    BatchRelationshipsResponse,
+    ChapterContentResponse,
+    ChapterRelationshipsResponse,
+    EmbedRequest,
+    EmbedResponse,
     ErrorResponse,
     GraphQueryRequest,
     GraphQueryResponse,
     HealthResponse,
     HybridSearchRequest,
     HybridSearchResponse,
+    RelatedChapterItem,
     SearchResultItem,
+    SimpleSearchRequest,
+    SimpleSearchResponse,
+    SimpleSearchResultItem,
     TraverseEdge,
     TraverseNode,
     TraverseRequest,
     TraverseResponse,
 )
+from src.search.metadata_filter import create_filter as create_domain_filter
 
-if TYPE_CHECKING:
-    from src.api.dependencies import ServiceContainer
+logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
@@ -92,6 +104,53 @@ async def hybrid_search(
             limit=request.limit * 2,  # Fetch extra for re-ranking
         )
 
+        # === Phase 1-2: Domain-aware filtering ===
+        # Apply focus area domain filter if specified
+        domain_filter = None
+        domain_applied = None
+        if request.focus_areas:
+            try:
+                domain_filter = create_domain_filter()
+                # Use first focus area as domain (could extend to multiple)
+                domain_applied = request.focus_areas[0] if request.focus_areas else None
+                if domain_applied and domain_applied in domain_filter.available_domains:
+                    # Convert vector results to filter-compatible format
+                    passages = [
+                        {
+                            "id": r.id,
+                            "content": r.payload.get("content", "") if r.payload else "",
+                            "score": r.score,
+                            "metadata": r.payload or {},
+                        }
+                        for r in vector_results
+                    ]
+                    # Apply filter (adjust scores, optionally remove low-relevance)
+                    filtered_passages = domain_filter.apply(
+                        passages=passages,
+                        domain=domain_applied,
+                        remove_filtered=False,  # Keep all, just adjust scores
+                    )
+                    # Update vector_results with adjusted scores and metadata
+                    passage_map = {p["id"]: p for p in filtered_passages}
+                    for vr in vector_results:
+                        if vr.id in passage_map:
+                            fp = passage_map[vr.id]
+                            vr.score = fp["score"]  # Use adjusted score
+                            if vr.payload is None:
+                                vr.payload = {}
+                            # Add domain filter metadata
+                            vr.payload["domain_filter"] = fp.get("metadata", {}).get("domain_filter", {})
+                    logger.debug(
+                        "Applied domain filter '%s' to %d results",
+                        domain_applied,
+                        len(vector_results),
+                    )
+                else:
+                    domain_applied = None  # Domain not recognized
+            except Exception as e:
+                logger.warning("Domain filter failed, continuing without: %s", e)
+                domain_applied = None
+
         # Get graph scores if enabled
         graph_scores: dict[str, float] = {}
         graph_metadata: dict[str, dict[str, Any]] = {}
@@ -118,6 +177,12 @@ async def hybrid_search(
             # Hybrid score formula
             hybrid_score = request.alpha * vector_score + (1 - request.alpha) * graph_score
 
+            # Extract domain filter metadata if present
+            domain_filter_data = (vr.payload or {}).get("domain_filter", {})
+            focus_area_result = domain_applied if domain_filter_data else None
+            focus_score_result = domain_filter_data.get("adjustment", 0.0) if domain_filter_data else None
+            domain_adjustment = domain_filter_data.get("adjustment", 0.0) if domain_filter_data else None
+
             results.append(
                 SearchResultItem(
                     id=vr.id,
@@ -126,6 +191,9 @@ async def hybrid_search(
                     graph_score=graph_score if graph_score > 0 else None,
                     payload=vr.payload or {},
                     graph_metadata=graph_metadata.get(vr.id),
+                    focus_area_applied=focus_area_result,
+                    focus_score=focus_score_result,
+                    domain_filter_adjustment=domain_adjustment,
                 )
             )
 
@@ -300,6 +368,7 @@ async def graph_query(
     summary="Health check endpoint",
 )
 async def health_check(
+    request: Request,
     services: ServiceContainer = Depends(get_services),  # noqa: B008
 ) -> HealthResponse:
     """
@@ -311,10 +380,11 @@ async def health_check(
     - Embedding service
 
     Args:
+        request: FastAPI request (for app.state access)
         services: Injected service container
 
     Returns:
-        HealthResponse with service statuses
+        HealthResponse with service statuses and dependencies
     """
     service_statuses: dict[str, str] = {}
 
@@ -338,6 +408,18 @@ async def health_check(
     except Exception:
         service_statuses["graph"] = "unhealthy"
 
+    # Get dependency status from app.state (set by lifespan handler)
+    dependencies: dict[str, str] = {}
+    if hasattr(request.app.state, "dependencies"):
+        dependencies = request.app.state.dependencies
+    else:
+        # Default for backward compatibility
+        dependencies = {
+            "qdrant": service_statuses.get("vector", "unknown"),
+            "neo4j": service_statuses.get("graph", "unknown"),
+            "embedder": "loaded" if services.embedding_service else "not_configured",
+        }
+
     # Determine overall status
     all_healthy = all(s in ("healthy", "not_configured") for s in service_statuses.values())
     overall_status = "healthy" if all_healthy else "degraded"
@@ -345,5 +427,457 @@ async def health_check(
     return HealthResponse(
         status=overall_status,
         services=service_statuses,
+        dependencies=dependencies,
         version="1.0.0",
     )
+
+
+# ==============================================================================
+# Embedding Endpoint (WBS 0.2.1)
+# ==============================================================================
+
+
+@router.post(
+    "/v1/embed",
+    response_model=EmbedResponse,
+    responses={
+        400: {"model": ErrorResponse, "description": "Invalid request"},
+        422: {"model": ErrorResponse, "description": "Validation error"},
+        500: {"model": ErrorResponse, "description": "Internal server error"},
+        503: {"model": ErrorResponse, "description": "Service unavailable"},
+    },
+    tags=["embeddings"],
+    summary="Generate embeddings for text",
+)
+async def embed_text(
+    request: EmbedRequest,
+    services: ServiceContainer = Depends(get_services),  # noqa: B008
+) -> EmbedResponse:
+    """
+    Generate embedding vectors for text input.
+
+    Accepts either a single text string or a list of texts.
+    Returns embedding vectors of the configured dimension.
+
+    Reference: END_TO_END_INTEGRATION_WBS.md WBS 0.2.1.3
+
+    Args:
+        request: Embedding request with text(s) to embed
+        services: Injected service container
+
+    Returns:
+        EmbedResponse with embedding vectors and metadata
+    """
+    if services.embedding_service is None:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail={"error": "embedding_service_unavailable", "message": "Embedding service is not configured"},
+        )
+
+    start_time = time.perf_counter()
+
+    try:
+        # Normalize input to list
+        texts = [request.text] if isinstance(request.text, str) else request.text
+
+        # Generate embeddings for each text
+        embeddings: list[list[float]] = []
+        for text in texts:
+            embedding = await services.embedding_service.embed(text)
+            embeddings.append(embedding)
+
+        # Determine dimensions from first embedding
+        dimensions = len(embeddings[0]) if embeddings else 0
+
+        # Model name (use default if not specified)
+        model_name = request.model or services.config.embedding_model if hasattr(services.config, 'embedding_model') else "all-mpnet-base-v2"
+
+        latency_ms = (time.perf_counter() - start_time) * 1000
+        logger.info(
+            "Generated %d embeddings in %.2fms",
+            len(embeddings),
+            latency_ms,
+        )
+
+        return EmbedResponse(
+            embeddings=embeddings,
+            model=model_name,
+            dimensions=dimensions,
+            usage={"total_tokens": sum(len(t.split()) for t in texts)},
+        )
+
+    except Exception as e:
+        logger.exception("Embedding generation failed")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail={"error": "embedding_failed", "message": str(e)},
+        ) from e
+
+
+# ==============================================================================
+# Simple Search Endpoint (WBS 0.2.2)
+# ==============================================================================
+
+
+@router.post(
+    "/v1/search",
+    response_model=SimpleSearchResponse,
+    responses={
+        400: {"model": ErrorResponse, "description": "Invalid request"},
+        422: {"model": ErrorResponse, "description": "Validation error"},
+        500: {"model": ErrorResponse, "description": "Internal server error"},
+        503: {"model": ErrorResponse, "description": "Service unavailable"},
+    },
+    tags=["search"],
+    summary="Perform simple similarity search",
+)
+async def simple_search(
+    request: SimpleSearchRequest,
+    services: ServiceContainer = Depends(get_services),  # noqa: B008
+) -> SimpleSearchResponse:
+    """
+    Execute a simple vector similarity search.
+
+    This is a streamlined search endpoint that performs pure vector
+    similarity search without graph-based scoring.
+
+    Reference: END_TO_END_INTEGRATION_WBS.md WBS 0.2.2
+
+    Args:
+        request: Search parameters including query and limit
+        services: Injected service container
+
+    Returns:
+        SimpleSearchResponse with ranked results
+    """
+    if services.vector_client is None:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail={"error": "vector_service_unavailable", "message": "Vector search service is not configured"},
+        )
+
+    start_time = time.perf_counter()
+
+    try:
+        # Get embedding for query
+        if services.embedding_service is None:
+            raise HTTPException(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                detail={"error": "embedding_service_unavailable", "message": "Embedding service is not configured"},
+            )
+
+        embedding = await services.embedding_service.embed(request.query)
+
+        # Perform vector search
+        vector_results = await services.vector_client.search(
+            collection=request.collection,
+            vector=embedding,
+            limit=request.limit,
+        )
+
+        # Build response results
+        results: list[SimpleSearchResultItem] = []
+        for vr in vector_results:
+            # Apply min_score filter if specified
+            if request.min_score is not None and vr.score < request.min_score:
+                continue
+
+            results.append(
+                SimpleSearchResultItem(
+                    id=vr.id,
+                    score=vr.score,
+                    payload=vr.payload or {},
+                )
+            )
+
+        latency_ms = (time.perf_counter() - start_time) * 1000
+
+        logger.info(
+            "Simple search for '%s' returned %d results in %.2fms",
+            request.query[:50],
+            len(results),
+            latency_ms,
+        )
+
+        return SimpleSearchResponse(
+            results=results,
+            total=len(results),
+            query=request.query,
+            latency_ms=latency_ms,
+        )
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.exception("Simple search failed")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail={"error": "search_failed", "message": str(e)},
+        ) from e
+
+
+# =============================================================================
+# Chapter Content Retrieval - Kitchen Brigade: Cookbook (semantic-search)
+# =============================================================================
+
+
+@router.get(
+    "/v1/chapters/{book_id}/{chapter_number}",
+    response_model=ChapterContentResponse,
+    responses={
+        404: {"model": ErrorResponse, "description": "Chapter not found"},
+        500: {"model": ErrorResponse, "description": "Internal server error"},
+        503: {"model": ErrorResponse, "description": "Service unavailable"},
+    },
+    tags=["chapters"],
+    summary="Get chapter content by book and chapter number",
+)
+async def get_chapter_content(
+    book_id: str,
+    chapter_number: int,
+    services: ServiceContainer = Depends(get_services),  # noqa: B008
+) -> ChapterContentResponse:
+    """
+    Retrieve chapter content from Neo4j by book ID and chapter number.
+    
+    This endpoint enables the Kitchen Brigade architecture where ai-agents
+    (Expeditor) retrieves content through semantic-search (Cookbook) rather
+    than directly accessing Neo4j.
+    
+    Args:
+        book_id: Book identifier (e.g., "Architecture_Patterns_with_Python")
+        chapter_number: Chapter number (1-indexed)
+        services: Injected service container
+        
+    Returns:
+        ChapterContentResponse with full chapter content and metadata
+    """
+    if services.graph_client is None:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail={"error": "graph_unavailable", "message": "Graph database is not configured"},
+        )
+    
+    try:
+        # Query Neo4j for chapter content
+        cypher = """
+        MATCH (c:Chapter)
+        WHERE c.book_id = $book_id AND c.number = $chapter_number
+        RETURN c.book_id as book_id,
+               c.number as chapter_number,
+               c.title as title,
+               c.summary as summary,
+               c.keywords as keywords,
+               c.concepts as concepts,
+               c.page_range as page_range
+        LIMIT 1
+        """
+        
+        result = await services.graph_client.execute_query(
+            cypher=cypher,
+            parameters={"book_id": book_id, "chapter_number": chapter_number},
+        )
+        
+        records = result.get("records", [])
+        
+        if not records:
+            # Return not found response
+            return ChapterContentResponse(
+                book_id=book_id,
+                chapter_number=chapter_number,
+                title="",
+                summary="",
+                keywords=[],
+                concepts=[],
+                page_range="",
+                found=False,
+            )
+        
+        record = records[0]
+        
+        return ChapterContentResponse(
+            book_id=record.get("book_id", book_id),
+            chapter_number=record.get("chapter_number", chapter_number),
+            title=record.get("title", ""),
+            summary=record.get("summary", ""),
+            keywords=record.get("keywords") or [],
+            concepts=record.get("concepts") or [],
+            page_range=record.get("page_range", ""),
+            found=True,
+        )
+        
+    except Exception as e:
+        logger.exception("Failed to retrieve chapter content: %s/%d", book_id, chapter_number)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail={"error": "chapter_retrieval_failed", "message": str(e)},
+        ) from e
+
+
+# =============================================================================
+# EEP-4: Graph Relationships Endpoints (AC-4.3.1 to AC-4.3.3)
+# =============================================================================
+
+
+@router.get(
+    "/v1/graph/relationships/{chapter_id}",
+    response_model=ChapterRelationshipsResponse,
+    responses={
+        404: {"model": ErrorResponse, "description": "Chapter not found"},
+        500: {"model": ErrorResponse, "description": "Internal server error"},
+        503: {"model": ErrorResponse, "description": "Service unavailable"},
+    },
+    tags=["graph"],
+    summary="Get relationships for a chapter",
+)
+async def get_chapter_relationships(
+    chapter_id: str,
+    services: ServiceContainer = Depends(get_services),  # noqa: B008
+) -> ChapterRelationshipsResponse:
+    """Get all relationships for a specific chapter.
+
+    AC-4.3.1: GET /v1/graph/relationships/{chapter_id}
+
+    Returns all PARALLEL, PERPENDICULAR, and SKIP_TIER relationships
+    for the specified chapter.
+
+    Args:
+        chapter_id: The chapter ID to query
+        services: Injected service container
+
+    Returns:
+        ChapterRelationshipsResponse with relationships
+    """
+    if services.graph_client is None:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail={"error": "graph_unavailable", "message": "Graph database is not configured"},
+        )
+
+    try:
+        # Query all relationship types
+        cypher = """
+        MATCH (c {id: $chapter_id})-[r:PARALLEL|PERPENDICULAR|SKIP_TIER]-(related)
+        RETURN 
+            related.id AS chapter_id,
+            related.title AS title,
+            related.tier AS target_tier,
+            type(r) AS relationship_type
+        """
+
+        result = await services.graph_client.execute_query(
+            cypher=cypher,
+            parameters={"chapter_id": chapter_id},
+        )
+
+        records = result.get("records", [])
+
+        relationships = [
+            RelatedChapterItem(
+                chapter_id=r.get("chapter_id", ""),
+                relationship_type=r.get("relationship_type", ""),
+                target_tier=r.get("target_tier", 1),
+                title=r.get("title"),
+            )
+            for r in records
+        ]
+
+        return ChapterRelationshipsResponse(
+            chapter_id=chapter_id,
+            relationships=relationships,
+            total_count=len(relationships),
+        )
+
+    except Exception as e:
+        logger.exception("Failed to get relationships for chapter: %s", chapter_id)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail={"error": "relationship_query_failed", "message": str(e)},
+        ) from e
+
+
+@router.post(
+    "/v1/graph/relationships/batch",
+    response_model=BatchRelationshipsResponse,
+    responses={
+        400: {"model": ErrorResponse, "description": "Invalid request"},
+        500: {"model": ErrorResponse, "description": "Internal server error"},
+        503: {"model": ErrorResponse, "description": "Service unavailable"},
+    },
+    tags=["graph"],
+    summary="Get relationships for multiple chapters",
+)
+async def get_batch_relationships(
+    request: BatchRelationshipsRequest,
+    services: ServiceContainer = Depends(get_services),  # noqa: B008
+) -> BatchRelationshipsResponse:
+    """Get relationships for multiple chapters in a batch.
+
+    AC-4.3.2: POST /v1/graph/relationships/batch
+
+    Efficiently retrieves relationships for multiple chapters
+    in a single request.
+
+    Args:
+        request: List of chapter IDs to query
+        services: Injected service container
+
+    Returns:
+        BatchRelationshipsResponse with all chapter relationships
+    """
+    if services.graph_client is None:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail={"error": "graph_unavailable", "message": "Graph database is not configured"},
+        )
+
+    try:
+        results: list[ChapterRelationshipsResponse] = []
+
+        for chapter_id in request.chapter_ids:
+            # Query relationships for each chapter
+            cypher = """
+            MATCH (c {id: $chapter_id})-[r:PARALLEL|PERPENDICULAR|SKIP_TIER]-(related)
+            RETURN 
+                related.id AS chapter_id,
+                related.title AS title,
+                related.tier AS target_tier,
+                type(r) AS relationship_type
+            """
+
+            result = await services.graph_client.execute_query(
+                cypher=cypher,
+                parameters={"chapter_id": chapter_id},
+            )
+
+            records = result.get("records", [])
+
+            relationships = [
+                RelatedChapterItem(
+                    chapter_id=r.get("chapter_id", ""),
+                    relationship_type=r.get("relationship_type", ""),
+                    target_tier=r.get("target_tier", 1),
+                    title=r.get("title"),
+                )
+                for r in records
+            ]
+
+            results.append(
+                ChapterRelationshipsResponse(
+                    chapter_id=chapter_id,
+                    relationships=relationships,
+                    total_count=len(relationships),
+                )
+            )
+
+        return BatchRelationshipsResponse(
+            results=results,
+            total_chapters=len(results),
+        )
+
+    except Exception as e:
+        logger.exception("Failed to get batch relationships")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail={"error": "batch_relationship_query_failed", "message": str(e)},
+        ) from e

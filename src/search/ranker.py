@@ -31,6 +31,7 @@ from __future__ import annotations
 _DEFAULT_STRATEGY = "linear"
 _DEFAULT_VECTOR_WEIGHT = 0.7
 _DEFAULT_GRAPH_WEIGHT = 0.3
+_DEFAULT_FOCUS_WEIGHT = 0.0  # Weight for focus area keyword matching
 _DEFAULT_RRF_K = 60
 _VALID_STRATEGIES = {"linear", "rrf", "max"}
 
@@ -67,6 +68,8 @@ class ResultRanker:
         graph_weight: float = _DEFAULT_GRAPH_WEIGHT,
         rrf_k: int = _DEFAULT_RRF_K,
         relationship_boosts: dict[str, float] | None = None,
+        focus_weight: float = _DEFAULT_FOCUS_WEIGHT,
+        focus_keywords: list[str] | None = None,
     ) -> None:
         """Initialize the ranker with configuration.
 
@@ -76,6 +79,8 @@ class ResultRanker:
             graph_weight: Weight for graph scores (default: 0.3)
             rrf_k: K parameter for RRF (default: 60)
             relationship_boosts: Boost multipliers by relationship type
+            focus_weight: Weight for focus area keyword matching (default: 0.0)
+            focus_keywords: Keywords that indicate relevant focus area
 
         Raises:
             ValueError: If strategy is invalid
@@ -95,6 +100,8 @@ class ResultRanker:
             if relationship_boosts is not None
             else _DEFAULT_RELATIONSHIP_BOOSTS.copy()
         )
+        self._focus_weight = focus_weight
+        self._focus_keywords = focus_keywords or []
 
     @property
     def strategy(self) -> str:
@@ -115,6 +122,70 @@ class ResultRanker:
     def rrf_k(self) -> int:
         """Get the RRF k parameter."""
         return self._rrf_k
+
+    @property
+    def focus_weight(self) -> float:
+        """Get the focus area weight."""
+        return self._focus_weight
+
+    @property
+    def focus_keywords(self) -> list[str]:
+        """Get the focus area keywords."""
+        return self._focus_keywords.copy()
+
+    def compute_focus_overlap(
+        self,
+        passage_text: str,
+    ) -> float:
+        """Compute overlap between passage text and focus keywords.
+
+        Args:
+            passage_text: Text content of the passage
+
+        Returns:
+            Overlap score in range [0, 1]
+        """
+        if not self._focus_keywords or not passage_text:
+            return 0.0
+
+        text_lower = passage_text.lower()
+        matches = sum(1 for kw in self._focus_keywords if kw.lower() in text_lower)
+        return matches / len(self._focus_keywords)
+
+    def fuse_with_focus(
+        self,
+        vector_scores: dict[str, float],
+        graph_scores: dict[str, float],
+        passages: dict[str, str],
+    ) -> dict[str, float]:
+        """Fuse scores including focus area overlap.
+
+        Extends base fusion with focus keyword matching:
+        final = (1 - focus_weight) * base_fused + focus_weight * focus_overlap
+
+        Args:
+            vector_scores: Dictionary of {doc_id: score} from vector search
+            graph_scores: Dictionary of {doc_id: score} from graph search
+            passages: Dictionary of {doc_id: text_content} for focus matching
+
+        Returns:
+            Dictionary of {doc_id: fused_score}
+        """
+        base_fused = self.fuse(vector_scores, graph_scores)
+
+        if self._focus_weight <= 0 or not self._focus_keywords:
+            return base_fused
+
+        result = {}
+        for doc_id, base_score in base_fused.items():
+            passage_text = passages.get(doc_id, "")
+            focus_score = self.compute_focus_overlap(passage_text)
+
+            # Blend base fusion with focus overlap
+            final = (1 - self._focus_weight) * base_score + self._focus_weight * focus_score
+            result[doc_id] = self._clamp_score(final)
+
+        return result
 
     def fuse(
         self,

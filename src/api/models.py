@@ -54,6 +54,30 @@ class HybridSearchRequest(BaseModel):
         default=None,
         description="Additional context for graph traversal",
     )
+    # Tier filtering (feature/semantic-tuning)
+    tier_filter: list[int] | None = Field(
+        default=None,
+        description="Filter results to specific taxonomy tiers (1, 2, or 3)",
+    )
+    tier_boost: bool = Field(
+        default=True,
+        description="Apply tier-based score boosting (tier 1 = highest)",
+    )
+    min_term_matches: int = Field(
+        default=1,
+        ge=1,
+        le=10,
+        description="Minimum number of query terms that must match",
+    )
+    # Domain-aware filtering (RELEVANCE_TUNING_PLAN.md)
+    focus_areas: list[str] | None = Field(
+        default=None,
+        description="Focus areas for domain-aware filtering (e.g., 'llm_rag', 'microservices_architecture')",
+    )
+    focus_keywords: list[str] | None = Field(
+        default=None,
+        description="Custom focus keywords for relevance scoring",
+    )
 
     @model_validator(mode="after")
     def validate_query_or_embedding(self) -> HybridSearchRequest:
@@ -62,6 +86,18 @@ class HybridSearchRequest(BaseModel):
             msg = "Either 'query' or 'embedding' must be provided"
             raise ValueError(msg)
         return self
+    
+    @field_validator("tier_filter")
+    @classmethod
+    def validate_tier_filter(cls, v: list[int] | None) -> list[int] | None:
+        """Ensure tier filter values are valid (1, 2, or 3)."""
+        if v is not None:
+            valid_tiers = {1, 2, 3}
+            invalid = [t for t in v if t not in valid_tiers]
+            if invalid:
+                msg = f"Invalid tier values: {invalid}. Valid tiers are 1, 2, 3."
+                raise ValueError(msg)
+        return v
 
 
 class SearchResultItem(BaseModel):
@@ -86,6 +122,32 @@ class SearchResultItem(BaseModel):
     graph_metadata: dict[str, Any] | None = Field(
         default=None,
         description="Graph relationship information",
+    )
+    # Tier information (feature/semantic-tuning)
+    tier: int | None = Field(
+        default=None,
+        description="Taxonomy tier (1=Architecture, 2=Implementation, 3=Engineering)",
+    )
+    tier_boost_applied: float | None = Field(
+        default=None,
+        description="Boost factor applied based on tier (if tier_boost enabled)",
+    )
+    term_match_count: int | None = Field(
+        default=None,
+        description="Number of query terms that matched in this result",
+    )
+    # Domain filtering results (RELEVANCE_TUNING_PLAN.md)
+    focus_area_applied: str | None = Field(
+        default=None,
+        description="Focus area filter that was applied (if any)",
+    )
+    focus_score: float | None = Field(
+        default=None,
+        description="Focus keyword overlap score (0-1)",
+    )
+    domain_filter_adjustment: float | None = Field(
+        default=None,
+        description="Score adjustment from domain filtering",
     )
 
 
@@ -267,6 +329,10 @@ class HealthResponse(BaseModel):
         default_factory=dict,
         description="Individual service statuses",
     )
+    dependencies: dict[str, str] = Field(
+        default_factory=dict,
+        description="External dependency connection statuses (qdrant, neo4j, embedder)",
+    )
     version: str = Field(description="API version")
 
 
@@ -280,4 +346,249 @@ class ErrorResponse(BaseModel):
     detail: dict[str, Any] | None = Field(
         default=None,
         description="Additional error details",
+    )
+
+
+# ==============================================================================
+# Embedding Models (WBS 0.2.1)
+# ==============================================================================
+
+
+class EmbedRequest(BaseModel):
+    """Request model for text embedding endpoint.
+    
+    Reference: END_TO_END_INTEGRATION_WBS.md WBS 0.2.1.1
+    """
+
+    model_config = ConfigDict(extra="forbid")
+
+    text: str | list[str] = Field(
+        description="Text or list of texts to embed",
+    )
+    model: str | None = Field(
+        default=None,
+        description="Model to use for embedding (uses default if not specified)",
+    )
+
+    @field_validator("text")
+    @classmethod
+    def validate_text(cls, v: str | list[str]) -> str | list[str]:
+        """Ensure text is not empty."""
+        if isinstance(v, str):
+            if not v.strip():
+                msg = "Text cannot be empty"
+                raise ValueError(msg)
+        elif isinstance(v, list):
+            if not v:
+                msg = "Text list cannot be empty"
+                raise ValueError(msg)
+            for i, t in enumerate(v):
+                if not isinstance(t, str) or not t.strip():
+                    msg = f"Text at index {i} is empty or invalid"
+                    raise ValueError(msg)
+        return v
+
+
+class EmbedResponse(BaseModel):
+    """Response model for text embedding endpoint.
+    
+    Reference: END_TO_END_INTEGRATION_WBS.md WBS 0.2.1.2
+    """
+
+    model_config = ConfigDict(extra="forbid")
+
+    embeddings: list[list[float]] = Field(
+        description="List of embedding vectors",
+    )
+    model: str = Field(
+        description="Model used for embedding",
+    )
+    dimensions: int = Field(
+        description="Dimension of each embedding vector",
+    )
+    usage: dict[str, int] | None = Field(
+        default=None,
+        description="Token usage statistics",
+    )
+
+
+# ==============================================================================
+# Simple Search Models (WBS 0.2.2)
+# ==============================================================================
+
+
+class SimpleSearchRequest(BaseModel):
+    """Request model for simple similarity search endpoint.
+    
+    Reference: END_TO_END_INTEGRATION_WBS.md WBS 0.2.2
+    """
+
+    model_config = ConfigDict(extra="forbid")
+
+    query: str = Field(
+        description="Text query to search for",
+        min_length=1,
+        max_length=10000,
+    )
+    collection: str = Field(
+        default="documents",
+        description="Vector collection to search",
+    )
+    limit: int = Field(
+        default=10,
+        ge=1,
+        le=100,
+        description="Maximum number of results to return",
+    )
+    min_score: float | None = Field(
+        default=None,
+        ge=0.0,
+        le=1.0,
+        description="Minimum similarity score threshold",
+    )
+
+
+class SimpleSearchResultItem(BaseModel):
+    """Individual search result for simple search."""
+
+    model_config = ConfigDict(extra="allow")
+
+    id: str = Field(description="Unique identifier for the result")
+    score: float = Field(
+        ge=0.0,
+        le=1.0,
+        description="Similarity score (0-1)",
+    )
+    payload: dict[str, Any] = Field(
+        default_factory=dict,
+        description="Associated metadata",
+    )
+
+
+class SimpleSearchResponse(BaseModel):
+    """Response model for simple similarity search endpoint.
+    
+    Reference: END_TO_END_INTEGRATION_WBS.md WBS 0.2.2
+    """
+
+    model_config = ConfigDict(extra="forbid")
+
+    results: list[SimpleSearchResultItem] = Field(
+        default_factory=list,
+        description="List of search results",
+    )
+    total: int = Field(
+        description="Number of results returned",
+    )
+    query: str = Field(
+        description="Original query text",
+    )
+    latency_ms: float = Field(
+        description="Search latency in milliseconds",
+    )
+
+
+# =============================================================================
+# Chapter Content Models - Kitchen Brigade: Cookbook (semantic-search)
+# =============================================================================
+
+
+class ChapterContentResponse(BaseModel):
+    """Response model for chapter content retrieval.
+    
+    Used by ai-agents (Expeditor) to retrieve chapter content from
+    the Cookbook (semantic-search) via Neo4j.
+    
+    Reference: Kitchen Brigade Architecture - Option A
+    """
+
+    model_config = ConfigDict(extra="forbid")
+
+    book_id: str = Field(description="Book identifier")
+    chapter_number: int = Field(description="Chapter number")
+    title: str = Field(description="Chapter title")
+    summary: str = Field(default="", description="Full chapter summary/content")
+    keywords: list[str] = Field(default_factory=list, description="Chapter keywords")
+    concepts: list[str] = Field(default_factory=list, description="Chapter concepts")
+    page_range: str = Field(default="", description="Page range (e.g., '46-73')")
+    found: bool = Field(default=True, description="Whether chapter was found")
+
+
+# =============================================================================
+# EEP-4: Graph Relationships Models (AC-4.3.1 to AC-4.3.3)
+# =============================================================================
+
+
+class RelatedChapterItem(BaseModel):
+    """A related chapter from relationship traversal.
+    
+    AC-4.3.3: Return relationship type with each related chapter.
+    """
+
+    model_config = ConfigDict(extra="forbid")
+
+    chapter_id: str = Field(description="Related chapter ID")
+    relationship_type: str = Field(
+        description="Type of relationship (PARALLEL, PERPENDICULAR, SKIP_TIER)"
+    )
+    target_tier: int = Field(
+        ge=1,
+        le=10,
+        description="Tier of the related chapter",
+    )
+    title: str | None = Field(
+        default=None,
+        description="Chapter title (if available)",
+    )
+
+
+class ChapterRelationshipsResponse(BaseModel):
+    """Response model for chapter relationships endpoint.
+    
+    AC-4.3.1: GET /v1/graph/relationships/{chapter_id}
+    """
+
+    model_config = ConfigDict(extra="forbid")
+
+    chapter_id: str = Field(description="The queried chapter ID")
+    relationships: list[RelatedChapterItem] = Field(
+        default_factory=list,
+        description="List of related chapters",
+    )
+    total_count: int = Field(
+        ge=0,
+        description="Total number of relationships found",
+    )
+
+
+class BatchRelationshipsRequest(BaseModel):
+    """Request model for batch relationships endpoint.
+    
+    AC-4.3.2: POST /v1/graph/relationships/batch
+    """
+
+    model_config = ConfigDict(extra="forbid")
+
+    chapter_ids: list[str] = Field(
+        min_length=1,
+        max_length=100,
+        description="List of chapter IDs to query",
+    )
+
+
+class BatchRelationshipsResponse(BaseModel):
+    """Response model for batch relationships endpoint.
+    
+    AC-4.3.2: POST /v1/graph/relationships/batch
+    """
+
+    model_config = ConfigDict(extra="forbid")
+
+    results: list[ChapterRelationshipsResponse] = Field(
+        default_factory=list,
+        description="Relationships for each queried chapter",
+    )
+    total_chapters: int = Field(
+        ge=0,
+        description="Number of chapters processed",
     )

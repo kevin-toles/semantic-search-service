@@ -10,6 +10,108 @@ The Semantic Search Service is a **microservice** that provides embedding genera
 
 ---
 
+## ⚠️ Gateway-First Communication Pattern
+
+**CRITICAL RULE**: External applications MUST access platform services through the Gateway.
+
+```
+┌──────────────────────────────────────────────────────────────────────────────┐
+│                    SERVICE COMMUNICATION PATTERN                             │
+├──────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│  EXTERNAL → semantic-search: Via Gateway:8080 (REQUIRED)                    │
+│  ─────────────────────────────────────────────────────                       │
+│  Applications outside the AI Platform must route through Gateway.           │
+│                                                                              │
+│  ✅ llm-document-enhancer → Gateway:8080 → semantic-search:8081             │
+│  ❌ llm-document-enhancer → semantic-search:8081 (VIOLATION!)               │
+│                                                                              │
+│  INTERNAL (Platform Services): Direct calls allowed                          │
+│  ───────────────────────────────────────────────────                         │
+│  Platform services (ai-agents, Code-Orchestrator) may call directly.        │
+│                                                                              │
+│  ✅ ai-agents:8082 → semantic-search:8081 (internal)                        │
+│  ✅ Code-Orchestrator:8083 → semantic-search:8081 (internal)                │
+│                                                                              │
+└──────────────────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## Kitchen Brigade Role: COOKBOOK (DUMB RETRIEVAL)
+
+In the Kitchen Brigade architecture, **semantic-search-service** is the **Cookbook** - a dumb retrieval system:
+
+```
+┌──────────────────────────────────────────────────────────────────────────────┐
+│                     📖 COOKBOOK - INTENTIONALLY DUMB                         │
+├──────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│  WHAT IT DOES:                                                               │
+│  ─────────────                                                               │
+│  ✓ Receives keywords/queries as INPUT (does NOT generate them)              │
+│  ✓ Queries Qdrant vector DB and Neo4j graph DB                              │
+│  ✓ Returns ALL matches without filtering or judgment                        │
+│  ✓ Just looks up "recipes" in the "cookbook"                                │
+│                                                                              │
+│  WHAT IT DOES NOT DO:                                                        │
+│  ────────────────────                                                        │
+│  ✗ Generate search terms (that's Code-Orchestrator-Service)                 │
+│  ✗ Filter or rank results (that's Code-Orchestrator-Service curation)       │
+│  ✗ Make semantic judgments (e.g., "chunking" = LLM context)                 │
+│  ✗ Host HuggingFace models (that's Code-Orchestrator-Service)               │
+│                                                                              │
+│  WHY DUMB IS GOOD:                                                           │
+│  ─────────────────                                                           │
+│  • Single responsibility (just retrieval)                                   │
+│  • Easy to test (input → output, no complex logic)                          │
+│  • Horizontally scalable (no state, no model loading)                       │
+│  • Intelligence is centralized in Sous Chef                                 │
+│                                                                              │
+└──────────────────────────────────────────────────────────────────────────────┘
+```
+
+### Data Flow
+
+```
+Code-Orchestrator-Service (Sous Chef)
+    │
+    │ Extracted keywords: ["chunking", "RAG", "embedding", "overlap"]
+    ▼
+┌─────────────────────────────────────────────────────────────────┐
+│             Semantic Search Service (This Service)              │
+│                                                                 │
+│  POST /v1/search                                                │
+│  {                                                              │
+│    "keywords": ["chunking", "RAG", "embedding"],               │
+│    "top_k": 20                                                  │
+│  }                                                              │
+│                                                                 │
+│  Internal:                                                      │
+│  ├── Qdrant: Vector similarity search                          │
+│  ├── Neo4j: Graph traversal (optional)                         │
+│  └── Hybrid: Combine results                                   │
+│                                                                 │
+│  Returns: ALL matches (no filtering)                           │
+│  [                                                              │
+│    {book: "AI Engineering", chapter: 5, score: 0.91},         │
+│    {book: "C++ Concurrency", chapter: 3, score: 0.45}, ← wrong│
+│    {book: "Building LLM Apps", chapter: 8, score: 0.88},      │
+│    ...                                                          │
+│  ]                                                              │
+└─────────────────────────────────────────────────────────────────┘
+    │
+    │ Raw results (may include false positives like C++ memory chunks)
+    ▼
+Code-Orchestrator-Service (Chef de Partie - Curation)
+    │
+    │ Filtered/ranked results (C++ filtered out)
+    ▼
+Consumer (ai-agents, llm-document-enhancer)
+```
+
+---
+
 ## Folder Structure
 
 ```
@@ -178,9 +280,9 @@ semantic-search-service/
 | POST | `/v1/embed/batch` | Async batch embedding job |
 | POST | `/v1/search` | Semantic similarity search |
 | POST | `/v1/search/vector` | Search by raw vector |
-| POST | `/v1/search/hybrid` | **NEW** - Combined vector + graph search |
-| POST | `/v1/graph/traverse` | **NEW** - Spider web graph traversal |
-| POST | `/v1/graph/query` | **NEW** - Raw Cypher query execution |
+| POST | `/v1/search/hybrid` | Combined vector + graph search (accepts `taxonomy` param) |
+| POST | `/v1/graph/traverse` | Spider web graph traversal |
+| POST | `/v1/graph/query` | Raw Cypher query execution |
 | POST | `/v1/topics/infer` | Infer topics for text |
 | GET | `/v1/topics/{model_id}/topics` | List all topics |
 | POST | `/v1/topics/similar` | Find docs with similar topics |
@@ -190,7 +292,161 @@ semantic-search-service/
 | DELETE | `/v1/indices/{id}` | Delete index |
 | GET | `/v1/chunks/{chunk_id}` | Get chunk text by ID |
 | GET | `/v1/chunks/{chunk_id}/context` | Get surrounding chunks |
+| GET | `/v1/taxonomies` | List available taxonomies |
 | GET | `/health` | Health check |
+
+---
+
+## Taxonomy-Agnostic Architecture
+
+> **Key Principle**: Taxonomies are query-time overlays, NOT baked into seeded data.
+
+### How It Works
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                    TAXONOMY AS QUERY-TIME OVERLAY                            │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│  SEEDED DATA (One-time, taxonomy-agnostic):                                 │
+│  • Qdrant vectors: content embeddings + enriched payloads (NO tier)         │
+│  • Neo4j nodes: Book/Chapter structure (NO tier baked in)                   │
+│                                                                              │
+│  QUERY FLOW:                                                                 │
+│  ───────────                                                                 │
+│  POST /v1/search/hybrid                                                      │
+│  {                                                                           │
+│    "query": "rate limiting patterns",                                       │
+│    "taxonomy": "AI-ML_taxonomy",    ← Optional: loaded at query time        │
+│    "tier_filter": [1, 2]            ← Optional: filter by tier              │
+│  }                                                                           │
+│                                                                              │
+│  1. Search Qdrant (taxonomy-agnostic vectors)                               │
+│  2. Load taxonomy from ai-platform-data/taxonomies/ (if specified)          │
+│  3. Apply tier mapping to results (query-time overlay)                      │
+│  4. Filter by tier_filter (if specified)                                     │
+│  5. Return results with tier/priority attached                               │
+│                                                                              │
+│  BENEFITS:                                                                   │
+│  • Adding new taxonomy = just add JSON file (NO re-seeding!)                │
+│  • Same book can have different tiers in different taxonomies               │
+│  • Users specify taxonomy at runtime via prompt/API                         │
+│                                                                              │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+### Search Response Examples
+
+**Without taxonomy** (returns all results, no tier info):
+```json
+{
+  "results": [
+    {"book": "Building Microservices", "chapter": 5, "score": 0.91},
+    {"book": "AI Engineering", "chapter": 3, "score": 0.88}
+  ]
+}
+```
+
+**With taxonomy** (tier/priority from specified taxonomy):
+```json
+{
+  "results": [
+    {"book": "Building Microservices", "chapter": 5, "score": 0.91, "tier": 1, "priority": 6},
+    {"book": "AI Engineering", "chapter": 3, "score": 0.88, "tier": 1, "priority": 3}
+  ]
+}
+```
+
+---
+
+## Enrichment Scalability Architecture
+
+> **Key Principle**: Cross-book similarity (`similar_chapters`) is computed against the FULL corpus, then filtered at query-time by taxonomy.
+
+### Problem (Pre-v1.4.0)
+
+```
+similar_chapters computed per taxonomy
+    ↓
+47 books × 1000 taxonomies = 47,000 enriched files (doesn't scale!)
+    ↓
+Adding new book = O(n² × t) re-enrichment
+```
+
+### Solution (v1.4.0)
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│            COMPUTE ONCE AGAINST FULL CORPUS, FILTER AT QUERY-TIME           │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│  ENRICHMENT (One-time, O(n²)):                                              │
+│  • `similar_chapters` computed against ALL 47+ books                        │
+│  • Single enriched file per book, shared across all taxonomies              │
+│  • Stored in Qdrant payload (no taxonomy info)                               │
+│                                                                              │
+│  QUERY-TIME FILTERING:                                                       │
+│  ─────────────────────                                                       │
+│  POST /v1/search/similar-chapters                                            │
+│  {                                                                           │
+│    "chapter_id": "arch_patterns_ch4",                                       │
+│    "taxonomy": "AI-ML_taxonomy"    ← Filter by books in this taxonomy       │
+│  }                                                                           │
+│                                                                              │
+│  1. Retrieve similar_chapters from Qdrant (all books)                       │
+│  2. Load taxonomy from ai-platform-data/taxonomies/                          │
+│  3. Filter similar_chapters to only books IN the taxonomy                   │
+│  4. Attach tier/priority from taxonomy                                       │
+│  5. Return filtered results                                                  │
+│                                                                              │
+│  INCREMENTAL UPDATE (Adding New Book):                                       │
+│  ─────────────────────────────────────                                       │
+│  1. Enrich new book against existing corpus (O(n))                          │
+│  2. Append new book to existing books' similar_chapters                     │
+│  3. Use Qdrant set_payload() for atomic updates                              │
+│  4. NO full re-enrichment required!                                          │
+│                                                                              │
+│  COMPLEXITY:                                                                 │
+│  │ Operation              │ Before        │ After          │                │
+│  ├────────────────────────┼───────────────┼────────────────┤                │
+│  │ Full enrichment        │ O(n² × t)     │ O(n²)          │                │
+│  │ Add new taxonomy       │ O(n²)         │ O(1)           │                │
+│  │ Add new book           │ O(n² × t)     │ O(n)           │                │
+│  └────────────────────────┴───────────────┴────────────────┘                │
+│                                                                              │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+### Similar Chapters API
+
+```python
+# Endpoint: POST /v1/search/similar-chapters
+{
+    "chapter_id": "arch_patterns_ch4_abc123",
+    "taxonomy": "AI-ML_taxonomy",    # Optional: filter by taxonomy
+    "tier_filter": [1, 2],           # Optional: only certain tiers
+    "limit": 10
+}
+
+# Response with taxonomy filter
+{
+    "similar_chapters": [
+        {"chapter_id": "...", "book": "Building Microservices", "score": 0.91, "tier": 1},
+        {"chapter_id": "...", "book": "Clean Architecture", "score": 0.88, "tier": 2}
+    ],
+    "total_unfiltered": 47,  # Total before taxonomy filter
+    "filtered_by": "AI-ML_taxonomy"
+}
+
+# Response without taxonomy filter
+{
+    "similar_chapters": [
+        {"chapter_id": "...", "book": "Building Microservices", "score": 0.91},
+        {"chapter_id": "...", "book": "Random Book Not In Taxonomy", "score": 0.87}
+    ],
+    "total_unfiltered": 47
+}
+```
 
 ---
 
@@ -207,6 +463,7 @@ semantic-search-service/
 - Metadata filtering with search
 - Top-k retrieval with scores
 - Payload storage for chunk metadata
+- **Atomic payload updates** via `set_payload()` for incremental enrichment
 
 ### Graph Engine (Neo4j) - NEW
 - Taxonomy graph storage

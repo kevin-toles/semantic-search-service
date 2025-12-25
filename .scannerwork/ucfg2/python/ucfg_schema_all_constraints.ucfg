@@ -1,34 +1,34 @@
 
 5src.graph.schema.SchemaManager.create_all_constraintsM
-A/Users/kevintoles/POC/semantic-search-service/src/graph/schema.pyã ã($"2*É
+A/Users/kevintoles/POC/semantic-search-service/src/graph/schema.pyç ç($"2*É
 2
-ä ä(.qo
+è è(.qo
 
-å å(0
+é é(0
 %1*>
 
 __unknown_file (" 
 src.graph.schema.SchemaManager2create_taxonomy_constraintsmk
 
-æ æ(,
+ê ê(,
 %2*>
 
 __unknown_file (" 
 src.graph.schema.SchemaManager2create_tier_constraintsmk
 
-ç ç(,
+ë ë(,
 %3*>
 
 __unknown_file (" 
 src.graph.schema.SchemaManager2create_book_constraintspn
 
-è è(/
+ì ì(/
 %4*>
 
 __unknown_file (" 
 src.graph.schema.SchemaManager2create_chapter_constraintspn
 
-é é(/
+í í(/
 %5*>
 
 __unknown_file (" 
@@ -36,6 +36,6 @@ A/Users/kevintoles/POC/semantic-search-service/src/graph/schema.pyã ã($"2*
 3*1
 3
 	schema.py"
-ï ï(
+ó ó(
 implicit returnB" 
 src.graph.schema.SchemaManagerH
