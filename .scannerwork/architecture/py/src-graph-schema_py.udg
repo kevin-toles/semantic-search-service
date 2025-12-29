@@ -1,5 +1,5 @@
 
-1.0PythonFrontend"1765168175826*py2.BŽ
+1.0PythonFrontend"1766908004474*py2.Bª
 
 imports1
 
@@ -35,54 +35,55 @@ __future__12
 4src.graph.schema.generate_create_relationship_cypher22
 $
 src.graph.schema.SchemaManager24
-8
-2src.graph.schema.SchemaManager.create_book_indexes26
-;
-5src.graph.schema.SchemaManager.create_concept_indexes28
-?
-9src.graph.schema.SchemaManager.create_concept_constraints30
-=
-7src.graph.schema.SchemaManager.get_existing_constraints32
-
-
-list34
-@
-:src.graph.schema.SchemaManager.create_taxonomy_constraints36
 4
-.src.graph.schema.SchemaManager.validate_schema38
-<
-6src.graph.schema.SchemaManager.create_tier_constraints40
+.src.graph.schema.SchemaManager.validate_schema26
+
+typing.Coroutine28
 ;
-5src.graph.schema.SchemaManager.create_all_constraints42
-9
-3src.graph.schema.SchemaManager.drop_all_constraints44
-0
-*src.graph.schema.SchemaManager.init_schema46
-<
-6src.graph.schema.SchemaManager.create_book_constraints48
-9
-3src.graph.schema.SchemaManager.get_existing_indexes50
--
-'src.graph.schema.SchemaManager.__init__52
+5src.graph.schema.SchemaManager.create_all_constraints30
 7
-1src.graph.schema.SchemaManager.create_all_indexes54
-1
-+src.graph.schema.SchemaManager.reset_schema56
-5
-/src.graph.schema.SchemaManager.drop_all_indexes58
-;
-5src.graph.schema.SchemaManager.create_chapter_indexes60
+1src.graph.schema.SchemaManager.create_all_indexes32
 ?
-9src.graph.schema.SchemaManager.create_chapter_constraints62
-!
-src.graph.schema.NodeLabels64
+9src.graph.schema.SchemaManager.create_chapter_constraints34
+=
+7src.graph.schema.SchemaManager.get_existing_constraints36
+@
+:src.graph.schema.SchemaManager.create_taxonomy_constraints38
+8
+2src.graph.schema.SchemaManager.create_book_indexes40
+-
+'src.graph.schema.SchemaManager.__init__42
+
+NoneType44
 1
-+src.graph.schema.generate_merge_node_cypher66
++src.graph.schema.SchemaManager.reset_schema46
+?
+9src.graph.schema.SchemaManager.create_concept_constraints48
+;
+5src.graph.schema.SchemaManager.create_concept_indexes50
+<
+6src.graph.schema.SchemaManager.create_tier_constraints52
+0
+*src.graph.schema.SchemaManager.init_schema54
+9
+3src.graph.schema.SchemaManager.drop_all_constraints56
+9
+3src.graph.schema.SchemaManager.get_existing_indexes58
+5
+/src.graph.schema.SchemaManager.drop_all_indexes60
+;
+5src.graph.schema.SchemaManager.create_chapter_indexes62
+<
+6src.graph.schema.SchemaManager.create_book_constraints64
+!
+src.graph.schema.NodeLabels66
+1
++src.graph.schema.generate_merge_node_cypher68
 )
-#src.graph.schema.RelationshipLabels68J
+#src.graph.schema.RelationshipLabels70J
 
 8
-89jÙ
+89jì
  
 10
 10115 *
@@ -111,18 +112,18 @@ $
 
 27
 27267 225
-
-29
-29287 225
+
+29
+29286
 
 31
 31307 225
 
 33
 33327 225
-
-35
-35346
+
+35
+35347 225
 
 37
 37367 225
@@ -135,9 +136,9 @@ $
 
 43
 43427 225
-
-45
-45447 225
+
+45
+45446
 
 47
 47467 225
@@ -167,13 +168,16 @@ $
 63627 225
 
 65
-65646 210
+65647 225
 
 67
-67667 210
+67666 210
 
 69
-69686 210rÚ
+69687 210
+
+71
+71706 210rþ
 
 10131*
 8 (#
@@ -208,23 +212,68 @@ $
 23194*
 8{ {((
 
-33353*
-8¾ ¾('
-
-39213*
+27293*
 8¢ ¢(
 
-51353*
+31293*
+8ç ç(%
+
+33293*
+8‹ ‹(!
+
+35293*
+8Ï Ï()
+
+37293*
+8¾ ¾('
+
+39293*
+8ß ß(*
+
+41293*
+8ó ó("
+
+43453*
+8³	 ³(
+
+47293*
+8ð ð(
+
+49293*
+8× ×()
+
+51293*
+8ƒ ƒ(%
+
+53293*
+8¿ ¿(&
+
+55293*
+8• •(
+
+57293*
+8Ô Ô(#
+
+59293*
 8Ç Ç(#
+
+61293*
+8á á(
+
+63293*
+8û û(%
+
+65293*
+8Ç Ç(&
 
-67193*
+69193*
 8[ [(
 
-67194*
+69194*
 8[ [(
 
-67194*
+69194*
 8[ [(
 
-67194*
+69194*
 8[ [(

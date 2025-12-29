@@ -7,7 +7,9 @@
         "RAG", "retrieval", "vector", "embedding", "LLM", "token", 
         "context window", "document", "corpus", "index", "semantic search",
         "prompt", "completion", "inference", "transformer", "attention",
-        "fine-tune", "fine-tuning", "BERT", "GPT", "langchain", "llamaindex"
+        "fine-tune", "fine-tuning", "BERT", "GPT", "langchain", "llamaindex",
+        "openai", "anthropic", "claude", "gemini", "ollama", "huggingface",
+        "agent", "chain", "memory", "chat", "conversation", "rag pipeline"
       ],
       "min_domain_matches": 1,
       "tier_whitelist": ["architecture", "practices"],
@@ -39,7 +41,9 @@
       "domain_keywords": [
         "fastapi", "flask", "django", "pydantic", "asyncio", "typing",
         "pandas", "numpy", "scipy", "sklearn", "pytorch", "tensorflow",
-        "decorator", "generator", "comprehension", "lambda"
+        "decorator", "generator", "comprehension", "lambda", "pytest",
+        "virtualenv", "poetry", "pipenv", "dunder", "__init__", "__call__",
+        "dataclass", "enum", "pathlib", "logging", "argparse", "click"
       ],
       "min_domain_matches": 0,
       "tier_whitelist": ["implementation"],
@@ -63,7 +67,9 @@
       "domain_keywords": [
         "docker", "kubernetes", "REST", "gRPC", "message queue", "kafka",
         "service mesh", "circuit breaker", "load balancer", "gateway",
-        "12-factor", "orchestration", "scalability", "resilience"
+        "12-factor", "orchestration", "scalability", "resilience",
+        "istio", "envoy", "consul", "etcd", "zookeeper", "rabbitmq",
+        "event-driven", "saga", "cqrs", "event sourcing", "api gateway"
       ],
       "min_domain_matches": 1,
       "tier_whitelist": ["architecture"],
@@ -77,6 +83,347 @@
         "in_whitelist_book": 0.25,
         "in_blacklist_book": 0.0,
         "in_whitelist_tier": 0.2,
+        "domain_keyword_present": 0.08,
+        "primary_only_no_domain": -0.1
+      }
+    },
+    "design_patterns": {
+      "description": "Software design patterns, SOLID principles, OOP concepts",
+      "primary_keywords": ["pattern", "design", "architecture", "principle", "refactor"],
+      "domain_keywords": [
+        "factory", "singleton", "observer", "adapter", "decorator", "strategy",
+        "builder", "prototype", "facade", "proxy", "composite", "bridge",
+        "flyweight", "chain of responsibility", "command", "iterator",
+        "mediator", "memento", "state", "template method", "visitor",
+        "repository", "unit of work", "dependency injection", "inversion of control",
+        "solid", "srp", "ocp", "lsp", "isp", "dip", "dry", "kiss", "yagni",
+        "abstraction", "encapsulation", "polymorphism", "inheritance",
+        "composition", "aggregation", "coupling", "cohesion", "interface",
+        "abstract class", "domain model", "aggregate", "entity", "value object",
+        "bounded context", "anti-corruption layer", "hexagonal", "clean architecture",
+        "ports and adapters", "onion architecture", "layered architecture"
+      ],
+      "min_domain_matches": 1,
+      "tier_whitelist": ["architecture", "practices"],
+      "book_blacklist_patterns": [],
+      "book_whitelist_patterns": [
+        "Design Patterns*",
+        "Clean Code*",
+        "Clean Architecture*",
+        "Domain-Driven Design*",
+        "Patterns of Enterprise*",
+        "Head First Design Patterns*",
+        "Refactoring*"
+      ],
+      "score_adjustments": {
+        "in_whitelist_book": 0.3,
+        "in_blacklist_book": 0.0,
+        "in_whitelist_tier": 0.2,
+        "domain_keyword_present": 0.1,
+        "primary_only_no_domain": -0.2
+      }
+    },
+    "database_storage": {
+      "description": "Databases, SQL, NoSQL, data storage and retrieval",
+      "primary_keywords": ["database", "sql", "query", "table", "schema"],
+      "domain_keywords": [
+        "postgresql", "postgres", "mysql", "sqlite", "oracle", "sql server",
+        "mongodb", "redis", "cassandra", "dynamodb", "elasticsearch", "neo4j",
+        "orm", "sqlalchemy", "sequelize", "prisma", "hibernate", "activerecord",
+        "transaction", "acid", "isolation", "commit", "rollback", "deadlock",
+        "index", "primary key", "foreign key", "join", "aggregate", "group by",
+        "normalization", "denormalization", "sharding", "replication", "partition",
+        "crud", "migration", "seed", "backup", "restore", "view", "stored procedure",
+        "trigger", "constraint", "bigquery", "snowflake", "redshift", "data warehouse",
+        "etl", "elt", "data lake", "data pipeline", "cdc", "change data capture"
+      ],
+      "min_domain_matches": 1,
+      "tier_whitelist": ["implementation", "architecture"],
+      "book_blacklist_patterns": [],
+      "book_whitelist_patterns": [
+        "Database*",
+        "SQL*",
+        "PostgreSQL*",
+        "MongoDB*",
+        "Redis*",
+        "Designing Data-Intensive*"
+      ],
+      "score_adjustments": {
+        "in_whitelist_book": 0.25,
+        "in_blacklist_book": 0.0,
+        "in_whitelist_tier": 0.15,
+        "domain_keyword_present": 0.08,
+        "primary_only_no_domain": -0.15
+      }
+    },
+    "testing_quality": {
+      "description": "Testing, QA, code quality, test automation",
+      "primary_keywords": ["test", "testing", "assert", "mock", "coverage"],
+      "domain_keywords": [
+        "unit test", "integration test", "end-to-end", "e2e", "acceptance test",
+        "pytest", "unittest", "jest", "mocha", "junit", "xunit", "rspec",
+        "mock", "stub", "spy", "fake", "fixture", "parameterize", "conftest",
+        "tdd", "bdd", "test-driven", "behavior-driven", "given-when-then",
+        "coverage", "code coverage", "branch coverage", "mutation testing",
+        "selenium", "playwright", "cypress", "puppeteer", "webdriver",
+        "load testing", "performance testing", "stress testing", "chaos engineering",
+        "regression", "smoke test", "sanity test", "test pyramid", "test double",
+        "property-based testing", "hypothesis", "fuzzing", "snapshot testing",
+        "continuous testing", "shift-left", "quality gate", "sonarqube", "linting"
+      ],
+      "min_domain_matches": 1,
+      "tier_whitelist": ["practices", "implementation"],
+      "book_blacklist_patterns": [],
+      "book_whitelist_patterns": [
+        "Test*",
+        "TDD*",
+        "Unit Testing*",
+        "Testing*",
+        "Working Effectively with Legacy Code*"
+      ],
+      "score_adjustments": {
+        "in_whitelist_book": 0.25,
+        "in_blacklist_book": 0.0,
+        "in_whitelist_tier": 0.2,
+        "domain_keyword_present": 0.1,
+        "primary_only_no_domain": -0.2
+      }
+    },
+    "devops_cicd": {
+      "description": "DevOps, CI/CD, infrastructure as code, deployment",
+      "primary_keywords": ["deploy", "pipeline", "ci", "cd", "automation"],
+      "domain_keywords": [
+        "jenkins", "github actions", "gitlab ci", "circleci", "travis",
+        "terraform", "ansible", "puppet", "chef", "pulumi", "cloudformation",
+        "helm", "argocd", "flux", "gitops", "infrastructure as code", "iac",
+        "build", "artifact", "release", "rollback", "blue-green", "canary",
+        "feature flag", "a/b testing", "continuous integration", "continuous deployment",
+        "continuous delivery", "environment", "staging", "production",
+        "monitoring", "logging", "alerting", "prometheus", "grafana", "datadog",
+        "observability", "tracing", "jaeger", "zipkin", "opentelemetry",
+        "sre", "site reliability", "incident", "postmortem", "runbook", "on-call",
+        "container registry", "ecr", "gcr", "acr", "docker hub", "artifactory"
+      ],
+      "min_domain_matches": 1,
+      "tier_whitelist": ["practices", "architecture"],
+      "book_blacklist_patterns": [],
+      "book_whitelist_patterns": [
+        "DevOps*",
+        "Continuous*",
+        "Site Reliability*",
+        "Terraform*",
+        "Kubernetes*",
+        "Docker*"
+      ],
+      "score_adjustments": {
+        "in_whitelist_book": 0.25,
+        "in_blacklist_book": 0.0,
+        "in_whitelist_tier": 0.2,
+        "domain_keyword_present": 0.08,
+        "primary_only_no_domain": -0.15
+      }
+    },
+    "security": {
+      "description": "Application security, authentication, authorization, cryptography",
+      "primary_keywords": ["security", "auth", "encrypt", "permission", "access"],
+      "domain_keywords": [
+        "authentication", "authorization", "oauth", "oauth2", "oidc", "saml",
+        "jwt", "token", "bearer", "api key", "secret", "credential",
+        "password", "hash", "bcrypt", "argon2", "salt", "pepper",
+        "encryption", "decryption", "aes", "rsa", "tls", "ssl", "https",
+        "certificate", "pki", "signing", "hmac", "digest", "checksum",
+        "rbac", "abac", "acl", "role", "permission", "privilege", "scope",
+        "xss", "csrf", "sql injection", "injection", "owasp", "cve", "vulnerability",
+        "penetration testing", "pentest", "security audit", "compliance",
+        "zero trust", "least privilege", "defense in depth", "threat model",
+        "firewall", "waf", "ids", "ips", "siem", "soar", "vault", "secrets manager"
+      ],
+      "min_domain_matches": 1,
+      "tier_whitelist": ["practices", "architecture"],
+      "book_blacklist_patterns": [],
+      "book_whitelist_patterns": [
+        "Security*",
+        "Secure*",
+        "OWASP*",
+        "Cryptography*",
+        "Hacking*"
+      ],
+      "score_adjustments": {
+        "in_whitelist_book": 0.3,
+        "in_blacklist_book": 0.0,
+        "in_whitelist_tier": 0.2,
+        "domain_keyword_present": 0.1,
+        "primary_only_no_domain": -0.2
+      }
+    },
+    "data_science_ml": {
+      "description": "Data science, machine learning, statistics, analytics",
+      "primary_keywords": ["model", "train", "predict", "feature", "dataset"],
+      "domain_keywords": [
+        "machine learning", "deep learning", "neural network", "cnn", "rnn", "lstm",
+        "regression", "classification", "clustering", "supervised", "unsupervised",
+        "gradient descent", "backpropagation", "loss function", "optimizer",
+        "overfitting", "underfitting", "regularization", "dropout", "batch normalization",
+        "cross-validation", "hyperparameter", "grid search", "random search",
+        "precision", "recall", "f1 score", "accuracy", "auc", "roc", "confusion matrix",
+        "pandas", "numpy", "scipy", "matplotlib", "seaborn", "plotly",
+        "scikit-learn", "xgboost", "lightgbm", "catboost", "keras",
+        "feature engineering", "feature selection", "dimensionality reduction",
+        "pca", "tsne", "umap", "normalization", "standardization", "encoding",
+        "time series", "forecasting", "anomaly detection", "recommendation",
+        "nlp", "computer vision", "image classification", "object detection",
+        "jupyter", "notebook", "colab", "kaggle", "mlflow", "wandb"
+      ],
+      "min_domain_matches": 1,
+      "tier_whitelist": ["implementation", "practices"],
+      "book_blacklist_patterns": [],
+      "book_whitelist_patterns": [
+        "Machine Learning*",
+        "Deep Learning*",
+        "Data Science*",
+        "Hands-On*",
+        "Python Machine Learning*",
+        "Practical Statistics*"
+      ],
+      "score_adjustments": {
+        "in_whitelist_book": 0.25,
+        "in_blacklist_book": 0.0,
+        "in_whitelist_tier": 0.15,
+        "domain_keyword_present": 0.08,
+        "primary_only_no_domain": -0.15
+      }
+    },
+    "cloud_infrastructure": {
+      "description": "Cloud platforms, serverless, infrastructure services",
+      "primary_keywords": ["cloud", "aws", "azure", "gcp", "serverless"],
+      "domain_keywords": [
+        "ec2", "s3", "lambda", "dynamodb", "rds", "sqs", "sns", "kinesis",
+        "iam", "vpc", "subnet", "security group", "cloudwatch", "cloudtrail",
+        "ecs", "eks", "fargate", "elastic beanstalk", "cloudformation", "cdk",
+        "azure functions", "blob storage", "cosmos db", "app service", "aks",
+        "cloud functions", "cloud run", "bigquery", "cloud storage", "gke",
+        "compute engine", "cloud sql", "pub/sub", "dataflow", "vertex ai",
+        "serverless", "function as a service", "faas", "paas", "iaas", "saas",
+        "auto scaling", "load balancing", "cdn", "cloudfront", "route53",
+        "multi-region", "availability zone", "disaster recovery", "backup",
+        "cost optimization", "reserved instances", "spot instances", "savings plan"
+      ],
+      "min_domain_matches": 1,
+      "tier_whitelist": ["architecture", "implementation"],
+      "book_blacklist_patterns": [],
+      "book_whitelist_patterns": [
+        "AWS*",
+        "Azure*",
+        "Google Cloud*",
+        "Cloud*",
+        "Serverless*"
+      ],
+      "score_adjustments": {
+        "in_whitelist_book": 0.25,
+        "in_blacklist_book": 0.0,
+        "in_whitelist_tier": 0.2,
+        "domain_keyword_present": 0.08,
+        "primary_only_no_domain": -0.15
+      }
+    },
+    "concurrency_parallelism": {
+      "description": "Concurrent programming, parallelism, async patterns",
+      "primary_keywords": ["thread", "async", "concurrent", "parallel", "lock"],
+      "domain_keywords": [
+        "threading", "multiprocessing", "multithreading", "process", "fork",
+        "async", "await", "coroutine", "asyncio", "event loop", "callback",
+        "future", "promise", "task", "executor", "thread pool", "worker",
+        "mutex", "semaphore", "lock", "rwlock", "spinlock", "condition variable",
+        "race condition", "deadlock", "livelock", "starvation", "thread safety",
+        "atomic", "cas", "compare and swap", "volatile", "memory barrier",
+        "actor", "channel", "csp", "message passing", "shared memory",
+        "parallel", "gpu", "cuda", "opencl", "simd", "vectorization",
+        "distributed computing", "mapreduce", "spark", "dask", "ray"
+      ],
+      "min_domain_matches": 1,
+      "tier_whitelist": ["implementation", "architecture"],
+      "book_blacklist_patterns": [],
+      "book_whitelist_patterns": [
+        "Concurrency*",
+        "Parallel*",
+        "Async*",
+        "Multithreaded*",
+        "C++ Concurrency*"
+      ],
+      "score_adjustments": {
+        "in_whitelist_book": 0.25,
+        "in_blacklist_book": 0.0,
+        "in_whitelist_tier": 0.15,
+        "domain_keyword_present": 0.08,
+        "primary_only_no_domain": -0.15
+      }
+    },
+    "web_development": {
+      "description": "Web development, frontend, backend, HTTP, APIs",
+      "primary_keywords": ["http", "web", "api", "frontend", "backend"],
+      "domain_keywords": [
+        "html", "css", "javascript", "typescript", "react", "vue", "angular",
+        "svelte", "next.js", "nuxt", "gatsby", "remix", "astro",
+        "node", "express", "fastify", "nestjs", "koa", "hapi",
+        "request", "response", "header", "cookie", "session", "cache",
+        "cors", "csrf", "xss", "csp", "content security policy",
+        "rest", "graphql", "websocket", "sse", "http2", "http3",
+        "endpoint", "route", "middleware", "controller", "handler",
+        "spa", "ssr", "ssg", "isr", "hydration", "client-side", "server-side",
+        "responsive", "mobile-first", "pwa", "service worker", "manifest",
+        "bundler", "webpack", "vite", "rollup", "esbuild", "parcel",
+        "npm", "yarn", "pnpm", "package manager", "monorepo", "turborepo"
+      ],
+      "min_domain_matches": 1,
+      "tier_whitelist": ["implementation", "practices"],
+      "book_blacklist_patterns": [],
+      "book_whitelist_patterns": [
+        "Web*",
+        "JavaScript*",
+        "React*",
+        "Node*",
+        "Full Stack*",
+        "Frontend*"
+      ],
+      "score_adjustments": {
+        "in_whitelist_book": 0.25,
+        "in_blacklist_book": 0.0,
+        "in_whitelist_tier": 0.15,
+        "domain_keyword_present": 0.08,
+        "primary_only_no_domain": -0.15
+      }
+    },
+    "cpp_systems": {
+      "description": "C++, systems programming, low-level development",
+      "primary_keywords": ["c++", "cpp", "pointer", "memory", "template"],
+      "domain_keywords": [
+        "stl", "std", "vector", "map", "set", "list", "deque", "array",
+        "smart pointer", "shared_ptr", "unique_ptr", "weak_ptr", "auto_ptr",
+        "raii", "resource acquisition", "move semantics", "rvalue", "lvalue",
+        "constexpr", "noexcept", "override", "final", "virtual", "vtable",
+        "template", "metaprogramming", "sfinae", "concepts", "requires",
+        "namespace", "header", "include", "preprocessor", "macro",
+        "memory management", "heap", "stack", "allocation", "deallocation",
+        "new", "delete", "malloc", "free", "placement new",
+        "exception", "throw", "catch", "try", "exception safety",
+        "compile", "link", "object file", "static library", "dynamic library",
+        "cmake", "make", "ninja", "bazel", "conan", "vcpkg",
+        "gdb", "lldb", "valgrind", "asan", "ubsan", "tsan"
+      ],
+      "min_domain_matches": 1,
+      "tier_whitelist": ["implementation"],
+      "book_blacklist_patterns": [],
+      "book_whitelist_patterns": [
+        "C++*",
+        "Effective C++*",
+        "Modern C++*",
+        "C++ Templates*",
+        "The C++ Programming*"
+      ],
+      "score_adjustments": {
+        "in_whitelist_book": 0.3,
+        "in_blacklist_book": 0.0,
+        "in_whitelist_tier": 0.15,
         "domain_keyword_present": 0.08,
         "primary_only_no_domain": -0.1
       }

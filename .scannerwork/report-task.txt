@@ -1,7 +1,7 @@
 organization=kevin-toles
 projectKey=semantic-search-service
 serverUrl=https://sonarcloud.io
-serverVersion=8.0.0.77094
+serverVersion=8.0.0.78018
 dashboardUrl=https://sonarcloud.io/dashboard?id=semantic-search-service
-ceTaskId=AZr8OPRt6y5_2ernSaab
-ceTaskUrl=https://sonarcloud.io/api/ce/task?id=AZr8OPRt6y5_2ernSaab
+ceTaskId=AZtj7LkTt5Ih-HzEtIlp
+ceTaskUrl=https://sonarcloud.io/api/ce/task?id=AZtj7LkTt5Ih-HzEtIlp

@@ -1,51 +1,50 @@
 
-) "Return fake traversal results."str
 
-0intself
-‘ ‘(start_node_id
-’ ’("relationship_types
-“ “(3	max_depth
-” ”(limit
-• •(	tuple"­*
+
+0int
+%"Return fake query results."strself
+ž ž(cypher
+Ÿ Ÿ(
+parameters
+   (0timeout
+¡ ¡(	tuple"€*
 (
 
-™ ™(	"#unknown-value#Btuple(
+¥ ¥(	"#unknown-value#Btuple(
 &
 
-™ ™(		"
-#is-exact#:Bbool
+¥ ¥(	"
+#is-exact#:Bbool
 
 
-™ ™(	
-"
-#assume#:	:
+¥ ¥(		"
+#assume#::
 8
 
-™ ™(	"#set-field# __collection_size:Bint(
+¥ ¥(	"#set-field# __collection_size:
+Bint(
 &
 
-™ ™(	"#array-add-last#:(
+¥ ¥(	"#array-add-last#:(
 &
 
-™ ™(	"#array-add-last#:(
+¥ ¥(	"#array-add-last#:(
 &
 
-™ ™(	"#array-add-last#:(
-&
-
-™ ™(	"#array-add-last#:%
+¥ ¥(	"#array-add-last#:%
 #
 
-™ ™(A_"#id#:Btuple=
+¥ ¥()_"#id#:Btuple=
 ;
 
-š š("
-asyncio.taskssleep:Btyping.Coroutine#
+¦ ¦("
+asyncio.taskssleep:
+Btyping.Coroutine#
 !
 
-š š("#unknown-value#3
-1
+¦ ¦("#unknown-value#0
+.
 
-› ›($"#get-field# _traverse_result:
+§ §(!"#get-field# _query_result:
 
-› ›($*E/Users/kevintoles/POC/semantic-search-service/src/api/dependencies.py
+§ §(!*E/Users/kevintoles/POC/semantic-search-service/src/api/dependencies.py

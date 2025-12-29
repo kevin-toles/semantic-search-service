@@ -1,5 +1,5 @@
 
-1.0PythonFrontend"1765168172614*py2.Bœ
+1.0PythonFrontend"1766907998201*py2.Bœ
 
 imports1
 
@@ -40,18 +40,18 @@ j
 dtests.unit.test_taxonomy_loader.TestTaxonomyDomainObjects.test_chapter_dataclass_has_required_fields28
 8
 2tests.unit.test_taxonomy_loader.TestTaxonomyLoader30
-^
-Xtests.unit.test_taxonomy_loader.TestTaxonomyLoader.test_load_taxonomy_creates_book_nodes32
+a
+[tests.unit.test_taxonomy_loader.TestTaxonomyLoader.test_load_taxonomy_creates_concept_nodes32
 
 src.core.config.Settings34
+a
+[tests.unit.test_taxonomy_loader.TestTaxonomyLoader.test_load_taxonomy_creates_taxonomy_node36
 t
-ntests.unit.test_taxonomy_loader.TestTaxonomyLoader.test_load_taxonomy_creates_chapter_nodes_with_relationships36
+ntests.unit.test_taxonomy_loader.TestTaxonomyLoader.test_load_taxonomy_creates_chapter_nodes_with_relationships38
 ^
-Xtests.unit.test_taxonomy_loader.TestTaxonomyLoader.test_load_taxonomy_links_book_to_tier38
-a
-[tests.unit.test_taxonomy_loader.TestTaxonomyLoader.test_load_taxonomy_creates_taxonomy_node40
-a
-[tests.unit.test_taxonomy_loader.TestTaxonomyLoader.test_load_taxonomy_creates_concept_nodes42
+Xtests.unit.test_taxonomy_loader.TestTaxonomyLoader.test_load_taxonomy_links_book_to_tier40
+^
+Xtests.unit.test_taxonomy_loader.TestTaxonomyLoader.test_load_taxonomy_creates_book_nodes42
 8
 2tests.unit.test_taxonomy_loader.TestTaxonomyParser44
 V
@@ -60,10 +60,10 @@ Ptests.unit.test_taxonomy_loader.TestTaxonomyParser.test_parse_taxonomy_from_fil
 pathlib.Path48
 U
 Otests.unit.test_taxonomy_loader.TestTaxonomyParser.test_parse_chapter_from_json50
-R
-Ltests.unit.test_taxonomy_loader.TestTaxonomyParser.test_parse_book_from_json52
 V
-Ptests.unit.test_taxonomy_loader.TestTaxonomyParser.test_parse_taxonomy_from_json54J
+Ptests.unit.test_taxonomy_loader.TestTaxonomyParser.test_parse_taxonomy_from_json52
+R
+Ltests.unit.test_taxonomy_loader.TestTaxonomyParser.test_parse_book_from_json54J
 
 8
 89jž
@@ -187,19 +187,19 @@ Ptests.unit.test_taxonomy_loader.TestTaxonomyParser.test_parse_taxonomy_from_jso
 8’	 ’(6
 
 33354*
-8Ž	 Ž(.
-
-37354*
-8¤	 ¤(D
-
-39354*
-8Ñ	 Ñ(.
+8»	 »(1
 
-41354*
+37354*
 8x	 x(1
 
+39354*
+8¤	 ¤(D
+
+41354*
+8Ñ	 Ñ(.
+
 43354*
-8»	 »(1
+8Ž	 Ž(.
 
 47494*
 8D	 D(&

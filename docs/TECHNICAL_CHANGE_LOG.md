@@ -18,6 +18,41 @@ This document tracks all implementation changes, their rationale, and git commit
 
 ---
 
+## 2025-12-27
+
+### CL-012: Legacy Infrastructure Removal
+
+| Field | Value |
+|-------|-------|
+| **Date/Time** | 2025-12-27 |
+| **WBS Item** | Infrastructure Cleanup |
+| **Change Type** | Removal |
+| **Summary** | Removed deprecated docker-compose.dev.yml and duplicate seeding scripts. Canonical infrastructure now lives in ai-platform-data. |
+| **Files Removed** | `docker-compose.dev.yml`, `scripts/seed_neo4j.py`, `scripts/seed_qdrant.py`, `scripts/init_neo4j_schema.cypher` |
+| **Rationale** | Per AI_CODING_PLATFORM_WBS.md, ai-platform-data owns canonical Neo4j + Qdrant definitions. Removes port conflicts and duplication. |
+| **Git Commit** | Pending |
+
+**Removed Resources:**
+- `docker-compose.dev.yml` - Duplicate Qdrant/Neo4j containers (conflicted with ai-platform-qdrant)
+- `scripts/seed_neo4j.py` - Duplicate of ai-platform-data/scripts/seed_neo4j.py
+- `scripts/seed_qdrant.py` - Duplicate of ai-platform-data/scripts/seed_qdrant.py
+- `scripts/init_neo4j_schema.cypher` - Duplicate of ai-platform-data/docker/neo4j/init-scripts/
+
+**Docker Cleanup:**
+- Removed containers: `semantic-search-qdrant`, `semantic-search-neo4j`
+- Removed volumes: `semantic_search_qdrant`, `semantic_search_neo4j`, `semantic_search_neo4j_logs`
+- Removed network: `semantic-search-service_default`
+
+**Canonical Locations:**
+| Resource | Canonical Location |
+|----------|-------------------|
+| Qdrant | ai-platform-data/docker/docker-compose.yml (`ai-platform-qdrant`) |
+| Neo4j | ai-platform-data/docker/docker-compose.yml (`ai-platform-neo4j`) |
+| Seeding scripts | ai-platform-data/scripts/ |
+| Schema init | ai-platform-data/docker/neo4j/init-scripts/ |
+
+---
+
 ## 2025-12-19
 
 ### CL-011: Gateway-First Communication Pattern Documentation
