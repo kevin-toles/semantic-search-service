@@ -210,6 +210,8 @@ class FakeEmbeddingService:
         """Return fake embedding."""
         await asyncio.sleep(0)  # Yield to event loop
         # Generate deterministic embedding based on text hash
+        # SECURITY: MD5 used only for test double determinism, not for security.
+        # Reviewed and marked SAFE in SonarCloud (S4790).
         import hashlib
 
         hash_value = int(hashlib.md5(text.encode()).hexdigest(), 16)  # noqa: S324

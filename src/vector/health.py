@@ -26,6 +26,9 @@ def get_qdrant_client(settings: Settings) -> QdrantClient:
     Raises:
         ConnectionError: If URL is invalid or connection cannot be established
     """
+    # SECURITY: Allows both http:// and https:// intentionally for local Docker
+    # networking (e.g., http://qdrant:6333). Production uses HTTPS via env config.
+    # Reviewed and marked SAFE in SonarCloud (S5332).
     if not settings.qdrant_url.startswith(("http://", "https://")):
         raise ConnectionError(f"Invalid Qdrant URL scheme: {settings.qdrant_url}")
 
