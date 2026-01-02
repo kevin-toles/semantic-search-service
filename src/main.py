@@ -235,11 +235,11 @@ class RealNeo4jClient:
 class RealEmbeddingService:
     """Wrapper around SentenceTransformer implementing EmbeddingServiceProtocol."""
 
-    def __init__(self, model_name: str = "all-mpnet-base-v2") -> None:
+    def __init__(self, model_name: str) -> None:
         """Initialize SentenceTransformer model.
         
         Args:
-            model_name: Name of the sentence-transformers model
+            model_name: Name of the sentence-transformers model (REQUIRED)
         """
         from sentence_transformers import SentenceTransformer
         
@@ -272,27 +272,30 @@ class RealEmbeddingService:
 def create_real_services(config: ServiceConfig | None = None) -> ServiceContainer:
     """Create ServiceContainer with real database clients.
     
-    Reads connection details from environment variables:
-    - QDRANT_URL: Qdrant server URL (default: http://localhost:6333)
-    - NEO4J_URI: Neo4j Bolt URI (default: bolt://localhost:7687)
-    - NEO4J_USER: Neo4j username (default: neo4j)
-    - NEO4J_PASSWORD: Neo4j password (default: devpassword)
-    - EMBEDDING_MODEL: SentenceTransformer model (default: all-mpnet-base-v2)
+    Reads connection details from environment variables (ALL REQUIRED):
+    - QDRANT_URL: Qdrant server URL
+    - NEO4J_URI: Neo4j Bolt URI
+    - NEO4J_USER: Neo4j username
+    - NEO4J_PASSWORD: Neo4j password
+    - EMBEDDING_MODEL: SentenceTransformer model name
     
     Args:
         config: Optional ServiceConfig override
         
     Returns:
         ServiceContainer with real clients initialized
+        
+    Raises:
+        ValueError: If required environment variables are not set
     """
     cfg = config or ServiceConfig()
     
-    # Get connection details from environment
-    qdrant_url = os.getenv("QDRANT_URL", "http://localhost:6333")
-    neo4j_uri = os.getenv("NEO4J_URI", "bolt://localhost:7687")
-    neo4j_user = os.getenv("NEO4J_USER", "neo4j")
-    neo4j_password = os.getenv("NEO4J_PASSWORD", "devpassword")
-    embedding_model = os.getenv("EMBEDDING_MODEL", "all-mpnet-base-v2")
+    # Get connection details from environment (required - no defaults)
+    qdrant_url = os.environ["QDRANT_URL"]
+    neo4j_uri = os.environ["NEO4J_URI"]
+    neo4j_user = os.environ["NEO4J_USER"]
+    neo4j_password = os.environ["NEO4J_PASSWORD"]
+    embedding_model = os.environ["EMBEDDING_MODEL"]
     
     logger.info("Creating real services...")
     logger.info("  Qdrant URL: %s", qdrant_url)

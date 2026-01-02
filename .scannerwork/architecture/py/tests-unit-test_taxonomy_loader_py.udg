@@ -1,5 +1,5 @@
 
-1.0PythonFrontend"1766907998201*py2.Bœ
+1.0PythonFrontend"1767067734072*py2.Bœ
 
 imports1
 
@@ -32,38 +32,38 @@
 src.graph.taxonomy_loader20
 ?
 9tests.unit.test_taxonomy_loader.TestTaxonomyDomainObjects22
-k
-etests.unit.test_taxonomy_loader.TestTaxonomyDomainObjects.test_taxonomy_dataclass_has_required_fields24
 g
-atests.unit.test_taxonomy_loader.TestTaxonomyDomainObjects.test_book_dataclass_has_required_fields26
+atests.unit.test_taxonomy_loader.TestTaxonomyDomainObjects.test_book_dataclass_has_required_fields24
+k
+etests.unit.test_taxonomy_loader.TestTaxonomyDomainObjects.test_taxonomy_dataclass_has_required_fields26
 j
 dtests.unit.test_taxonomy_loader.TestTaxonomyDomainObjects.test_chapter_dataclass_has_required_fields28
 8
 2tests.unit.test_taxonomy_loader.TestTaxonomyLoader30
-a
-[tests.unit.test_taxonomy_loader.TestTaxonomyLoader.test_load_taxonomy_creates_concept_nodes32
+t
+ntests.unit.test_taxonomy_loader.TestTaxonomyLoader.test_load_taxonomy_creates_chapter_nodes_with_relationships32
 
 src.core.config.Settings34
+^
+Xtests.unit.test_taxonomy_loader.TestTaxonomyLoader.test_load_taxonomy_links_book_to_tier36
 a
-[tests.unit.test_taxonomy_loader.TestTaxonomyLoader.test_load_taxonomy_creates_taxonomy_node36
-t
-ntests.unit.test_taxonomy_loader.TestTaxonomyLoader.test_load_taxonomy_creates_chapter_nodes_with_relationships38
+[tests.unit.test_taxonomy_loader.TestTaxonomyLoader.test_load_taxonomy_creates_taxonomy_node38
 ^
-Xtests.unit.test_taxonomy_loader.TestTaxonomyLoader.test_load_taxonomy_links_book_to_tier40
-^
-Xtests.unit.test_taxonomy_loader.TestTaxonomyLoader.test_load_taxonomy_creates_book_nodes42
+Xtests.unit.test_taxonomy_loader.TestTaxonomyLoader.test_load_taxonomy_creates_book_nodes40
+a
+[tests.unit.test_taxonomy_loader.TestTaxonomyLoader.test_load_taxonomy_creates_concept_nodes42
 8
 2tests.unit.test_taxonomy_loader.TestTaxonomyParser44
-V
-Ptests.unit.test_taxonomy_loader.TestTaxonomyParser.test_parse_taxonomy_from_file46
-
-pathlib.Path48
-U
-Otests.unit.test_taxonomy_loader.TestTaxonomyParser.test_parse_chapter_from_json50
-V
-Ptests.unit.test_taxonomy_loader.TestTaxonomyParser.test_parse_taxonomy_from_json52
 R
-Ltests.unit.test_taxonomy_loader.TestTaxonomyParser.test_parse_book_from_json54J
+Ltests.unit.test_taxonomy_loader.TestTaxonomyParser.test_parse_book_from_json46
+V
+Ptests.unit.test_taxonomy_loader.TestTaxonomyParser.test_parse_taxonomy_from_file48
+
+pathlib.Path50
+U
+Otests.unit.test_taxonomy_loader.TestTaxonomyParser.test_parse_chapter_from_json52
+V
+Ptests.unit.test_taxonomy_loader.TestTaxonomyParser.test_parse_taxonomy_from_json54J
 
 8
 89jž
@@ -125,12 +125,12 @@ Ltests.unit.test_taxonomy_loader.TestTaxonomyParser.test_parse_book_from_json5
 
 47
 47467 245
-
-49
-49486
 
-51
-51507 245
+49
+49487 245
+
+51
+51506
 
 53
 53527 245
@@ -187,19 +187,19 @@ Ltests.unit.test_taxonomy_loader.TestTaxonomyParser.test_parse_book_from_json5
 8’	 ’(6
 
 33354*
-8»	 »(1
-
-37354*
-8x	 x(1
-
-39354*
 8¤	 ¤(D
 
-41354*
+37354*
 8Ñ	 Ñ(.
+
+39354*
+8x	 x(1
+
+41354*
+8Ž	 Ž(.
 
 43354*
-8Ž	 Ž(.
+8»	 »(1
 
-47494*
+49514*
 8D	 D(&

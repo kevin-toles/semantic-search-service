@@ -1,5 +1,5 @@
 
-1.0PythonFrontend"1766908003226*py2.Bƒ
+1.0PythonFrontend"1767067740108*py2.Bƒ
 
 imports1
 
@@ -48,45 +48,45 @@ __future__12
 &src.graph.traversal.TraversalDirection34
 
 	enum.Enum36
+)
+#src.graph.traversal.TraversalResult38
 (
-"src.graph.traversal.GraphTraversal38
-5
-/src.graph.traversal.GraphTraversal.bfs_traverse40
-5
-/src.graph.traversal.GraphTraversal.dfs_traverse42
-;
-5src.graph.traversal.GraphTraversal._get_tier_for_node44
-1
-+src.graph.traversal.GraphTraversal.__init__46
-
-NoneType48
+"src.graph.traversal.GraphTraversal40
+>
+8src.graph.traversal.GraphTraversal.find_related_chapters42
+>
+8src.graph.traversal.GraphTraversal.get_relationship_type44
+*
+$src.graph.traversal.RelationshipType46
 	
-int50
+int48
+5
+/src.graph.traversal.GraphTraversal.bfs_traverse50
 @
 :src.graph.traversal.GraphTraversal.get_traversal_direction52
-B
-<src.graph.traversal.GraphTraversal.find_cross_reference_path54
-A
-;src.graph.traversal.GraphTraversal._infer_relationship_type56
-
-
-list58
->
-8src.graph.traversal.GraphTraversal.find_related_chapters60
-?
-9src.graph.traversal.GraphTraversal._sort_by_tier_priority62
+;
+5src.graph.traversal.GraphTraversal._get_tier_for_node54
+1
++src.graph.traversal.GraphTraversal.__init__56
+
+NoneType58
 7
-1src.graph.traversal.GraphTraversal._get_neighbors64
->
-8src.graph.traversal.GraphTraversal.get_relationship_type66
-*
-$src.graph.traversal.RelationshipType68
+1src.graph.traversal.GraphTraversal._get_neighbors60
+A
+;src.graph.traversal.GraphTraversal._infer_relationship_type62
+
+
+list64
+B
+<src.graph.traversal.GraphTraversal.find_cross_reference_path66
+?
+9src.graph.traversal.GraphTraversal._sort_by_tier_priority68
+5
+/src.graph.traversal.GraphTraversal.dfs_traverse70
 =
-7src.graph.traversal.GraphTraversal._calculate_relevance70
+7src.graph.traversal.GraphTraversal._calculate_relevance72
 
-float72
-)
-#src.graph.traversal.TraversalResult74J
+float74J
 
 8
 89jô
@@ -138,58 +138,58 @@ $src.graph.traversal.RelationshipType68
 39386 210
 
 41
-41407 239
+41406 210
 
 43
-43427 239
+43427 241
 
 45
-45447 239
+45447 241
 
 47
-47467 239
+47466 210
 
 49
 49486
-
-51
-51506
+
+51
+51507 241
 
 53
-53527 239
+53527 241
 
 55
-55547 239
+55547 241
 
 57
-57567 239
+57567 241
 
 59
 59586
 
 61
-61607 239
+61607 241
 
 63
-63627 239
-
-65
-65647 239
+63627 241
+
+65
+65646
 
 67
-67667 239
+67667 241
 
 69
-69686 210
+69687 241
 
 71
-71707 239
-
-73
-73726
+71707 241
 
-75
-75746 210rè
+73
+73727 241
+
+75
+75746rè
 
 10131*
 8 (#
@@ -218,98 +218,98 @@ $src.graph.traversal.RelationshipType68
 35372*
 8- -(
 
-41313*
-8Î Î(
-
-41334*
-8Î Î(
-
 43313*
-8… …(
+8ö ö($
 
 43334*
-8… …(
+8ö ö($
 
-45313*
-8¾ ¾(!
+43274*
+8ö ö($
 
-45334*
-8¾ ¾(!
+43274*
+8ö ö($
 
-47493*
-8Œ	 Œ(
+45473*
+8ž	 ž(
 
-47514*
-8Œ	 Œ(
+45494*
+8ž	 ž(
+
+45494*
+8ž	 ž(
+
+51313*
+8Î Î(
+
+51334*
+8Î Î(
 
 53353*
 8µ	 µ( 
 
-53514*
+53494*
 8µ	 µ( 
 
-53514*
+53494*
 8µ	 µ( 
 
 55313*
-8À À((
+8¾ ¾(!
 
 55334*
-8À À((
+8¾ ¾(!
 
-55334*
-8À À((
+57593*
+8Œ	 Œ(
 
-55274*
-8À À((
-
-57333*
-8õ	 õ(!
-
-57594*
-8õ	 õ(!
+57494*
+8Œ	 Œ(
 
 61313*
-8ö ö($
+8§ §(
 
 61334*
-8ö ö($
-
-61274*
-8ö ö($
-
-61274*
-8ö ö($
-
-63313*
-8× ×(%
-
-63594*
-8× ×(%
-
-65313*
 8§ §(
 
-65334*
-8§ §(
+63333*
+8õ	 õ(!
 
-67693*
-8ž	 ž(
+63654*
+8õ	 õ(!
 
-67514*
-8ž	 ž(
+67313*
+8À À((
 
-67514*
-8ž	 ž(
+67334*
+8À À((
 
-71733*
-8‰	 ‰(
+67334*
+8À À((
 
-71514*
-8‰	 ‰(
+67274*
+8À À((
+
+69313*
+8× ×(%
+
+69654*
+8× ×(%
+
+71313*
+8… …(
 
 71334*
+8… …(
+
+73753*
+8‰	 ‰(
+
+73494*
+8‰	 ‰(
+
+73334*
 8‰	 ‰(
 
-69372*
+47372*
 8 (

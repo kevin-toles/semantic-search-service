@@ -1,5 +1,5 @@
 
-1.0PythonFrontend"1766908004474*py2.Bª
+1.0PythonFrontend"1767067740519*py2.Bª
 
 imports1
 
@@ -35,46 +35,46 @@ __future__12
 4src.graph.schema.generate_create_relationship_cypher22
 $
 src.graph.schema.SchemaManager24
-4
-.src.graph.schema.SchemaManager.validate_schema26
+<
+6src.graph.schema.SchemaManager.create_book_constraints26
 
 typing.Coroutine28
-;
-5src.graph.schema.SchemaManager.create_all_constraints30
-7
-1src.graph.schema.SchemaManager.create_all_indexes32
-?
-9src.graph.schema.SchemaManager.create_chapter_constraints34
-=
-7src.graph.schema.SchemaManager.get_existing_constraints36
-@
-:src.graph.schema.SchemaManager.create_taxonomy_constraints38
-8
-2src.graph.schema.SchemaManager.create_book_indexes40
--
-'src.graph.schema.SchemaManager.__init__42
-
-NoneType44
-1
-+src.graph.schema.SchemaManager.reset_schema46
-?
-9src.graph.schema.SchemaManager.create_concept_constraints48
-;
-5src.graph.schema.SchemaManager.create_concept_indexes50
-<
-6src.graph.schema.SchemaManager.create_tier_constraints52
 0
-*src.graph.schema.SchemaManager.init_schema54
+*src.graph.schema.SchemaManager.init_schema30
+?
+9src.graph.schema.SchemaManager.create_concept_constraints32
 9
-3src.graph.schema.SchemaManager.drop_all_constraints56
+3src.graph.schema.SchemaManager.drop_all_constraints34
+-
+'src.graph.schema.SchemaManager.__init__36
+
+NoneType38
+;
+5src.graph.schema.SchemaManager.create_concept_indexes40
+;
+5src.graph.schema.SchemaManager.create_all_constraints42
+?
+9src.graph.schema.SchemaManager.create_chapter_constraints44
+<
+6src.graph.schema.SchemaManager.create_tier_constraints46
+1
++src.graph.schema.SchemaManager.reset_schema48
+=
+7src.graph.schema.SchemaManager.get_existing_constraints50
+7
+1src.graph.schema.SchemaManager.create_all_indexes52
+8
+2src.graph.schema.SchemaManager.create_book_indexes54
+;
+5src.graph.schema.SchemaManager.create_chapter_indexes56
 9
 3src.graph.schema.SchemaManager.get_existing_indexes58
 5
 /src.graph.schema.SchemaManager.drop_all_indexes60
-;
-5src.graph.schema.SchemaManager.create_chapter_indexes62
-<
-6src.graph.schema.SchemaManager.create_book_constraints64
+4
+.src.graph.schema.SchemaManager.validate_schema62
+@
+:src.graph.schema.SchemaManager.create_taxonomy_constraints64
 !
 src.graph.schema.NodeLabels66
 1
@@ -127,18 +127,18 @@ $
 
 37
 37367 225
-
-39
-39387 225
+
+39
+39386
 
 41
 41407 225
 
 43
 43427 225
-
-45
-45446
+
+45
+45447 225
 
 47
 47467 225
@@ -213,46 +213,46 @@ $
 8{ {((
 
 27293*
-8¢ ¢(
+8Ç Ç(&
 
 31293*
-8ç ç(%
-
-33293*
-8‹ ‹(!
-
-35293*
-8Ï Ï()
-
-37293*
-8¾ ¾('
-
-39293*
-8ß ß(*
-
-41293*
-8ó ó("
-
-43453*
-8³	 ³(
-
-47293*
-8ð ð(
-
-49293*
-8× ×()
-
-51293*
-8ƒ ƒ(%
-
-53293*
-8¿ ¿(&
-
-55293*
 8• •(
 
-57293*
+33293*
+8× ×()
+
+35293*
 8Ô Ô(#
+
+37393*
+8³	 ³(
+
+41293*
+8ƒ ƒ(%
+
+43293*
+8ç ç(%
+
+45293*
+8Ï Ï()
+
+47293*
+8¿ ¿(&
+
+49293*
+8ð ð(
+
+51293*
+8¾ ¾('
+
+53293*
+8‹ ‹(!
+
+55293*
+8ó ó("
+
+57293*
+8û û(%
 
 59293*
 8Ç Ç(#
@@ -261,10 +261,10 @@ $
 8á á(
 
 63293*
-8û û(%
+8¢ ¢(
 
 65293*
-8Ç Ç(&
+8ß ß(*
 
 69193*
 8[ [(

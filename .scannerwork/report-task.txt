@@ -3,5 +3,5 @@ projectKey=semantic-search-service
 serverUrl=https://sonarcloud.io
 serverVersion=8.0.0.78018
 dashboardUrl=https://sonarcloud.io/dashboard?id=semantic-search-service
-ceTaskId=AZtj7LkTt5Ih-HzEtIlp
-ceTaskUrl=https://sonarcloud.io/api/ce/task?id=AZtj7LkTt5Ih-HzEtIlp
+ceTaskId=AZttcheHx0mWaziK8aPf
+ceTaskUrl=https://sonarcloud.io/api/ce/task?id=AZttcheHx0mWaziK8aPf

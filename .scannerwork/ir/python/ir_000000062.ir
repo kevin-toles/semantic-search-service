@@ -1,17 +1,43 @@
 
++""Return fake relationship scores."str
 
-0int
- "Return health status."strself
-´ ´("£=
+	0intself
+ª ª(node_ids
+« «(context
+¬ ¬(-	tuple"Ý*
+(
+
+° °(	"#unknown-value#Btuple(
+&
+
+° °(	"
+#is-exact#:Bbool
+
+
+° °(	"
+#assume#::
+8
+
+° °(	
+"#set-field# __collection_size:	Bint(
+&
+
+° °(	"#array-add-last#:(
+&
+
+° °(	"#array-add-last#:%
+#
+
+° °(_"#id#:Btuple=
 ;
 
-¶ ¶("
-asyncio.taskssleep:Btyping.Coroutine#
+± ±("
+asyncio.taskssleep:	Btyping.Coroutine#
 !
 
-¶ ¶("#unknown-value#+
-)
+± ±("#unknown-value#7
+5
 
-· ·("#get-field# _healthy:
+² ²(("" #get-field# _relationship_scores:
 
-· ·(*E/Users/kevintoles/POC/semantic-search-service/src/api/dependencies.py
+² ²((*E/Users/kevintoles/POC/semantic-search-service/src/api/dependencies.py

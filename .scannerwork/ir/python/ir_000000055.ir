@@ -1,12 +1,32 @@
 
 
-0int
- "Return health status."strselfx x("›;
+0int
+&"Return fake search results."strselfl l(
+collectionm m(vectorn n(limito o(kwargsp p("dict	tuple"Û(
+&
+t t(	"#unknown-value#Btuple&
+$
+t t(		"
+#is-exact#:Bbool
+
+t t(	
+"
+#assume#:	8
+6
+t t(	"#set-field# __collection_size:Bint&
+$
+t t(	"#array-add-last#:&
+$
+t t(	"#array-add-last#:&
+$
+t t(	"#array-add-last#:#
+!
+t t((_"#id#:Btuple;
 9
-z z("
-asyncio.taskssleep:Btyping.Coroutine!
+u u("
+asyncio.taskssleep:Btyping.Coroutine!
 
-z z("#unknown-value#)
-'
-{ {("#get-field# _healthy:
-{ {(*E/Users/kevintoles/POC/semantic-search-service/src/api/dependencies.py
+u u("#unknown-value#!
+
+v v($"#unknown-value#
+v v($*E/Users/kevintoles/POC/semantic-search-service/src/api/dependencies.py

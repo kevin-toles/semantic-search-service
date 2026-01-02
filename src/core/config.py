@@ -32,29 +32,25 @@ class Settings(BaseSettings):
     # ===========================================
     semantic_search_port: int = Field(default=8081, description="Service port")
     sbert_model: str = Field(
-        default="all-mpnet-base-v2",
-        description="Sentence-BERT model for embeddings",
+        description="Sentence-BERT model for embeddings - REQUIRED, set via SBERT_MODEL env var",
     )
 
     # ===========================================
-    # NEO4J CONFIGURATION
+    # NEO4J CONFIGURATION (all required via env vars)
     # ===========================================
     neo4j_url: str = Field(
-        default="bolt://localhost:7687",
-        description="Neo4j Bolt protocol URL",
+        description="Neo4j Bolt protocol URL - REQUIRED, set via NEO4J_URL env var",
     )
-    neo4j_user: str = Field(default="neo4j", description="Neo4j username")
+    neo4j_user: str = Field(description="Neo4j username - REQUIRED, set via NEO4J_USER env var")
     neo4j_password: str = Field(
-        default="devpassword",
-        description="Neo4j password",
+        description="Neo4j password - REQUIRED, set via NEO4J_PASSWORD env var",
     )
 
     # ===========================================
-    # QDRANT CONFIGURATION
+    # QDRANT CONFIGURATION (required via env vars)
     # ===========================================
     qdrant_url: str = Field(
-        default="http://localhost:6333",
-        description="Qdrant REST API URL",
+        description="Qdrant REST API URL - REQUIRED, set via QDRANT_URL env var",
     )
 
     # ===========================================

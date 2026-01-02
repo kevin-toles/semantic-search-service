@@ -70,6 +70,11 @@ class GraphClientProtocol(Protocol):
 class EmbeddingServiceProtocol(Protocol):
     """Protocol for embedding service."""
 
+    @property
+    def model_name(self) -> str:
+        """Get the embedding model name."""
+        ...
+
     async def embed(self, text: str) -> list[float]:
         """Generate embedding for text."""
         ...
@@ -202,9 +207,15 @@ class FakeGraphClient:
 class FakeEmbeddingService:
     """Fake embedding service for testing."""
 
-    def __init__(self, dimension: int = 768) -> None:
+    def __init__(self, dimension: int = 768, model_name: str = "fake-model") -> None:
         """Initialize with embedding dimension."""
         self._dimension = dimension
+        self._model_name = model_name
+
+    @property
+    def model_name(self) -> str:
+        """Get the model name."""
+        return self._model_name
 
     async def embed(self, text: str) -> list[float]:
         """Return fake embedding."""

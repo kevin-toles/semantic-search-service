@@ -1,5 +1,5 @@
 
-1.0PythonFrontend"1766908002263*py2.Bÿ
+1.0PythonFrontend"1767067738831*py2.Bÿ
 
 imports1
 
@@ -26,16 +26,16 @@ __future__12
 src.graph.exceptions.Neo4jError14
 
 	Exception16
-0
-*src.graph.exceptions.Neo4jTransactionError18
 *
-$src.graph.exceptions.Neo4jQueryError20
+$src.graph.exceptions.Neo4jQueryError18
 3
--src.graph.exceptions.Neo4jQueryError.__init__22
+-src.graph.exceptions.Neo4jQueryError.__init__20
 
-NoneType24
+NoneType22
 	
-str26
+str24
+0
+*src.graph.exceptions.Neo4jTransactionError26
 /
 )src.graph.exceptions.Neo4jConnectionError28
 8
@@ -61,16 +61,16 @@ $src.graph.exceptions.Neo4jQueryError20
 19186 210
 
 21
-21206 210
-
-23
-23227 221
+21207 219
+
+23
+23226
 
 25
 25246
-
-27
-27266
+
+27
+27266 210
 
 29
 29286 210
@@ -85,22 +85,22 @@ $src.graph.exceptions.Neo4jQueryError20
 8 (
 
 19152*
-8= =(
-
-21152*
 8$ $(
 
-23253*
+21233*
 8+	 +(
 
-23274*
+21254*
 8+	 +(
+
+27152*
+8= =(
 
 29152*
 8 (
 
-31253*
+31233*
 8	 (
 
-31274*
+31254*
 8	 (

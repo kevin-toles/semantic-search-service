@@ -1,5 +1,5 @@
 
-1.0PythonFrontend"1766908004113*py2.Bù
+1.0PythonFrontend"1767067740592*py2.Bù
 
 imports1
 
@@ -44,62 +44,62 @@ __future__12
 3tests.unit.test_graph.test_neo4j_client.mock_driver32
 J
 Dtests.unit.test_graph.test_neo4j_client.TestNeo4jClientErrorHandling34
-v
-ptests.unit.test_graph.test_neo4j_client.TestNeo4jClientErrorHandling.test_query_failure_raises_neo4j_query_error36
+€
+ztests.unit.test_graph.test_neo4j_client.TestNeo4jClientErrorHandling.test_connection_failure_raises_neo4j_connection_error36
 
 typing.Coroutine38
-€
-ztests.unit.test_graph.test_neo4j_client.TestNeo4jClientErrorHandling.test_connection_failure_raises_neo4j_connection_error40
+v
+ptests.unit.test_graph.test_neo4j_client.TestNeo4jClientErrorHandling.test_query_failure_raises_neo4j_query_error40
 K
 Etests.unit.test_graph.test_neo4j_client.TestNeo4jClientContextManager42
-u
-otests.unit.test_graph.test_neo4j_client.TestNeo4jClientContextManager.test_async_context_manager_closes_on_exit44
 x
-rtests.unit.test_graph.test_neo4j_client.TestNeo4jClientContextManager.test_async_context_manager_connects_on_enter46
+rtests.unit.test_graph.test_neo4j_client.TestNeo4jClientContextManager.test_async_context_manager_connects_on_enter44
+u
+otests.unit.test_graph.test_neo4j_client.TestNeo4jClientContextManager.test_async_context_manager_closes_on_exit46
 A
 ;tests.unit.test_graph.test_neo4j_client.TestFakeNeo4jClient48
-a
-[tests.unit.test_graph.test_neo4j_client.TestFakeNeo4jClient.test_fake_client_same_interface50
-
-NoneType52
 h
-btests.unit.test_graph.test_neo4j_client.TestFakeNeo4jClient.test_fake_client_async_context_manager54
+btests.unit.test_graph.test_neo4j_client.TestFakeNeo4jClient.test_fake_client_async_context_manager50
 _
-Ytests.unit.test_graph.test_neo4j_client.TestFakeNeo4jClient.test_fake_client_stores_nodes56
+Ytests.unit.test_graph.test_neo4j_client.TestFakeNeo4jClient.test_fake_client_stores_nodes52
+a
+[tests.unit.test_graph.test_neo4j_client.TestFakeNeo4jClient.test_fake_client_same_interface54
+
+NoneType56
 B
 <tests.unit.test_graph.test_neo4j_client.TestNeo4jClientTypes58
 j
 dtests.unit.test_graph.test_neo4j_client.TestNeo4jClientTypes.test_query_return_type_is_list_of_dicts60
 a
 [tests.unit.test_graph.test_neo4j_client.TestNeo4jClientTypes.test_execute_write_return_type62
-B
-<tests.unit.test_graph.test_neo4j_client.TestNeo4jClientWrite64
-d
-^tests.unit.test_graph.test_neo4j_client.TestNeo4jClientWrite.test_execute_write_in_transaction66
 G
-Atests.unit.test_graph.test_neo4j_client.TestNeo4jClientConnection68
-c
-]tests.unit.test_graph.test_neo4j_client.TestNeo4jClientConnection.test_connect_creates_driver70
+Atests.unit.test_graph.test_neo4j_client.TestNeo4jClientConnection64
 j
-dtests.unit.test_graph.test_neo4j_client.TestNeo4jClientConnection.test_connect_verifies_connectivity72
+dtests.unit.test_graph.test_neo4j_client.TestNeo4jClientConnection.test_connect_verifies_connectivity66
 d
-^tests.unit.test_graph.test_neo4j_client.TestNeo4jClientConnection.test_close_handles_no_driver74
+^tests.unit.test_graph.test_neo4j_client.TestNeo4jClientConnection.test_close_handles_no_driver68
 `
-Ztests.unit.test_graph.test_neo4j_client.TestNeo4jClientConnection.test_close_closes_driver76
+Ztests.unit.test_graph.test_neo4j_client.TestNeo4jClientConnection.test_close_closes_driver70
+c
+]tests.unit.test_graph.test_neo4j_client.TestNeo4jClientConnection.test_connect_creates_driver72
+B
+<tests.unit.test_graph.test_neo4j_client.TestNeo4jClientWrite74
+d
+^tests.unit.test_graph.test_neo4j_client.TestNeo4jClientWrite.test_execute_write_in_transaction76
 B
 <tests.unit.test_graph.test_neo4j_client.TestNeo4jClientQuery78
-g
-atests.unit.test_graph.test_neo4j_client.TestNeo4jClientQuery.test_query_raises_without_connection80
+`
+Ztests.unit.test_graph.test_neo4j_client.TestNeo4jClientQuery.test_query_accepts_parameters80
 ]
 Wtests.unit.test_graph.test_neo4j_client.TestNeo4jClientQuery.test_query_executes_cypher82
-`
-Ztests.unit.test_graph.test_neo4j_client.TestNeo4jClientQuery.test_query_accepts_parameters84
+g
+atests.unit.test_graph.test_neo4j_client.TestNeo4jClientQuery.test_query_raises_without_connection84
 K
 Etests.unit.test_graph.test_neo4j_client.TestNeo4jClientInitialization86
-h
-btests.unit.test_graph.test_neo4j_client.TestNeo4jClientInitialization.test_client_accepts_settings88
 r
-ltests.unit.test_graph.test_neo4j_client.TestNeo4jClientInitialization.test_client_lazy_driver_initialization90
+ltests.unit.test_graph.test_neo4j_client.TestNeo4jClientInitialization.test_client_lazy_driver_initialization88
+h
+btests.unit.test_graph.test_neo4j_client.TestNeo4jClientInitialization.test_client_accepts_settings90
 l
 ftests.unit.test_graph.test_neo4j_client.TestNeo4jClientInitialization.test_client_stores_configuration92J
 
@@ -169,15 +169,15 @@ ftests.unit.test_graph.test_neo4j_client.TestNeo4jClientInitialization.test_clie
 
 51
 51507 249
-
-53
-53526
+
+53
+53527 249
 
 55
 55547 249
-
-57
-57567 249
+
+57
+57566
 
 59
 59586 210
@@ -195,19 +195,19 @@ ftests.unit.test_graph.test_neo4j_client.TestNeo4jClientInitialization.test_clie
 67667 265
 
 69
-69686 210
+69687 265
 
 71
-71707 269
+71707 265
 
 73
-73727 269
+73727 265
 
 75
-75747 269
+75746 210
 
 77
-77767 269
+77767 275
 
 79
 79786 210
@@ -336,85 +336,85 @@ ftests.unit.test_graph.test_neo4j_client.TestNeo4jClientInitialization.test_clie
 8. .(
 
 37393*
-8 (:
+8õ õ(D
 
 37314*
-8 (:
+8õ õ(D
 
 41393*
-8õ õ(D
+8 (:
 
 41314*
-8õ õ(D
+8 (:
 
 45393*
-8É É(8
+8· ·(;
 
 45314*
-8É É(8
+8· ·(;
 
 47393*
-8· ·(;
+8É É(8
 
 47314*
-8· ·(;
+8É É(8
 
-51533*
-8º	 º((
-
-55393*
+51393*
 8è è(5
 
-57393*
+53393*
 8Ð Ð(,
 
-61533*
+55573*
+8º	 º((
+
+61573*
 8ù	 ù(0
 
 61314*
 8ù	 ù(0
 
-63533*
+63573*
 8…	 …('
 
 63314*
 8…	 …('
-
-67393*
-8Ã Ã(0
-
-67314*
-8Ã Ã(0
 
-71393*
-8g g(*
+67393*
+8| |(1
 
-71314*
-8g g(*
+67314*
+8| |(1
+
+69393*
+8£ £(+
+
+69314*
+8£ £(+
+
+71393*
+8 ('
+
+71314*
+8 ('
 
 73393*
-8| |(1
+8g g(*
 
 73314*
-8| |(1
-
-75393*
-8£ £(+
-
-75314*
-8£ £(+
+8g g(*
 
 77393*
-8 ('
+8Ã Ã(0
 
 77314*
-8 ('
+8Ã Ã(0
 
 81393*
-8­ ­(3
+8‰ ‰(,
 
 81314*
-8­ ­(3
+8‰ ‰(,
 
 83393*
 8æ æ()
@@ -423,24 +423,24 @@ ftests.unit.test_graph.test_neo4j_client.TestNeo4jClientInitialization.test_clie
 8æ æ()
 
 85393*
-8‰ ‰(,
+8­ ­(3
 
 85314*
-8‰ ‰(,
+8­ ­(3
 
-89533*
-8>	 >(%
+89573*
+8G	 G(/
 
 89314*
+8G	 G(/
+
+91573*
 8>	 >(%
 
-91533*
-8G	 G(/
-
 91314*
-8G	 G(/
+8>	 >(%
 
-93533*
+93573*
 8R	 R()
 
 93314*

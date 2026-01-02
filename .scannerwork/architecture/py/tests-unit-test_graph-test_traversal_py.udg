@@ -1,5 +1,5 @@
 
-1.0PythonFrontend"1766908002914*py2.BÈ 
+1.0PythonFrontend"1767067739994*py2.BÈ 
 
 imports1
 
@@ -36,22 +36,22 @@ d
 ^tests.unit.test_graph.test_traversal.TestRelationshipTypes.test_perpendicular_is_adjacent_tier24
 
 NoneType26
-_
-Ytests.unit.test_graph.test_traversal.TestRelationshipTypes.test_skip_tier_is_non_adjacent28
 [
-Utests.unit.test_graph.test_traversal.TestRelationshipTypes.test_parallel_is_same_tier30
+Utests.unit.test_graph.test_traversal.TestRelationshipTypes.test_parallel_is_same_tier28
 `
-Ztests.unit.test_graph.test_traversal.TestRelationshipTypes.test_relationship_types_defined32
+Ztests.unit.test_graph.test_traversal.TestRelationshipTypes.test_relationship_types_defined30
+_
+Ytests.unit.test_graph.test_traversal.TestRelationshipTypes.test_skip_tier_is_non_adjacent32
 H
 Btests.unit.test_graph.test_traversal.TestTierRelationshipDetection34
-g
-atests.unit.test_graph.test_traversal.TestTierRelationshipDetection.test_non_adjacent_tier_is_skip36
 l
-ftests.unit.test_graph.test_traversal.TestTierRelationshipDetection.test_adjacent_tier_is_perpendicular38
-k
-etests.unit.test_graph.test_traversal.TestTierRelationshipDetection.test_relationship_is_bidirectional40
+ftests.unit.test_graph.test_traversal.TestTierRelationshipDetection.test_adjacent_tier_is_perpendicular36
 c
-]tests.unit.test_graph.test_traversal.TestTierRelationshipDetection.test_same_tier_is_parallel42
+]tests.unit.test_graph.test_traversal.TestTierRelationshipDetection.test_same_tier_is_parallel38
+g
+atests.unit.test_graph.test_traversal.TestTierRelationshipDetection.test_non_adjacent_tier_is_skip40
+k
+etests.unit.test_graph.test_traversal.TestTierRelationshipDetection.test_relationship_is_bidirectional42
 <
 6tests.unit.test_graph.test_traversal.sample_graph_data44
 
@@ -59,66 +59,66 @@ c
 dict46
 ;
 5tests.unit.test_graph.test_traversal.TestBFSTraversal48
-W
-Qtests.unit.test_graph.test_traversal.TestBFSTraversal.test_bfs_respects_max_depth50
+e
+_tests.unit.test_graph.test_traversal.TestBFSTraversal.test_bfs_finds_parallel_connections_first50
 
 typing.Coroutine52
 
 unittest.mock.MagicMock54
+W
+Qtests.unit.test_graph.test_traversal.TestBFSTraversal.test_bfs_respects_max_depth56
 [
-Utests.unit.test_graph.test_traversal.TestBFSTraversal.test_bfs_returns_traversal_path56
-e
-_tests.unit.test_graph.test_traversal.TestBFSTraversal.test_bfs_finds_parallel_connections_first58
+Utests.unit.test_graph.test_traversal.TestBFSTraversal.test_bfs_returns_traversal_path58
 J
 Dtests.unit.test_graph.test_traversal.fake_neo4j_client_for_traversal60
-A
-;tests.unit.test_graph.test_traversal.TestSpiderWebTraversal62
-o
-itests.unit.test_graph.test_traversal.TestSpiderWebTraversal.test_related_chapters_include_relevance_score64
-d
-^tests.unit.test_graph.test_traversal.TestSpiderWebTraversal.test_traverse_all_related_chapters66
-g
-atests.unit.test_graph.test_traversal.TestSpiderWebTraversal.test_related_chapters_grouped_by_tier68
 ;
-5tests.unit.test_graph.test_traversal.TestDFSTraversal70
+5tests.unit.test_graph.test_traversal.TestDFSTraversal62
 W
-Qtests.unit.test_graph.test_traversal.TestDFSTraversal.test_dfs_respects_max_depth72
+Qtests.unit.test_graph.test_traversal.TestDFSTraversal.test_dfs_respects_max_depth64
 R
-Ltests.unit.test_graph.test_traversal.TestDFSTraversal.test_dfs_avoids_cycles74
+Ltests.unit.test_graph.test_traversal.TestDFSTraversal.test_dfs_avoids_cycles66
 X
-Rtests.unit.test_graph.test_traversal.TestDFSTraversal.test_dfs_explores_deep_paths76
+Rtests.unit.test_graph.test_traversal.TestDFSTraversal.test_dfs_explores_deep_paths68
+A
+;tests.unit.test_graph.test_traversal.TestSpiderWebTraversal70
+g
+atests.unit.test_graph.test_traversal.TestSpiderWebTraversal.test_related_chapters_grouped_by_tier72
+d
+^tests.unit.test_graph.test_traversal.TestSpiderWebTraversal.test_traverse_all_related_chapters74
+o
+itests.unit.test_graph.test_traversal.TestSpiderWebTraversal.test_related_chapters_include_relevance_score76
 >
 8tests.unit.test_graph.test_traversal.TestTraversalResult78
-d
-^tests.unit.test_graph.test_traversal.TestTraversalResult.test_traversal_result_optional_fields80
 h
-btests.unit.test_graph.test_traversal.TestTraversalResult.test_traversal_result_has_required_fields82
+btests.unit.test_graph.test_traversal.TestTraversalResult.test_traversal_result_has_required_fields80
+d
+^tests.unit.test_graph.test_traversal.TestTraversalResult.test_traversal_result_optional_fields82
 K
 Etests.unit.test_graph.test_traversal.TestGraphTraversalInitialization84
 l
 ftests.unit.test_graph.test_traversal.TestGraphTraversalInitialization.test_traversal_default_max_depth86
-k
-etests.unit.test_graph.test_traversal.TestGraphTraversalInitialization.test_traversal_stores_max_depth88
+o
+itests.unit.test_graph.test_traversal.TestGraphTraversalInitialization.test_traversal_accepts_neo4j_client88
 n
 htests.unit.test_graph.test_traversal.TestGraphTraversalInitialization.test_traversal_accepts_fake_client90
-o
-itests.unit.test_graph.test_traversal.TestGraphTraversalInitialization.test_traversal_accepts_neo4j_client92
+k
+etests.unit.test_graph.test_traversal.TestGraphTraversalInitialization.test_traversal_stores_max_depth92
 A
 ;tests.unit.test_graph.test_traversal.TestTraversalDirection94
 ^
 Xtests.unit.test_graph.test_traversal.TestTraversalDirection.test_direction_types_defined96
+c
+]tests.unit.test_graph.test_traversal.TestTraversalDirection.test_down_direction_toward_tier_n98
+c
+\tests.unit.test_graph.test_traversal.TestTraversalDirection.test_lateral_direction_same_tier100
 b
-\tests.unit.test_graph.test_traversal.TestTraversalDirection.test_lateral_direction_same_tier98
-b
-[tests.unit.test_graph.test_traversal.TestTraversalDirection.test_up_direction_toward_tier_1100
-d
-]tests.unit.test_graph.test_traversal.TestTraversalDirection.test_down_direction_toward_tier_n102
+[tests.unit.test_graph.test_traversal.TestTraversalDirection.test_up_direction_toward_tier_1102
 C
 <tests.unit.test_graph.test_traversal.TestCrossReferencePaths104
-d
-]tests.unit.test_graph.test_traversal.TestCrossReferencePaths.test_path_respects_tier_priority106
 c
-\tests.unit.test_graph.test_traversal.TestCrossReferencePaths.test_find_path_between_concepts108
+\tests.unit.test_graph.test_traversal.TestCrossReferencePaths.test_find_path_between_concepts106
+d
+]tests.unit.test_graph.test_traversal.TestCrossReferencePaths.test_path_respects_tier_priority108
 i
 btests.unit.test_graph.test_traversal.TestCrossReferencePaths.test_path_includes_relationship_types110J
 
@@ -385,46 +385,46 @@ btests.unit.test_graph.test_traversal.TestCrossReferencePaths.test_path_includes
 8»	 »(,
 
 29273*
-8Á	 Á('
-
-31273*
 8µ	 µ(#
 
-33273*
+31273*
 8­	 ­((
 
-37273*
-8º	 º('
+33273*
+8Á	 Á('
 
-39273*
+37273*
 8®	 ®(,
 
+39273*
+8¢	 ¢(#
+
 41273*
-8Æ	 Æ(+
+8º	 º('
 
 43273*
-8¢	 ¢(#
+8Æ	 Æ(+
 
 45473*
 8 (
 
 51533*
-8ï ï(*
+8Ý Ý(8
 
 51554*
-8ï ï(*
+8Ý Ý(8
 
 57533*
-8 (.
+8ï ï(*
 
 57554*
-8 (.
+8ï ï(*
 
 59533*
-8Ý Ý(8
+8 (.
 
 59554*
-8Ý Ý(8
+8 (.
 
 61553*
 8^ ^($
@@ -433,82 +433,82 @@ btests.unit.test_graph.test_traversal.TestCrossReferencePaths.test_path_includes
 8^ ^($
 
 65533*
-8º º(<
+8¬ ¬(*
 
 65554*
-8º º(<
+8¬ ¬(*
 
 67533*
-8– –(1
+8½ ½(%
 
 67554*
-8– –(1
+8½ ½(%
 
 69533*
-8¦ ¦(4
+8œ œ(+
 
 69554*
-8¦ ¦(4
+8œ œ(+
 
 73533*
-8¬ ¬(*
+8¦ ¦(4
 
 73554*
-8¬ ¬(*
+8¦ ¦(4
 
 75533*
-8½ ½(%
+8– –(1
 
 75554*
-8½ ½(%
+8– –(1
 
 77533*
-8œ œ(+
+8º º(<
 
 77554*
-8œ œ(+
+8º º(<
 
 81273*
-8ä	 ä(.
+8Ô	 Ô(2
 
 83273*
-8Ô	 Ô(2
+8ä	 ä(.
 
 87273*
 8	 ()
 
 89273*
-8‡	 ‡((
+8ó	 ó(,
 
 91273*
 8ý	 ý(+
 
 93273*
-8ó	 ó(,
+8‡	 ‡((
 
 97273*
 8Ð	 Ð(%
 
 99273*
-8ä	 ä()
-
-101273*
-8Ø	 Ø((
-
-103273*
 8Þ	 Þ(*
 
+101273*
+8ä	 ä()
+
+103273*
+8Ø	 Ø((
+
 107533*
-8û û(/
+8Ø Ø(.
 
 107554*
-8û û(/
+8Ø Ø(.
 
 109533*
-8Ø Ø(.
+8û û(/
 
 109554*
-8Ø Ø(.
+8û û(/
 
 111533*
 8é é(4

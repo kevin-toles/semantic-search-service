@@ -489,8 +489,8 @@ async def embed_text(
         # Determine dimensions from first embedding
         dimensions = len(embeddings[0]) if embeddings else 0
 
-        # Model name (use default if not specified)
-        model_name = request.model or services.config.embedding_model if hasattr(services.config, 'embedding_model') else "all-mpnet-base-v2"
+        # Model name from request or embedding service
+        model_name = request.model or getattr(services.embedding_service, 'model_name', 'unknown')
 
         latency_ms = (time.perf_counter() - start_time) * 1000
         logger.info(
