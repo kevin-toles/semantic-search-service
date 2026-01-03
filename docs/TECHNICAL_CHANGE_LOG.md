@@ -18,6 +18,115 @@ This document tracks all implementation changes, their rationale, and git commit
 
 ---
 
+## 2026-01-01
+
+### CL-016: Platform Consolidation - Real Backend Configuration (PCON-7)
+
+| Field | Value |
+|-------|-------|
+| **Date/Time** | 2026-01-01 |
+| **WBS Item** | PCON-7 (Platform Consolidation) |
+| **Change Type** | Feature, Configuration |
+| **Summary** | Configured semantic-search-service to use real Neo4j and Qdrant backends instead of FAKE implementations. Updated core config, API routes, and removed obsolete documentation. |
+| **Files Changed** | `src/core/config.py`, `src/api/routes/*.py`, `docker-compose.yml`, obsolete docs removed |
+| **Rationale** | Platform consolidation audit discovered service was running with fake backends for 3+ days. PCON-7 enables real database connectivity. |
+| **Git Commit** | `1cf282d` |
+
+**Configuration Changes:**
+
+| Setting | Before | After |
+|---------|--------|-------|
+| `NEO4J_URI` | fake | `bolt://ai-platform-neo4j:7687` |
+| `QDRANT_URL` | fake | `http://ai-platform-qdrant:6333` |
+| `SBERT_MODEL` | `all-mpnet-base-v2` | `all-MiniLM-L6-v2` (384 dimensions) |
+| `ENABLE_GRAPH_SEARCH` | false | true |
+| `ENABLE_HYBRID_SEARCH` | false | true |
+
+**Health Endpoint (After):**
+```json
+{
+  "status": "healthy",
+  "dependencies": {
+    "qdrant": "connected",
+    "neo4j": "connected",
+    "embedder": "all-MiniLM-L6-v2"
+  }
+}
+```
+
+**Cross-Reference:** See PLATFORM_CONSOLIDATION_WBS.md PCON-7 for full context.
+
+---
+
+## 2025-12-31
+
+### CL-015: Tiered Network Architecture Docker Compose
+
+| Field | Value |
+|-------|-------|
+| **Date/Time** | 2025-12-31 |
+| **WBS Item** | Infrastructure |
+| **Change Type** | Feature |
+| **Summary** | Created docker-compose.yml for tiered network architecture. Service connects to ai-platform-network for canonical database access. |
+| **Files Changed** | `docker-compose.yml` |
+| **Rationale** | Enable semantic-search-service to connect to canonical ai-platform-neo4j and ai-platform-qdrant containers |
+| **Git Commit** | `ff6819f` |
+
+**Network Configuration:**
+```yaml
+networks:
+  ai-platform-network:
+    external: true
+```
+
+---
+
+### CL-014: SonarCloud .scannerwork Ignore
+
+| Field | Value |
+|-------|-------|
+| **Date/Time** | 2025-12-31 |
+| **WBS Item** | Tooling |
+| **Change Type** | Chore |
+| **Summary** | Added .scannerwork/ directory to .gitignore to exclude SonarCloud scanner artifacts |
+| **Files Changed** | `.gitignore` |
+| **Rationale** | Prevent accidental commit of scanner artifacts |
+| **Git Commit** | `bbc4180` |
+
+---
+
+## 2025-12-29
+
+### CL-013: SonarCloud Security Hotspot SAFE Comments
+
+| Field | Value |
+|-------|-------|
+| **Date/Time** | 2025-12-29 |
+| **WBS Item** | Security |
+| **Change Type** | Security |
+| **Summary** | Added SAFE comments to acknowledge reviewed SonarCloud security hotspots that are intentional or mitigated. |
+| **Files Changed** | Multiple source files |
+| **Rationale** | SonarCloud flagged potential security issues that were reviewed and determined to be safe in context |
+| **Git Commit** | `40cb549` |
+
+---
+
+## 2025-12-28
+
+### CL-012.1: Domain Taxonomy Update and File Cleanup
+
+| Field | Value |
+|-------|-------|
+| **Date/Time** | 2025-12-28 |
+| **WBS Item** | Data Management |
+| **Change Type** | Chore |
+| **Summary** | Updated domain_taxonomy.json configuration and cleaned up unused files |
+| **Files Changed** | `config/domain_taxonomy.json`, various unused files removed |
+| **Rationale** | Maintain clean codebase and up-to-date configuration |
+| **Git Commit** | `db257a9` |
+
+---
+
 ## 2025-12-27
 
 ### CL-012: Legacy Infrastructure Removal

@@ -39,7 +39,7 @@ services:
       timeout: 10s
       retries: 3
       start_period: 10s
-    restart: unless-stopped
+    restart: "no"  # Manual control via Platform Control Panel
     networks:
       - ai-platform-network
       - data-network
