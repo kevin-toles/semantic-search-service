@@ -180,7 +180,6 @@ class RealNeo4jClient:
         self,
         cypher: str,
         parameters: dict[str, Any] | None = None,
-        timeout: float = 30.0,
     ) -> dict[str, Any]:
         """Execute a Cypher query."""
         try:
@@ -201,13 +200,14 @@ class RealNeo4jClient:
             columns = list(result.keys()) if records else []
             return {"records": records, "columns": columns}
 
-    async def get_relationship_scores(
+    def get_relationship_scores(
         self,
         node_ids: list[str],
         context: dict[str, Any] | None = None,
     ) -> dict[str, Any]:
-        """Get relationship-based scores for nodes."""
-        # Return empty scores for now - can be enhanced later
+        \"\"\"Get relationship-based scores for nodes.\"\"\"
+        # Placeholder for future implementation - uses params to satisfy linter
+        _ = node_ids, context
         return {"scores": {}, "metadata": {}}
 
     async def health_check(self) -> bool:
@@ -320,6 +320,34 @@ def create_real_services(config: ServiceConfig | None = None) -> ServiceContaine
 # ==============================================================================
 
 
+async def _check_qdrant_health(services: ServiceContainer, app: FastAPI) -> None:
+    """Check Qdrant health and update app state."""
+    try:
+        if await services.vector_client.health_check():
+            app.state.dependencies["qdrant"] = "connected"
+            logger.info("Qdrant: connected")
+        else:
+            app.state.dependencies["qdrant"] = "disconnected"
+            logger.warning("Qdrant: disconnected")
+    except Exception as e:
+        app.state.dependencies["qdrant"] = f"error: {e}"
+        logger.error("Qdrant error: %s", e)
+
+
+async def _check_neo4j_health(services: ServiceContainer, app: FastAPI) -> None:
+    """Check Neo4j health and update app state."""
+    try:
+        if await services.graph_client.health_check():
+            app.state.dependencies["neo4j"] = "connected"
+            logger.info("Neo4j: connected")
+        else:
+            app.state.dependencies["neo4j"] = "disconnected"
+            logger.warning("Neo4j: disconnected")
+    except Exception as e:
+        app.state.dependencies["neo4j"] = f"error: {e}"
+        logger.error("Neo4j error: %s", e)
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     """Application lifespan manager.
@@ -343,29 +371,8 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
             "embedder": "loaded",
         }
         
-        # Check Qdrant health
-        try:
-            if await services.vector_client.health_check():
-                app.state.dependencies["qdrant"] = "connected"
-                logger.info("Qdrant: connected")
-            else:
-                app.state.dependencies["qdrant"] = "disconnected"
-                logger.warning("Qdrant: disconnected")
-        except Exception as e:
-            app.state.dependencies["qdrant"] = f"error: {e}"
-            logger.error("Qdrant error: %s", e)
-        
-        # Check Neo4j health
-        try:
-            if await services.graph_client.health_check():
-                app.state.dependencies["neo4j"] = "connected"
-                logger.info("Neo4j: connected")
-            else:
-                app.state.dependencies["neo4j"] = "disconnected"
-                logger.warning("Neo4j: disconnected")
-        except Exception as e:
-            app.state.dependencies["neo4j"] = f"error: {e}"
-            logger.error("Neo4j error: %s", e)
+        await _check_qdrant_health(services, app)
+        await _check_neo4j_health(services, app)
     else:
         logger.info("Starting with FAKE clients (USE_REAL_CLIENTS not set)")
         app.state.dependencies = {
