@@ -6,7 +6,7 @@ NO HARDCODED VALUES - URLs are determined at runtime based on mode.
 
 Modes:
   - docker: All services in Docker (uses Docker DNS names)
-  - hybrid: Native Qdrant+Redis, Docker Neo4j (uses localhost)
+  - hybrid: All infra in Docker, inference-service native (uses localhost for infra)
   - native: All native (uses localhost)
 
 Usage:
@@ -37,6 +37,13 @@ DEFAULT_PORTS = {
     "neo4j_http": 7474,
     "qdrant": 6333,
     "redis": 6379,
+}
+
+# Default credentials (matches existing Neo4j volume)
+# Note: Neo4j stores password in volume, so first-run password persists
+DEFAULT_CREDENTIALS = {
+    "neo4j_user": "neo4j",
+    "neo4j_password": "devpassword",  # Matches existing volume data
 }
 
 

@@ -305,7 +305,7 @@ def create_real_services(config: ServiceConfig | None = None) -> ServiceContaine
     qdrant_url = os.environ.get("QDRANT_URL") or urls["QDRANT_URL"]
     neo4j_uri = os.environ.get("NEO4J_URI") or urls["NEO4J_URI"]
     
-    # These are always from env (credentials should never be hardcoded)
+    # Credentials - defaults match existing Neo4j volume (devpassword)
     neo4j_user = os.environ.get("NEO4J_USER", "neo4j")
     neo4j_password = os.environ.get("NEO4J_PASSWORD", "devpassword")
     embedding_model = os.environ.get("EMBEDDING_MODEL", "all-MiniLM-L6-v2")
