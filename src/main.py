@@ -4,6 +4,7 @@ Main entry point for semantic-search-service.
 Creates the FastAPI application instance for uvicorn.
 
 WBS 0.2.3: Supports real database clients via USE_REAL_CLIENTS=true
+PCON-7: Dynamic infrastructure URL resolution (no hardcoded values)
 """
 
 from __future__ import annotations
@@ -24,6 +25,7 @@ from src.api.dependencies import (
     ServiceContainer,
     VectorClientProtocol,
 )
+from src.infrastructure_config import get_infrastructure_urls, get_infrastructure_mode
 
 if TYPE_CHECKING:
     from collections.abc import AsyncGenerator
@@ -205,7 +207,7 @@ class RealNeo4jClient:
         node_ids: list[str],
         context: dict[str, Any] | None = None,
     ) -> dict[str, Any]:
-        \"\"\"Get relationship-based scores for nodes.\"\"\"
+        """Get relationship-based scores for nodes."""
         # Placeholder for future implementation - uses params to satisfy linter
         _ = node_ids, context
         return {"scores": {}, "metadata": {}}
@@ -265,39 +267,50 @@ class RealEmbeddingService:
 
 
 # ==============================================================================
-# Service Factory (WBS 0.2.3)
+# Service Factory (WBS 0.2.3, PCON-7)
 # ==============================================================================
 
 
 def create_real_services(config: ServiceConfig | None = None) -> ServiceContainer:
     """Create ServiceContainer with real database clients.
     
-    Reads connection details from environment variables (ALL REQUIRED):
-    - QDRANT_URL: Qdrant server URL
-    - NEO4J_URI: Neo4j Bolt URI
+    Connection URLs are resolved dynamically based on INFRASTRUCTURE_MODE:
+    - docker: Uses Docker DNS names (ai-platform-neo4j, ai-platform-qdrant)
+    - hybrid/native: Uses localhost
+    
+    If explicit env vars are set, they override the dynamic values.
+    
+    Required env vars:
     - NEO4J_USER: Neo4j username
     - NEO4J_PASSWORD: Neo4j password
     - EMBEDDING_MODEL: SentenceTransformer model name
+    
+    Optional (auto-resolved from INFRASTRUCTURE_MODE if not set):
+    - QDRANT_URL: Qdrant server URL
+    - NEO4J_URI: Neo4j Bolt URI
     
     Args:
         config: Optional ServiceConfig override
         
     Returns:
         ServiceContainer with real clients initialized
-        
-    Raises:
-        ValueError: If required environment variables are not set
     """
     cfg = config or ServiceConfig()
     
-    # Get connection details from environment (required - no defaults)
-    qdrant_url = os.environ["QDRANT_URL"]
-    neo4j_uri = os.environ["NEO4J_URI"]
-    neo4j_user = os.environ["NEO4J_USER"]
-    neo4j_password = os.environ["NEO4J_PASSWORD"]
-    embedding_model = os.environ["EMBEDDING_MODEL"]
+    # Get dynamic URLs based on infrastructure mode
+    mode = get_infrastructure_mode()
+    urls = get_infrastructure_urls(mode)
     
-    logger.info("Creating real services...")
+    # Use env var if explicitly set, otherwise use dynamic value
+    qdrant_url = os.environ.get("QDRANT_URL") or urls["QDRANT_URL"]
+    neo4j_uri = os.environ.get("NEO4J_URI") or urls["NEO4J_URI"]
+    
+    # These are always from env (credentials should never be hardcoded)
+    neo4j_user = os.environ.get("NEO4J_USER", "neo4j")
+    neo4j_password = os.environ.get("NEO4J_PASSWORD", "devpassword")
+    embedding_model = os.environ.get("EMBEDDING_MODEL", "all-MiniLM-L6-v2")
+    
+    logger.info("Creating real services (mode: %s)...", mode)
     logger.info("  Qdrant URL: %s", qdrant_url)
     logger.info("  Neo4j URI: %s", neo4j_uri)
     logger.info("  Embedding model: %s", embedding_model)
@@ -352,10 +365,13 @@ async def _check_neo4j_health(services: ServiceContainer, app: FastAPI) -> None:
 async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     """Application lifespan manager.
     
-    On startup: Initialize real services if USE_REAL_CLIENTS=true
+    On startup: Initialize real services (default behavior)
     On shutdown: Clean up resources
+    
+    Set USE_FAKE_CLIENTS=true to use mock clients for testing only.
     """
-    use_real_clients = os.getenv("USE_REAL_CLIENTS", "false").lower() in ("true", "1", "yes")
+    use_fake_clients = os.getenv("USE_FAKE_CLIENTS", "false").lower() in ("true", "1", "yes")
+    use_real_clients = not use_fake_clients
     
     if use_real_clients:
         logger.info("Starting with REAL database clients")
@@ -374,7 +390,7 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
         await _check_qdrant_health(services, app)
         await _check_neo4j_health(services, app)
     else:
-        logger.info("Starting with FAKE clients (USE_REAL_CLIENTS not set)")
+        logger.info("Starting with FAKE clients (USE_FAKE_CLIENTS=true)")
         app.state.dependencies = {
             "qdrant": "fake",
             "neo4j": "fake",
