@@ -85,10 +85,10 @@ class ServiceConfig:
     """Configuration for services."""
 
     enable_hybrid_search: bool = True
-    vector_collection: str = "documents"
+    vector_collection: str = "chapters"  # Default to chapters (textbook data)
     default_alpha: float = 0.7
     max_results: int = 100
-    embedding_dimension: int = 768
+    embedding_dimension: int = 384  # all-MiniLM-L6-v2 dimension
 
 
 @dataclass
