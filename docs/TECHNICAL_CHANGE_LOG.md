@@ -18,6 +18,75 @@ This document tracks all implementation changes, their rationale, and git commit
 
 ---
 
+## 2026-01-07
+
+### CL-017: Neo4j ↔ Qdrant Bridge - Integration Planning
+
+| Field | Value |
+|-------|-------|
+| **Date/Time** | 2026-01-07 |
+| **WBS Item** | Database Bridge |
+| **Change Type** | Architecture, Documentation |
+| **Summary** | Documents the new Neo4j ↔ Qdrant bridge created in ai-platform-data. This service is the primary consumer of the bridge for hybrid search. |
+| **Files Changed** | Documentation only (implementation pending) |
+| **Rationale** | Enable concept-to-code navigation for hybrid search queries |
+| **Git Commit** | N/A (documentation) |
+
+**Bridge Overview:**
+
+The bridge connects textbook concepts (Neo4j) with indexed code repositories (Qdrant):
+
+```
+Query "rate limiting" 
+  → Neo4j: Concept → SAME_AS → CodeConcept → FOUND_IN → CodeDomain("backend")
+  → Qdrant: search code_chunks WHERE domain="backend"
+```
+
+**New Node Types Available (in Neo4j):**
+
+| Node | Purpose |
+|------|---------|
+| `Topic` | BERTopic clusters for query expansion |
+| `CodeDomain` | Domains from indexed repos |
+| `CodeRepo` | Individual repositories |
+| `CodeConcept` | Concepts found in code |
+
+**New Relationships Available:**
+
+| Relationship | Use Case |
+|--------------|----------|
+| `SAME_AS` | CodeConcept ↔ Concept (bridge textbook to code) |
+| `SIMILAR_TO` | Chapter → Chapter (cross-reference) |
+| `HAS_TOPIC` | Chapter → Topic (topic expansion) |
+| `FOUND_IN` | CodeConcept → CodeDomain (domain filtering) |
+
+**Hybrid Search Enhancement (Planned):**
+
+```python
+# Before: Query Qdrant directly
+results = qdrant.search("rate limiting", collection="code_chunks")
+
+# After: Use bridge for domain filtering
+async def hybrid_search_with_bridge(query: str):
+    # 1. Find relevant domains via Neo4j
+    domains = neo4j.query("""
+        MATCH (c:Concept)-[:SAME_AS]-(cc:CodeConcept)-[:FOUND_IN]->(d:CodeDomain)
+        WHERE c.name CONTAINS $query
+        RETURN DISTINCT d.name as domain
+    """, query=query)
+    
+    # 2. Filter Qdrant search by domains
+    return qdrant.search(query, collection="code_chunks", 
+                         filter={"domain": {"$in": domains}})
+```
+
+**Cross-Reference:**
+- ai-platform-data/TECHNICAL_CHANGE_LOG.md: CL-021
+- ai-platform-data/docs/NEO4J_SEEDING_GUIDE.md: v2.0.0
+- Platform-Wide/Active/TECHNICAL_CHANGE_LOG.md: CL-014
+
+---
+
 ## 2026-01-01
 
 ### CL-016: Platform Consolidation - Real Backend Configuration (PCON-7)

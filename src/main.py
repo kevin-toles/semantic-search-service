@@ -182,22 +182,35 @@ class RealNeo4jClient:
         self,
         cypher: str,
         parameters: dict[str, Any] | None = None,
+        timeout: float | None = None,
     ) -> dict[str, Any]:
-        """Execute a Cypher query."""
+        """Execute a Cypher query.
+        
+        Args:
+            cypher: Cypher query string
+            parameters: Query parameters
+            timeout: Query timeout in seconds (currently informational only)
+        """
         try:
             result = await asyncio.get_event_loop().run_in_executor(
                 None,
-                lambda: self._execute_query_sync(cypher, parameters or {}),
+                lambda: self._execute_query_sync(cypher, parameters or {}, timeout),
             )
             return result
         except Exception as e:
             logger.warning("Neo4j query failed: %s", e)
             return {"records": [], "columns": []}
 
-    def _execute_query_sync(self, cypher: str, parameters: dict[str, Any]) -> dict[str, Any]:
-        """Execute query synchronously."""
+    def _execute_query_sync(self, cypher: str, parameters: dict[str, Any], timeout: float | None = None) -> dict[str, Any]:
+        """Execute query synchronously.
+        
+        Args:
+            cypher: Cypher query string
+            parameters: Query parameters
+            timeout: Query timeout in seconds (passed to Neo4j session)
+        """
         with self._driver.session() as session:
-            result = session.run(cypher, parameters)
+            result = session.run(cypher, parameters, timeout=timeout)
             records = [dict(record) for record in result]
             columns = list(result.keys()) if records else []
             return {"records": records, "columns": columns}
