@@ -182,38 +182,44 @@ class RealNeo4jClient:
         self,
         cypher: str,
         parameters: dict[str, Any] | None = None,
-        timeout: float | None = None,
+        query_timeout: float | None = None,
     ) -> dict[str, Any]:
         """Execute a Cypher query.
         
         Args:
             cypher: Cypher query string
             parameters: Query parameters
-            timeout: Query timeout in seconds (currently informational only)
+            query_timeout: Query timeout in seconds (uses asyncio.timeout context manager)
         """
         try:
-            result = await asyncio.get_event_loop().run_in_executor(
-                None,
-                lambda: self._execute_query_sync(cypher, parameters or {}, timeout),
-            )
+            async with asyncio.timeout(query_timeout):
+                result = await asyncio.get_event_loop().run_in_executor(
+                    None,
+                    lambda: self._execute_query_sync(cypher, parameters or {}),
+                )
             return result
+        except TimeoutError:
+            logger.warning("Neo4j query timed out after %s seconds", timeout)
+            return {"records": [], "columns": []}
         except Exception as e:
             logger.warning("Neo4j query failed: %s", e)
             return {"records": [], "columns": []}
 
-    def _execute_query_sync(self, cypher: str, parameters: dict[str, Any], timeout: float | None = None) -> dict[str, Any]:
+    def _execute_query_sync(self, cypher: str, parameters: dict[str, Any]) -> dict[str, Any]:
         """Execute query synchronously.
         
         Args:
             cypher: Cypher query string
             parameters: Query parameters
-            timeout: Query timeout in seconds (passed to Neo4j session)
         """
-        with self._driver.session() as session:
-            result = session.run(cypher, parameters, timeout=timeout)
+        def _run_query(tx: Any) -> dict[str, Any]:
+            result = tx.run(cypher, parameters)
             records = [dict(record) for record in result]
             columns = list(result.keys()) if records else []
             return {"records": records, "columns": columns}
+        
+        with self._driver.session(default_access_mode="READ", fetch_size=1000) as session:
+            return session.execute_read(_run_query)
 
     def get_relationship_scores(
         self,

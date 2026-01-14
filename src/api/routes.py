@@ -40,6 +40,10 @@ from src.search.metadata_filter import create_filter as create_domain_filter
 
 logger = logging.getLogger(__name__)
 
+# Error message constants
+GRAPH_UNAVAILABLE_ERROR = "graph_unavailable"
+GRAPH_NOT_CONFIGURED_MESSAGE = "Graph database is not configured"
+
 router = APIRouter()
 
 
@@ -655,7 +659,7 @@ async def get_chapter_content(
     if services.graph_client is None:
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail={"error": "graph_unavailable", "message": "Graph database is not configured"},
+            detail={"error": GRAPH_UNAVAILABLE_ERROR, "message": GRAPH_NOT_CONFIGURED_MESSAGE},
         )
     
     try:
@@ -751,7 +755,7 @@ async def get_chapter_relationships(
     if services.graph_client is None:
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail={"error": "graph_unavailable", "message": "Graph database is not configured"},
+            detail={"error": GRAPH_UNAVAILABLE_ERROR, "message": GRAPH_NOT_CONFIGURED_MESSAGE},
         )
 
     try:
@@ -828,7 +832,7 @@ async def get_batch_relationships(
     if services.graph_client is None:
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail={"error": "graph_unavailable", "message": "Graph database is not configured"},
+            detail={"error": GRAPH_UNAVAILABLE_ERROR, "message": GRAPH_NOT_CONFIGURED_MESSAGE},
         )
 
     try:
