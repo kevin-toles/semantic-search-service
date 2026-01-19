@@ -42,15 +42,11 @@ services:
     restart: "no"  # Manual control via Platform Control Panel
     networks:
       - ai-platform-network
-      - data-network
 
 # ==============================================================================
-# Networks - Tiered network architecture
+# Networks - Single network for dev (tiered networks in production only)
 # ==============================================================================
 networks:
   ai-platform-network:
     name: ai-platform-network
-    external: true
-  data-network:
-    name: data-network
     external: true
