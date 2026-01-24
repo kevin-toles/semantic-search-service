@@ -8,9 +8,10 @@ import pytest
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
-from src.api.dependencies import FakeEmbeddingService, ServiceConfig, ServiceContainer
+from src.api.dependencies import ServiceConfig, ServiceContainer
 from src.api.models import EmbedRequest, EmbedResponse
 from src.api.routes import get_services, router
+from tests.fakes import FakeEmbeddingService
 
 
 @pytest.fixture

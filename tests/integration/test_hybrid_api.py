@@ -27,6 +27,9 @@ from typing import Any
 from unittest.mock import MagicMock
 
 import pytest
+from fastapi.testclient import TestClient
+
+from tests.conftest import create_test_app
 
 # =============================================================================
 # Test Fixtures
@@ -90,11 +93,7 @@ class TestHybridSearchEndpoint:
 
     def test_hybrid_search_success(self) -> None:
         """POST /v1/search/hybrid should return hybrid results."""
-        from fastapi.testclient import TestClient
-
-        from src.api.app import create_app
-
-        app = create_app()
+        app = create_test_app()
         client = TestClient(app)
 
         response = client.post(
@@ -112,11 +111,7 @@ class TestHybridSearchEndpoint:
 
     def test_hybrid_search_with_embedding(self) -> None:
         """POST /v1/search/hybrid should accept pre-computed embedding."""
-        from fastapi.testclient import TestClient
-
-        from src.api.app import create_app
-
-        app = create_app()
+        app = create_test_app()
         client = TestClient(app)
 
         response = client.post(
@@ -132,11 +127,7 @@ class TestHybridSearchEndpoint:
 
     def test_hybrid_search_requires_query_or_embedding(self) -> None:
         """POST /v1/search/hybrid should require query or embedding."""
-        from fastapi.testclient import TestClient
-
-        from src.api.app import create_app
-
-        app = create_app()
+        app = create_test_app()
         client = TestClient(app)
 
         response = client.post(
@@ -154,11 +145,7 @@ class TestHybridSearchEndpoint:
         sample_hybrid_response: list[dict[str, Any]],
     ) -> None:
         """Hybrid search response should have correct format."""
-        from fastapi.testclient import TestClient
-
-        from src.api.app import create_app
-
-        app = create_app()
+        app = create_test_app()
         client = TestClient(app)
 
         response = client.post(
@@ -175,11 +162,7 @@ class TestHybridSearchEndpoint:
 
     def test_hybrid_search_respects_limit(self) -> None:
         """Hybrid search should respect limit parameter."""
-        from fastapi.testclient import TestClient
-
-        from src.api.app import create_app
-
-        app = create_app()
+        app = create_test_app()
         client = TestClient(app)
 
         response = client.post(
@@ -196,14 +179,19 @@ class TestHybridSearchEndpoint:
 
     def test_hybrid_search_disabled_returns_error(self) -> None:
         """When hybrid search disabled, should return 503."""
-        from fastapi.testclient import TestClient
-
         from src.api.app import create_app
         from src.api.dependencies import ServiceConfig, ServiceContainer
 
+        from tests.fakes import FakeEmbeddingService, FakeGraphClient, FakeVectorClient
+
         # Create app with hybrid search disabled
         config = ServiceConfig(enable_hybrid_search=False)
-        services = ServiceContainer(config=config)
+        services = ServiceContainer(
+            config=config,
+            vector_client=FakeVectorClient(),
+            graph_client=FakeGraphClient(),
+            embedding_service=FakeEmbeddingService(),
+        )
 
         app = create_app(services=services)
         client = TestClient(app)
@@ -227,11 +215,7 @@ class TestGraphTraverseEndpoint:
 
     def test_graph_traverse_success(self) -> None:
         """POST /v1/graph/traverse should return traversal results."""
-        from fastapi.testclient import TestClient
-
-        from src.api.app import create_app
-
-        app = create_app()
+        app = create_test_app()
         client = TestClient(app)
 
         response = client.post(
@@ -252,11 +236,7 @@ class TestGraphTraverseEndpoint:
 
     def test_graph_traverse_requires_start_node(self) -> None:
         """POST /v1/graph/traverse should require start_node_id."""
-        from fastapi.testclient import TestClient
-
-        from src.api.app import create_app
-
-        app = create_app()
+        app = create_test_app()
         client = TestClient(app)
 
         response = client.post(
@@ -271,11 +251,7 @@ class TestGraphTraverseEndpoint:
 
     def test_graph_traverse_default_depth(self) -> None:
         """Graph traverse should use default max_depth if not specified."""
-        from fastapi.testclient import TestClient
-
-        from src.api.app import create_app
-
-        app = create_app()
+        app = create_test_app()
         client = TestClient(app)
 
         response = client.post(
@@ -290,13 +266,18 @@ class TestGraphTraverseEndpoint:
 
     def test_graph_traverse_disabled_returns_error(self) -> None:
         """When graph search disabled, should return 503."""
-        from fastapi.testclient import TestClient
-
         from src.api.app import create_app
         from src.api.dependencies import ServiceConfig, ServiceContainer
 
+        from tests.fakes import FakeEmbeddingService, FakeGraphClient, FakeVectorClient
+
         config = ServiceConfig(enable_hybrid_search=False)
-        services = ServiceContainer(config=config)
+        services = ServiceContainer(
+            config=config,
+            vector_client=FakeVectorClient(),
+            graph_client=FakeGraphClient(),
+            embedding_service=FakeEmbeddingService(),
+        )
 
         app = create_app(services=services)
         client = TestClient(app)
@@ -319,11 +300,7 @@ class TestGraphQueryEndpoint:
 
     def test_graph_query_success(self) -> None:
         """POST /v1/graph/query should execute Cypher query."""
-        from fastapi.testclient import TestClient
-
-        from src.api.app import create_app
-
-        app = create_app()
+        app = create_test_app()
         client = TestClient(app)
 
         response = client.post(
@@ -341,11 +318,7 @@ class TestGraphQueryEndpoint:
 
     def test_graph_query_with_parameters(self) -> None:
         """POST /v1/graph/query should accept parameters."""
-        from fastapi.testclient import TestClient
-
-        from src.api.app import create_app
-
-        app = create_app()
+        app = create_test_app()
         client = TestClient(app)
 
         response = client.post(
@@ -360,11 +333,7 @@ class TestGraphQueryEndpoint:
 
     def test_graph_query_requires_cypher(self) -> None:
         """POST /v1/graph/query should require cypher field."""
-        from fastapi.testclient import TestClient
-
-        from src.api.app import create_app
-
-        app = create_app()
+        app = create_test_app()
         client = TestClient(app)
 
         response = client.post(
@@ -379,11 +348,7 @@ class TestGraphQueryEndpoint:
 
     def test_graph_query_rejects_write_operations(self) -> None:
         """POST /v1/graph/query should reject write operations."""
-        from fastapi.testclient import TestClient
-
-        from src.api.app import create_app
-
-        app = create_app()
+        app = create_test_app()
         client = TestClient(app)
 
         response = client.post(
@@ -477,11 +442,7 @@ class TestErrorHandling:
 
     def test_invalid_json_returns_422(self) -> None:
         """Invalid JSON should return 422."""
-        from fastapi.testclient import TestClient
-
-        from src.api.app import create_app
-
-        app = create_app()
+        app = create_test_app()
         client = TestClient(app)
 
         response = client.post(
@@ -498,11 +459,10 @@ class TestErrorHandling:
 
         from src.api.app import configure_app_services, create_app
         from src.api.dependencies import (
-            FakeEmbeddingService,
-            FakeGraphClient,
             ServiceConfig,
             ServiceContainer,
         )
+        from tests.fakes import FakeEmbeddingService, FakeGraphClient
 
         # Create a vector client that raises an error
         class ErrorVectorClient:
@@ -525,7 +485,7 @@ class TestErrorHandling:
             embedding_service=FakeEmbeddingService(),
         )
 
-        app = create_app()
+        app = create_app(services=services)
         configure_app_services(app, services)
         client = TestClient(app)
 
@@ -548,11 +508,7 @@ class TestHealthCheck:
 
     def test_health_check_returns_200(self) -> None:
         """GET /health should return 200."""
-        from fastapi.testclient import TestClient
-
-        from src.api.app import create_app
-
-        app = create_app()
+        app = create_test_app()
         client = TestClient(app)
 
         response = client.get("/health")
@@ -561,11 +517,7 @@ class TestHealthCheck:
 
     def test_health_check_includes_services(self) -> None:
         """Health check should report service status."""
-        from fastapi.testclient import TestClient
-
-        from src.api.app import create_app
-
-        app = create_app()
+        app = create_test_app()
         client = TestClient(app)
 
         response = client.get("/health")

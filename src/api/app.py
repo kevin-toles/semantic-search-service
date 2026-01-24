@@ -10,9 +10,6 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from src.api.dependencies import (
-    FakeEmbeddingService,
-    FakeGraphClient,
-    FakeVectorClient,
     ServiceConfig,
     ServiceContainer,
 )
@@ -27,10 +24,13 @@ def create_app(
 
     Args:
         config: Optional service configuration
-        services: Optional pre-configured service container
+        services: Optional pre-configured service container (required for production)
 
     Returns:
         Configured FastAPI application
+
+    Raises:
+        ValueError: If services is None in production (no default fakes)
     """
     app = FastAPI(
         title="Semantic Search Service",
@@ -49,15 +49,12 @@ def create_app(
         allow_headers=["*"],
     )
 
-    # Set up service container
+    # Set up service container - require explicit services (no default fakes)
     if services is None:
-        cfg = config or ServiceConfig()
-        # Create default fake services for testing
-        services = ServiceContainer(
-            config=cfg,
-            vector_client=FakeVectorClient(),
-            graph_client=FakeGraphClient(),
-            embedding_service=FakeEmbeddingService(),
+        raise ValueError(
+            "ServiceContainer is required. "
+            "For testing, use fixtures from tests/fakes.py. "
+            "For production, provide real service implementations."
         )
 
     # Store services in app state for dependency injection
@@ -74,6 +71,8 @@ def create_app(
 
     # Include routes
     app.include_router(router)
+
+    return app
 
     return app
 
