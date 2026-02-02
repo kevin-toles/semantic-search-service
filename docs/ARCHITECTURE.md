@@ -1,9 +1,10 @@
 # Semantic Search Microservice
 
-> **Version:** 2.0.0  
+> **Version:** 2.1.0  
 > **Updated:** 2026-02-01  
 > **Status:** Active  
-> **Role:** Kitchen Brigade "Cookbook" - Dumb Retrieval Service
+> **Role:** Kitchen Brigade "Cookbook" - Dumb Retrieval Service  
+> **Git Reference:** `12634ed` - `910153d` (Jan 2026 updates)
 
 ## Overview
 
@@ -122,109 +123,110 @@ Consumer (ai-agents, llm-document-enhancer)
 ```
 semantic-search-service/
 ├── src/
+│   ├── __init__.py
+│   ├── main.py                      # FastAPI app entry point + lifespan handler
+│   ├── infrastructure_config.py     # Dynamic infrastructure URL resolution
+│   │
 │   ├── api/
 │   │   ├── __init__.py
-│   │   ├── routes/
-│   │   │   ├── __init__.py
-│   │   │   ├── embed.py             # POST /v1/embed
-│   │   │   ├── search.py            # POST /v1/search
-│   │   │   ├── topics.py            # /v1/topics/*
-│   │   │   ├── indices.py           # /v1/indices/*
-│   │   │   ├── chunks.py            # /v1/chunks/*
-│   │   │   └── health.py            # /health, /ready
-│   │   ├── middleware/
-│   │   │   ├── __init__.py
-│   │   │   └── logging.py
-│   │   └── deps.py
+│   │   ├── app.py                   # Application factory (create_app)
+│   │   ├── dependencies.py          # ServiceContainer DI
+│   │   ├── models.py                # Pydantic request/response models
+│   │   └── routes.py                # All API endpoints (single file)
 │   │
 │   ├── core/
 │   │   ├── __init__.py
-│   │   ├── config.py                # Pydantic settings
-│   │   └── exceptions.py
+│   │   ├── config.py                # Pydantic settings (env-based)
+│   │   └── logging.py               # Structured JSON logging (WBS-LOG0)
 │   │
-│   ├── embedding/
+│   ├── graph/                       # Neo4j Graph Layer
 │   │   ├── __init__.py
-│   │   ├── engine.py                # SBERT embedding engine
-│   │   ├── models.py                # Model registry
-│   │   └── preprocessor.py          # Text preprocessing
+│   │   ├── exceptions.py            # Graph-specific exceptions
+│   │   ├── health.py                # Neo4j health checks
+│   │   ├── neo4j_client.py          # Async Neo4j driver wrapper
+│   │   ├── relationships.py         # EEP-4 relationship types
+│   │   ├── schema.py                # Graph schema definitions
+│   │   ├── taxonomy_loader.py       # Taxonomy JSON loading
+│   │   └── traversal.py             # Spider web traversal (BFS/DFS)
 │   │
-│   ├── search/
+│   ├── retrievers/                  # Retriever Abstractions (Phase 4)
 │   │   ├── __init__.py
-│   │   ├── faiss_index.py           # FAISS index wrapper
-│   │   ├── metadata_filter.py       # Post-search filtering
-│   │   └── ranker.py                # Result ranking
+│   │   ├── exceptions.py            # Retriever exceptions
+│   │   ├── hybrid_retriever.py      # Combined vector + graph retriever
+│   │   ├── neo4j_retriever.py       # Neo4j graph retriever
+│   │   └── qdrant_retriever.py      # Qdrant vector retriever
 │   │
-│   ├── graph/                       # NEW - Graph RAG components
+│   ├── search/                      # Search Components
 │   │   ├── __init__.py
-│   │   ├── traversal.py             # Spider web traversal (BFS/DFS)
-│   │   └── hybrid_search.py         # Vector + Graph fusion
+│   │   ├── exceptions.py            # Search exceptions
+│   │   ├── hybrid.py                # Hybrid search logic
+│   │   ├── metadata_filter.py       # Domain-aware filtering
+│   │   ├── ranker.py                # Score fusion (LINEAR, RRF, MAX)
+│   │   └── vector.py                # Vector search utilities
 │   │
-│   ├── retrievers/                  # NEW - Retriever abstractions
-│   │   ├── __init__.py
-│   │   ├── base.py                  # Abstract retriever interface
-│   │   ├── qdrant_retriever.py      # Qdrant vector retriever
-│   │   └── neo4j_retriever.py       # Neo4j graph retriever
-│   │
-│   ├── topics/
-│   │   ├── __init__.py
-│   │   ├── lda.py                   # Gensim LDA
-│   │   ├── lsi.py                   # Gensim LSI
-│   │   └── inference.py             # Topic inference
-│   │
-│   ├── indices/
-│   │   ├── __init__.py
-│   │   ├── manager.py               # Index lifecycle management
-│   │   ├── storage.py               # Index persistence (local/S3)
-│   │   └── chunks.py                # Chunk text storage
-│   │
-│   ├── models/
-│   │   ├── __init__.py
-│   │   ├── requests.py
-│   │   ├── responses.py
-│   │   └── domain.py
-│   │
-│   └── main.py                      # FastAPI app entry point
+│   └── vector/                      # Qdrant Vector Layer
+│       ├── __init__.py
+│       └── health.py                # Qdrant health checks
 │
 ├── tests/
-│   ├── unit/
-│   │   ├── test_embedding/
-│   │   ├── test_search/
-│   │   ├── test_graph/              # NEW - Graph traversal tests
-│   │   ├── test_retrievers/         # NEW - Retriever tests
-│   │   └── test_topics/
+│   ├── __init__.py
+│   ├── conftest.py                  # Pytest fixtures
+│   ├── fakes.py                     # Test doubles (CL-017 refactor)
+│   ├── benchmark/
+│   │   └── test_performance.py      # WBS 6.1 performance tests
 │   ├── integration/
-│   │   ├── test_search_api.py
-│   │   ├── test_embed_api.py
-│   │   └── test_retrievers_integration.py  # NEW
-│   ├── benchmark/                   # NEW - Performance benchmarks (WBS 6.1)
-│   │   └── test_performance.py
-│   ├── validation/                  # NEW - Validation tests (WBS 6.2, 6.3)
-│   │   ├── test_spider_web_coverage.py
-│   │   └── test_citation_accuracy.py
-│   └── conftest.py
+│   │   ├── test_hybrid_api.py
+│   │   └── test_retrievers_integration.py
+│   ├── unit/
+│   │   ├── test_chapter_api.py      # Kitchen Brigade chapter tests
+│   │   ├── test_embed_api.py        # WBS 0.2.1 tests
+│   │   ├── test_metadata_filter.py
+│   │   ├── test_neo4j_health.py
+│   │   ├── test_qdrant_health.py
+│   │   ├── test_search_api.py       # WBS 0.2.2 tests
+│   │   ├── test_taxonomy_loader.py
+│   │   ├── test_graph/
+│   │   │   ├── test_eep4_relationships.py
+│   │   │   ├── test_schema.py
+│   │   │   └── test_traversal.py
+│   │   ├── test_retrievers/
+│   │   │   ├── test_hybrid_retriever.py
+│   │   │   ├── test_neo4j_retriever.py
+│   │   │   └── test_qdrant_retriever.py
+│   │   └── test_search/
+│   │       └── test_ranker.py
+│   └── validation/
+│       ├── test_citation_accuracy.py   # WBS 6.3
+│       └── test_spider_web_coverage.py # WBS 6.2
 │
 ├── docs/
 │   ├── ARCHITECTURE.md              # This file
-│   ├── API.md
-│   ├── GRAPH_RAG_POC.md             # Graph RAG design document
-│   ├── INDEXING.md                  # How to build indices
-│   └── reports/                     # NEW - Generated reports
+│   ├── TECHNICAL_CHANGE_LOG.md      # Change history
+│   ├── openapi.yaml                 # OpenAPI spec
+│   └── reports/                     # Generated reports
 │       ├── BENCHMARK_REPORT.md      # WBS 6.1 deliverable
-│       ├── SPIDER_WEB_COVERAGE_REPORT.md  # WBS 6.2 deliverable
-│       └── CITATION_ACCURACY_REPORT.md    # WBS 6.3 deliverable
+│       ├── SPIDER_WEB_COVERAGE_REPORT.md
+│       └── CITATION_ACCURACY_REPORT.md
 │
 ├── scripts/
-│   ├── start.sh
-│   ├── build_index.py               # CLI for index building
-│   ├── train_topics.py              # CLI for topic model training
-│   ├── generate_benchmark_report.py # NEW - WBS 6.1
-│   └── generate_citation_accuracy_report.py  # NEW - WBS 6.3
+│   ├── demo_graph_rag.py            # Demo script
+│   ├── generate_benchmark_report.py # WBS 6.1
+│   ├── generate_citation_accuracy_report.py  # WBS 6.3
+│   ├── validate_0.2.1_embed.sh      # Validation: embed endpoint
+│   ├── validate_0.2.2_search.sh     # Validation: search endpoint
+│   ├── validate_0.2.3_real_clients.sh # Validation: real backends
+│   └── validate_domain_filter.py    # Domain filter validation
+│
+├── config/
+│   └── domain_taxonomy.json         # Domain filtering config
 │
 ├── Dockerfile
-├── docker-compose.yml
+├── docker-compose.yml               # Tiered network (CL-015)
 ├── pyproject.toml
 ├── requirements.txt
-└── README.md
+├── requirements-dev.txt
+├── start_service.sh                 # Convenience startup script
+└── SEMANTIC_SEARCH_SERVICE_INVENTORY.md
 ```
 
 ---
@@ -236,14 +238,14 @@ semantic-search-service/
                           │            CONSUMERS                     │
                           │                                          │
                           │  ┌────────────┐  ┌────────────────────┐ │
-                          │  │ llm-gateway│  │ llm-doc-enhancer   │ │
-                          │  │ (tools)    │  │ (pre-compute)      │ │
+                          │  │ llm-gateway│  │ ai-agents          │ │
+                          │  │ (tools)    │  │ (Kitchen Brigade)  │ │
                           │  └─────┬──────┘  └─────────┬──────────┘ │
                           │        │                   │            │
                           │        │   ┌───────────────┘            │
                           │        │   │  ┌────────────────────┐   │
-                          │        │   │  │ ai-agents          │   │
-                          │        │   │  │ (code similarity)  │   │
+                          │        │   │  │ Code-Orchestrator  │   │
+                          │        │   │  │ (Sous Chef)        │   │
                           │        │   │  └─────────┬──────────┘   │
                           └────────┼───┼────────────┼──────────────┘
                                    │   │            │
@@ -254,51 +256,56 @@ semantic-search-service/
 │                                                                               │
 │  ┌─────────────────────────────────────────────────────────────────────────┐ │
 │  │                           API Layer (FastAPI)                            │ │
-│  │  POST /v1/embed  │  POST /v1/search  │  POST /v1/topics/*  │  GET /health│ │
+│  │  POST /v1/embed │ POST /v1/search │ POST /v1/search/hybrid │ GET /health│ │
+│  │  POST /v1/graph/* │ GET /v1/chapters/* │ GET /v1/graph/relationships/*  │ │
 │  └─────────────────────────────────────────────────────────────────────────┘ │
 │                                      │                                        │
-│  ┌──────────────┐  ┌──────────────┐  │  ┌──────────────┐  ┌──────────────┐   │
-│  │  Embedding   │  │   Vector     │  │  │   Topic      │  │    Index     │   │
-│  │   Engine     │  │   Search     │  │  │   Modeler    │  │   Manager    │   │
-│  │              │  │              │  │  │              │  │              │   │
-│  │ • SBERT      │  │ • FAISS      │  │  │ • LDA        │  │ • Create     │   │
-│  │ • MiniLM     │  │ • Flat/IVF   │  │  │ • LSI        │  │ • Add/Delete │   │
-│  │ • mpnet      │  │ • HNSW       │  │  │ • Doc2Vec    │  │ • Rebuild    │   │
-│  └──────┬───────┘  └──────┬───────┘  │  └──────┬───────┘  └──────┬───────┘   │
-│         │                 │          │         │                 │            │
-└─────────┼─────────────────┼──────────┼─────────┼─────────────────┼────────────┘
-          │                 │          │         │                 │
-          ▼                 ▼          │         ▼                 ▼
-┌──────────────────┐ ┌─────────────────┐│  ┌─────────────────┐ ┌─────────────────┐
-│ HuggingFace Hub  │ │ FAISS Indices   ││  │ Gensim Models   │ │ Chunk Storage   │
-│ (SBERT models)   │ │ (local/S3)      ││  │ (local/S3)      │ │ (local/S3)      │
-└──────────────────┘ └─────────────────┘│  └─────────────────┘ └─────────────────┘
+│  ┌──────────────┐  ┌──────────────┐  │  ┌──────────────┐                     │
+│  │  Embedding   │  │   Vector     │  │  │   Graph      │                     │
+│  │   Service    │  │   Client     │  │  │   Client     │                     │
+│  │              │  │              │  │  │              │                     │
+│  │ • SBERT      │  │ • Qdrant     │  │  │ • Neo4j      │                     │
+│  │ • MiniLM     │  │ • Hybrid     │  │  │ • Traversal  │                     │
+│  └──────┬───────┘  └──────┬───────┘  │  └──────┬───────┘                     │
+│         │                 │          │         │                              │
+└─────────┼─────────────────┼──────────┼─────────┼──────────────────────────────┘
+          │                 │          │         │
+          ▼                 ▼          │         ▼
+┌──────────────────┐ ┌─────────────────┐│  ┌─────────────────┐
+│ HuggingFace Hub  │ │ Qdrant          ││  │ Neo4j           │
+│ (SBERT models)   │ │ (ai-platform-)  ││  │ (ai-platform-)  │
+└──────────────────┘ └─────────────────┘│  └─────────────────┘
+                                        │
 ```
 
 ---
 
 ## API Endpoints
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| POST | `/v1/embed` | Generate embeddings for texts |
-| POST | `/v1/embed/batch` | Async batch embedding job |
-| POST | `/v1/search` | Semantic similarity search |
-| POST | `/v1/search/vector` | Search by raw vector |
-| POST | `/v1/search/hybrid` | Combined vector + graph search (accepts `taxonomy` param) |
-| POST | `/v1/graph/traverse` | Spider web graph traversal |
-| POST | `/v1/graph/query` | Raw Cypher query execution |
-| POST | `/v1/topics/infer` | Infer topics for text |
-| GET | `/v1/topics/{model_id}/topics` | List all topics |
-| POST | `/v1/topics/similar` | Find docs with similar topics |
-| POST | `/v1/indices` | Create new index |
-| POST | `/v1/indices/{id}/vectors` | Add vectors to index |
-| GET | `/v1/indices/{id}/stats` | Get index statistics |
-| DELETE | `/v1/indices/{id}` | Delete index |
-| GET | `/v1/chunks/{chunk_id}` | Get chunk text by ID |
-| GET | `/v1/chunks/{chunk_id}/context` | Get surrounding chunks |
-| GET | `/v1/taxonomies` | List available taxonomies |
-| GET | `/health` | Health check |
+| Method | Endpoint | Description | WBS Ref |
+|--------|----------|-------------|---------|
+| POST | `/v1/embed` | Generate embeddings for text(s) | WBS 0.2.1 |
+| POST | `/v1/search` | Simple vector similarity search | WBS 0.2.2 |
+| POST | `/v1/search/hybrid` | Combined vector + graph search (accepts `taxonomy`, `focus_areas`) | Phase 3 |
+| POST | `/v1/graph/traverse` | Spider web graph traversal (BFS/DFS) | Phase 2 |
+| POST | `/v1/graph/query` | Execute read-only Cypher queries | Phase 2 |
+| GET | `/v1/chapters/{book_id}/{chapter_number}` | Get chapter content (Kitchen Brigade) | CL-017 |
+| GET | `/v1/graph/relationships/{chapter_id}` | Get relationships for chapter | EEP-4 |
+| POST | `/v1/graph/relationships/batch` | Batch relationship queries | EEP-4 |
+| GET | `/health` | Health check with dependency status | WBS 0.2.3 |
+
+### Removed/Not Implemented Endpoints
+
+The following endpoints from the original design were **not implemented** (functionality absorbed elsewhere or deferred):
+
+| Endpoint | Status | Reason |
+|----------|--------|--------|
+| `/v1/embed/batch` | Not implemented | Single `/v1/embed` accepts lists |
+| `/v1/search/vector` | Not implemented | Use `/v1/search` with query |
+| `/v1/topics/*` | Not implemented | Topic modeling deferred |
+| `/v1/indices/*` | Not implemented | Index management via scripts |
+| `/v1/chunks/*` | Not implemented | Chunk storage in Qdrant payloads |
+| `/v1/taxonomies` | Not implemented | Taxonomies loaded from files |
 
 ---
 
@@ -457,32 +464,36 @@ Adding new book = O(n² × t) re-enrichment
 
 ## Components
 
-### Embedding Engine (SBERT)
-- Loads sentence-transformer models
+### Embedding Service (SBERT)
+- Loads sentence-transformer models via `SentenceTransformer`
+- Configured via `SBERT_MODEL` env var (default: `all-MiniLM-L6-v2`, 384 dims)
 - Generates dense vector embeddings
-- Supports multiple models (MiniLM, mpnet)
-- Batched inference for efficiency
+- Batched inference via single `/v1/embed` endpoint accepting lists
 
 ### Vector Search (Qdrant)
-- Cloud-native vector database
+- Cloud-native vector database (port 6333)
 - Metadata filtering with search
 - Top-k retrieval with scores
-- Payload storage for chunk metadata
+- Payload storage for chapter metadata
 - **Atomic payload updates** via `set_payload()` for incremental enrichment
+- Health checks via `src/vector/health.py`
 
-### Graph Engine (Neo4j) - NEW
-- Taxonomy graph storage
+### Graph Engine (Neo4j)
+- Knowledge graph storage (port 7687)
 - Cypher query execution
 - Spider web traversal (PARALLEL, PERPENDICULAR, SKIP_TIER)
 - Bidirectional relationship navigation
+- EEP-4 relationship types: PARALLEL, PERPENDICULAR, SKIP_TIER, LATERAL
+- Health checks via `src/graph/health.py`
 
-### Hybrid Search Engine - NEW
+### Hybrid Search Engine
 - Query planner (vector vs graph vs both)
+- Domain-aware filtering via `focus_areas` parameter
 - Result merger with score fusion
 - Re-ranking based on tier relationships
 - Deduplication across sources
 
-### Graph Traversal Engine - NEW (WBS 6.4)
+### Graph Traversal Engine (WBS 6.4)
 
 The graph traversal system implements a "spider web" model for navigating the taxonomy graph:
 
@@ -514,7 +525,7 @@ relevance = min(1.0, depth_score + type_bonus)
 | Hybrid Search | <500ms | 115.22ms | ✅ |
 | Score Fusion | <1ms | 0.08ms | ✅ |
 
-### Result Ranker - NEW (WBS 6.4)
+### Result Ranker (WBS 6.4)
 
 Implements multiple score fusion strategies for combining vector and graph results:
 
@@ -542,15 +553,20 @@ Cross-reference citations maintain high relevance:
 | PERPENDICULAR | ≥70% | 90% | ✅ |
 | Average Overall | ≥85% | 90% | ✅ |
 
-### Topic Modeler (Gensim)
-- LDA for topic discovery
-- LSI for semantic similarity
-- Topic inference for new documents
+### Service Container (Dependency Injection)
 
-### Index Manager
-- Index lifecycle (create, add, delete, rebuild)
-- Persistence to local disk or S3
-- Blue-green deployment for index updates
+The `ServiceContainer` pattern provides centralized service management:
+
+```python
+# src/api/dependencies.py
+class ServiceContainer:
+    config: Settings
+    embedding_service: EmbeddingService | None
+    vector_client: QdrantRetriever | None
+    graph_client: Neo4jClient | None
+```
+
+Injected at startup via `create_app()` factory with lifespan context manager.
 
 ---
 
@@ -558,10 +574,15 @@ Cross-reference citations maintain high relevance:
 
 | Dependency | Type | Purpose |
 |------------|------|---------|
-| HuggingFace Hub | External | SBERT model downloads |
-| Qdrant | Infrastructure | Vector database (replaces FAISS) |
-| Neo4j | Infrastructure | Taxonomy graph database |
-| S3 (optional) | Infrastructure | Index/model storage |
+| HuggingFace Hub | External | SBERT model downloads (startup) |
+| Qdrant | Infrastructure | Vector database (`ai-platform-qdrant`) |
+| Neo4j | Infrastructure | Knowledge graph (`ai-platform-neo4j`) |
+| FastAPI | Framework | REST API framework |
+| sentence-transformers | Library | Embedding generation |
+| neo4j (driver) | Library | Async Neo4j client |
+| qdrant-client | Library | Qdrant REST client |
+
+**Note:** Topic modeling (Gensim) and index management (FAISS) were **not implemented** - functionality absorbed by Qdrant and Neo4j.
 
 ---
 
@@ -665,48 +686,65 @@ volumes:
 ## Configuration
 
 ```python
-# src/core/config.py
+# src/core/config.py (actual implementation)
 class Settings(BaseSettings):
+    """
+    Application settings loaded from environment variables.
+    All database connections REQUIRED via env vars (no hardcoded defaults).
+    """
+    
+    model_config = SettingsConfigDict(
+        env_file=".env",
+        case_sensitive=False,
+        extra="ignore",
+    )
+    
     # Service
-    service_name: str = "semantic-search-service"
-    port: int = 8081
+    semantic_search_port: int = Field(default=8081)
     
-    # Embedding
-    sbert_model: str = "all-mpnet-base-v2"
-    embedding_batch_size: int = 32
+    # Embedding (REQUIRED)
+    sbert_model: str = Field(description="REQUIRED via SBERT_MODEL env var")
     
-    # Storage
-    index_storage_path: str = "/data/indices"
-    model_cache_path: str = "/data/models"
-    topic_model_path: str = "/data/topics"
+    # Neo4j (REQUIRED - no defaults per PCON-7)
+    neo4j_url: str = Field(description="REQUIRED via NEO4J_URL")
+    neo4j_user: str = Field(description="REQUIRED via NEO4J_USER")
+    neo4j_password: str = Field(description="REQUIRED via NEO4J_PASSWORD")
     
-    # Qdrant (NEW)
-    qdrant_url: str = "http://localhost:6333"
-    qdrant_collection: str = "chapters"
+    # Qdrant (REQUIRED - no defaults per PCON-7)
+    qdrant_url: str = Field(description="REQUIRED via QDRANT_URL")
     
-    # Neo4j (NEW)
-    neo4j_url: str = "bolt://localhost:7687"
-    neo4j_user: str = "neo4j"
-    neo4j_password: str = ""
-    neo4j_database: str = "neo4j"
-    
-    # Hybrid Search (NEW)
-    hybrid_default_vector_weight: float = 0.6
-    hybrid_default_graph_weight: float = 0.4
-    hybrid_max_traversal_hops: int = 5
-    
-    # Optional S3
-    s3_bucket: Optional[str] = None
-    
-    class Config:
-        env_prefix = "SEMANTIC_SEARCH_"
+    # Feature Flags (enabled by default after Phase 6 validation)
+    enable_graph_search: bool = Field(default=True)
+    enable_hybrid_search: bool = Field(default=True)
 ```
+
+### Environment Variables (Required)
+
+| Variable | Example | Description |
+|----------|---------|-------------|
+| `SBERT_MODEL` | `all-MiniLM-L6-v2` | Sentence-BERT model name |
+| `NEO4J_URL` | `bolt://localhost:7687` | Neo4j Bolt URI |
+| `NEO4J_USER` | `neo4j` | Neo4j username |
+| `NEO4J_PASSWORD` | `devpassword` | Neo4j password |
+| `QDRANT_URL` | `http://localhost:6333` | Qdrant REST API URL |
+
+**Note:** Per PCON-7 (Platform Consolidation), no hardcoded database URLs. All connections configured via environment variables. See `docker-compose.yml` for tiered network configuration.
 
 ---
 
 ## See Also
 
-- [GRAPH_RAG_POC.md](./GRAPH_RAG_POC.md) - Graph-augmented semantic search POC
-- [API.md](./API.md) - Full API documentation
-- [INDEXING.md](./INDEXING.md) - How to build indices
+- [TECHNICAL_CHANGE_LOG.md](./TECHNICAL_CHANGE_LOG.md) - Detailed change history with git commit references
+- [openapi.yaml](./openapi.yaml) - OpenAPI specification
 - [ai-agents/docs/ARCHITECTURE.md](/ai-agents/docs/ARCHITECTURE.md) - AI Agents service (primary consumer)
+- [ai-platform-data/docs/SCHEMA_REFERENCE.md](/ai-platform-data/docs/SCHEMA_REFERENCE.md) - Neo4j schema definitions
+
+### Related Change Log Entries
+
+| Entry | Date | Description |
+|-------|------|-------------|
+| CL-017 | 2026-01-07 | Neo4j ↔ Qdrant Bridge integration |
+| CL-016 | 2026-01-01 | PCON-7 real backend configuration |
+| CL-015 | 2025-12-31 | Tiered network docker-compose |
+| CL-011 | 2025-12-19 | Gateway-First Communication Pattern |
+| CL-009 | 2025-12-13 | Query-time taxonomy filtering |
