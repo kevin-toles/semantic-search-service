@@ -1,5 +1,10 @@
 # Semantic Search Microservice
 
+> **Version:** 2.0.0  
+> **Updated:** 2026-02-01  
+> **Status:** Active  
+> **Role:** Kitchen Brigade "Cookbook" - Dumb Retrieval Service
+
 ## Overview
 
 The Semantic Search Service is a **microservice** that provides embedding generation, vector search, and topic modeling capabilities. It exposes REST APIs consumed by other microservices and applications.
