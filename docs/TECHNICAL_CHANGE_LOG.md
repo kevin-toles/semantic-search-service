@@ -18,6 +18,51 @@ This document tracks all implementation changes, their rationale, and git commit
 
 ---
 
+## 2026-02-01
+
+### CL-018: Architecture Document Reconciliation (v2.1.0)
+
+| Field | Value |
+|-------|-------|
+| **Date/Time** | 2026-02-01 |
+| **WBS Item** | Documentation |
+| **Change Type** | Documentation |
+| **Summary** | Major update to ARCHITECTURE.md to reflect actual implementation state. Removed aspirational features never implemented (topics, indices, chunks endpoints). Updated folder structure, API endpoints, and configuration to match codebase. |
+| **Files Changed** | `docs/ARCHITECTURE.md` |
+| **Rationale** | Architecture document had significant drift from actual implementation. Cross-referenced git history (309b887..12634ed) and TECHNICAL_CHANGE_LOG (CL-001 through CL-017) to align documentation with reality. |
+| **Git Commit** | `cde92fc` |
+
+**Key Changes:**
+
+| Section | Before | After |
+|---------|--------|-------|
+| Folder structure | Listed `src/embedding/`, `src/topics/`, `src/indices/`, `src/models/` | Reflects actual: `src/api/routes.py` (single file), `src/vector/`, `src/graph/`, `src/retrievers/` |
+| API endpoints | 18 endpoints including topics/*, indices/*, chunks/* | 9 actual endpoints (removed 9 unimplemented) |
+| Components | Topic Modeler, Index Manager | Removed (not implemented) |
+| Configuration | Hardcoded defaults | PCON-7 compliant (required env vars) |
+| See Also | Referenced non-existent API.md, GRAPH_RAG_POC.md, INDEXING.md | Updated to existing docs |
+
+**Removed Endpoints (never implemented):**
+- `/v1/embed/batch`
+- `/v1/search/vector`
+- `/v1/topics/*` (4 endpoints)
+- `/v1/indices/*` (4 endpoints)
+- `/v1/chunks/*` (2 endpoints)
+- `/v1/taxonomies`
+
+**Actual Endpoints Documented:**
+- `POST /v1/embed`
+- `POST /v1/search`
+- `POST /v1/search/hybrid`
+- `POST /v1/graph/traverse`
+- `POST /v1/graph/query`
+- `GET /v1/chapters/{book_id}/{chapter_number}`
+- `GET /v1/graph/relationships/{chapter_id}`
+- `POST /v1/graph/relationships/batch`
+- `GET /health`
+
+---
+
 ## 2026-01-07
 
 ### CL-017: Neo4j ↔ Qdrant Bridge - Integration Planning
