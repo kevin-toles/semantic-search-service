@@ -5,6 +5,7 @@ Creates the FastAPI application instance for uvicorn.
 
 WBS 0.2.3: Supports real database clients via USE_REAL_CLIENTS=true
 PCON-7: Dynamic infrastructure URL resolution (no hardcoded values)
+AC-LOG0: Structured logging with file output
 """
 
 from __future__ import annotations
@@ -25,6 +26,7 @@ from src.api.dependencies import (
     ServiceContainer,
     VectorClientProtocol,
 )
+from src.core.logging import setup_structured_logging, get_logger
 from src.infrastructure_config import get_infrastructure_urls, get_infrastructure_mode
 
 if TYPE_CHECKING:
@@ -32,7 +34,9 @@ if TYPE_CHECKING:
 
     from fastapi import FastAPI
 
-logger = logging.getLogger(__name__)
+# Set up structured logging at import time (AC-LOG0)
+setup_structured_logging(service_name="semantic-search")
+logger = get_logger("semantic-search")
 
 
 # ==============================================================================

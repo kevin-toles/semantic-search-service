@@ -81,6 +81,19 @@ def get_log_level_from_env(service_prefix: str = "SEMANTIC_SEARCH") -> int:
     return level if isinstance(level, int) else logging.INFO
 
 
+def _get_default_log_path() -> str:
+    """Get platform-appropriate default log file path.
+    
+    Returns:
+        macOS: ~/Library/Logs/ai-platform/semantic-search/app.log
+        Linux: /var/log/semantic-search/app.log
+    """
+    if sys.platform == "darwin":
+        home = Path.home()
+        return str(home / "Library" / "Logs" / "ai-platform" / "semantic-search" / "app.log")
+    return "/var/log/semantic-search/app.log"
+
+
 def create_file_handler(
     log_file_path: str = "/var/log/semantic-search/app.log",
     service_name: str = "semantic-search",
@@ -104,10 +117,18 @@ def create_file_handler(
 
 def setup_structured_logging(
     service_name: str = "semantic-search",
-    log_file_path: str | None = "/var/log/semantic-search/app.log",
+    log_file_path: str | None = None,
     log_level: int | None = None,
+    enable_file_logging: bool | None = None,
 ) -> logging.Logger:
-    """Set up structured logging with file handler."""
+    """Set up structured logging with optional file handler.
+    
+    Args:
+        service_name: Service name for log identification.
+        log_file_path: Path for log file. Defaults from env or platform-appropriate location.
+        log_level: Log level. Defaults from SEMANTIC_SEARCH_LOG_LEVEL env var.
+        enable_file_logging: Enable file logging. Defaults from SEMANTIC_SEARCH_ENABLE_FILE_LOGGING env var.
+    """
     if log_level is None:
         log_level = get_log_level_from_env()
     
@@ -121,14 +142,20 @@ def setup_structured_logging(
     console_handler.addFilter(CorrelationIdFilter())
     logger.addHandler(console_handler)
     
+    # Determine if file logging is enabled
+    if enable_file_logging is None:
+        enable_file_logging = os.environ.get("SEMANTIC_SEARCH_ENABLE_FILE_LOGGING", "true").lower() in ("true", "1", "yes")
+    
     # File handler
-    if log_file_path:
+    if enable_file_logging:
+        if log_file_path is None:
+            log_file_path = os.environ.get("SEMANTIC_SEARCH_LOG_FILE_PATH") or _get_default_log_path()
         try:
             file_handler = create_file_handler(log_file_path, service_name)
             file_handler.setLevel(log_level)
             logger.addHandler(file_handler)
-        except PermissionError:
-            logger.warning(f"Cannot write to {log_file_path}, file logging disabled")
+        except (PermissionError, OSError) as e:
+            logger.warning(f"Cannot write to {log_file_path}, file logging disabled: {e}")
     
     logger.propagate = False
     return logger
