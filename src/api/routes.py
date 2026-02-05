@@ -572,27 +572,61 @@ async def simple_search(
 
         embedding = await services.embedding_service.embed(request.query)
 
-        # Perform vector search
-        vector_results = await services.vector_client.search(
-            collection=request.collection,
-            vector=embedding,
-            limit=request.limit,
-        )
-
-        # Build response results
-        results: list[SimpleSearchResultItem] = []
-        for vr in vector_results:
-            # Apply min_score filter if specified
-            if request.min_score is not None and vr.score < request.min_score:
-                continue
-
-            results.append(
-                SimpleSearchResultItem(
-                    id=vr.id,
-                    score=vr.score,
-                    payload=vr.payload or {},
-                )
+        # Handle "all" collection as multi-collection search
+        # Primary collections for cross-corpus search
+        if request.collection == "all":
+            collections_to_search = ["chapters", "code_chunks", "textbook_code"]
+            all_results: list[SimpleSearchResultItem] = []
+            
+            for coll in collections_to_search:
+                try:
+                    coll_results = await services.vector_client.search(
+                        collection=coll,
+                        vector=embedding,
+                        limit=request.limit,
+                    )
+                    for vr in coll_results:
+                        if request.min_score is not None and vr.score < request.min_score:
+                            continue
+                        # Add collection source to payload
+                        payload = vr.payload or {}
+                        payload["_collection"] = coll
+                        all_results.append(
+                            SimpleSearchResultItem(
+                                id=vr.id,
+                                score=vr.score,
+                                payload=payload,
+                            )
+                        )
+                except Exception as coll_error:
+                    logger.warning("Search in collection '%s' failed: %s", coll, coll_error)
+                    continue
+            
+            # Sort by score descending and limit
+            all_results.sort(key=lambda x: x.score, reverse=True)
+            results = all_results[:request.limit]
+        else:
+            # Perform single collection vector search
+            vector_results = await services.vector_client.search(
+                collection=request.collection,
+                vector=embedding,
+                limit=request.limit,
             )
+
+            # Build response results
+            results: list[SimpleSearchResultItem] = []
+            for vr in vector_results:
+                # Apply min_score filter if specified
+                if request.min_score is not None and vr.score < request.min_score:
+                    continue
+
+                results.append(
+                    SimpleSearchResultItem(
+                        id=vr.id,
+                        score=vr.score,
+                        payload=vr.payload or {},
+                    )
+                )
 
         latency_ms = (time.perf_counter() - start_time) * 1000
 
