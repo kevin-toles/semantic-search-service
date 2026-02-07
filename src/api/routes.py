@@ -37,6 +37,7 @@ from src.api.models import (
     TraverseResponse,
 )
 from src.search.metadata_filter import create_filter as create_domain_filter
+from src.search.query_expansion import get_query_expander
 
 logger = logging.getLogger(__name__)
 
@@ -570,27 +571,100 @@ async def simple_search(
                 detail={"error": "embedding_service_unavailable", "message": "Embedding service is not configured"},
             )
 
-        embedding = await services.embedding_service.embed(request.query)
+        # === Query Expansion: Abbreviation ↔ Full Form ===
+        # When enabled, expand "llm" to also search "large language model"
+        queries_to_search = [request.query]
+        expanded_queries = []
+        
+        if request.expand_abbreviations:
+            try:
+                expander = get_query_expander()
+                expanded_queries = expander.expand_query(request.query, max_expansions=2)
+                # Remove the original (already in queries_to_search)
+                queries_to_search = expanded_queries
+                if len(queries_to_search) > 1:
+                    logger.info(
+                        "Query expansion: '%s' → %s",
+                        request.query[:50],
+                        [q[:50] for q in queries_to_search],
+                    )
+            except Exception as e:
+                logger.warning("Query expansion failed, using original: %s", e)
+        
+        # Get embeddings for all query variants
+        embeddings = []
+        for query in queries_to_search:
+            embedding = await services.embedding_service.embed(query)
+            embeddings.append(embedding)
 
         # Handle "all" collection as multi-collection search
         # Primary collections for cross-corpus search
         if request.collection == "all":
             collections_to_search = ["chapters", "code_chunks", "textbook_code"]
             all_results: list[SimpleSearchResultItem] = []
+            seen_ids: set[str] = set()  # Deduplicate across expanded queries
             
             for coll in collections_to_search:
+                for emb_idx, embedding in enumerate(embeddings):
+                    try:
+                        coll_results = await services.vector_client.search(
+                            collection=coll,
+                            vector=embedding,
+                            limit=request.limit,
+                        )
+                        for vr in coll_results:
+                            if vr.id in seen_ids:
+                                continue  # Skip duplicates from expanded queries
+                            seen_ids.add(vr.id)
+                            
+                            if request.min_score is not None and vr.score < request.min_score:
+                                continue
+                            # Add collection source and expansion info to payload
+                            payload = vr.payload or {}
+                            payload["_collection"] = coll
+                            if emb_idx > 0:
+                                payload["_matched_expanded_query"] = queries_to_search[emb_idx][:100]
+                            all_results.append(
+                                SimpleSearchResultItem(
+                                    id=vr.id,
+                                    score=vr.score,
+                                    payload=payload,
+                                )
+                            )
+                    except Exception as coll_error:
+                        logger.warning("Search in collection '%s' failed: %s", coll, coll_error)
+                        continue
+            
+            # Sort by score descending and limit
+            all_results.sort(key=lambda x: x.score, reverse=True)
+            results = all_results[:request.limit]
+        else:
+            # Perform single collection vector search with query expansion
+            all_results: list[SimpleSearchResultItem] = []
+            seen_ids: set[str] = set()
+            
+            for emb_idx, embedding in enumerate(embeddings):
                 try:
-                    coll_results = await services.vector_client.search(
-                        collection=coll,
+                    vector_results = await services.vector_client.search(
+                        collection=request.collection,
                         vector=embedding,
                         limit=request.limit,
                     )
-                    for vr in coll_results:
+
+                    # Build response results
+                    for vr in vector_results:
+                        if vr.id in seen_ids:
+                            continue  # Skip duplicates from expanded queries
+                        seen_ids.add(vr.id)
+                        
+                        # Apply min_score filter if specified
                         if request.min_score is not None and vr.score < request.min_score:
                             continue
-                        # Add collection source to payload
+
                         payload = vr.payload or {}
-                        payload["_collection"] = coll
+                        if emb_idx > 0:
+                            payload["_matched_expanded_query"] = queries_to_search[emb_idx][:100]
+                        
                         all_results.append(
                             SimpleSearchResultItem(
                                 id=vr.id,
@@ -598,43 +672,27 @@ async def simple_search(
                                 payload=payload,
                             )
                         )
-                except Exception as coll_error:
-                    logger.warning("Search in collection '%s' failed: %s", coll, coll_error)
+                except Exception as search_error:
+                    logger.warning("Search with query variant failed: %s", search_error)
                     continue
             
             # Sort by score descending and limit
             all_results.sort(key=lambda x: x.score, reverse=True)
             results = all_results[:request.limit]
-        else:
-            # Perform single collection vector search
-            vector_results = await services.vector_client.search(
-                collection=request.collection,
-                vector=embedding,
-                limit=request.limit,
-            )
-
-            # Build response results
-            results: list[SimpleSearchResultItem] = []
-            for vr in vector_results:
-                # Apply min_score filter if specified
-                if request.min_score is not None and vr.score < request.min_score:
-                    continue
-
-                results.append(
-                    SimpleSearchResultItem(
-                        id=vr.id,
-                        score=vr.score,
-                        payload=vr.payload or {},
-                    )
-                )
 
         latency_ms = (time.perf_counter() - start_time) * 1000
 
+        # Include expansion info in response
+        expansion_info = None
+        if len(queries_to_search) > 1:
+            expansion_info = queries_to_search
+
         logger.info(
-            "Simple search for '%s' returned %d results in %.2fms",
+            "Simple search for '%s' returned %d results in %.2fms%s",
             request.query[:50],
             len(results),
             latency_ms,
+            f" (expanded to {len(queries_to_search)} queries)" if len(queries_to_search) > 1 else "",
         )
 
         return SimpleSearchResponse(

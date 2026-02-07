@@ -446,6 +446,10 @@ class SimpleSearchRequest(BaseModel):
         le=1.0,
         description="Minimum similarity score threshold",
     )
+    expand_abbreviations: bool = Field(
+        default=True,
+        description="Expand abbreviations to full forms and vice versa (e.g., 'llm' → 'large language model')",
+    )
 
 
 class SimpleSearchResultItem(BaseModel):
